@@ -9,13 +9,19 @@ chart hoisting-recursion bugfix, XSS hardening (esc()/textContent), freshness
 stamp in topbar, Obama chat memory (last 12 turns, market context per-turn),
 real BTC/ETH/SOL candles via CoinGecko with source label.
 
+**Also done (later same day):** keys moved to gitignored config.local.js
+(zero-prompt startup), private GitHub remote (rosalinatorres888/rose-alpha-dashboard),
+chaos prediction track record with 24h outcome scoring + computed paper P&L
+(random P&L removed), CoinGecko real crypto candles, mobile pass.
+
 **Next up (in order):**
-1. Key proxy (Cloudflare Worker or Vercel function) — REQUIRED before any
-   public hosting; Finnhub key is hardcoded, Anthropic key is client-side.
-2. Real stock candles (unlocked by the same proxy).
-3. GitHub remote + Pages hosting once keys are out.
-4. Optional: persist Chaos Alpha predictions to localStorage (real track
-   record), mobile-responsive pass, prompt caching once chats run long.
+1. Key proxy (Cloudflare Worker or Vercel function) — REQUIRED before public
+   hosting. Note: Finnhub key exists in commit 079784b history — fresh repo
+   or history rewrite before going public.
+2. Real stock candles (unlocked by the same proxy — CORS is the only blocker).
+3. Public hosting (GitHub Pages / Vercel).
+4. Optional: prompt caching once Obama chats run long (structure ready);
+   standalone rose-alpha-logo.svg + favicon export.
 
 **Brand decisions (locked):** rose-pink for negatives (not red), teal accent,
 Inter font, semi-dark gray Obama panel in light mode.
