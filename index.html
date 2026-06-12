@@ -686,6 +686,21 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 /* ── SAFE TEXT RENDERING ── */
 .obama-bubble{white-space:pre-wrap;}
 .data-stamp{font-size:11px;color:var(--muted);letter-spacing:.04em;}
+
+/* ── MOBILE PASS ── */
+@media(max-width:720px){
+  .topbar{padding:0 12px;}
+  .api-badge,.data-stamp{display:none;}
+  .tabs{overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;}
+  .trump-avatar{width:200px;height:230px;}
+  .obama-avatar{width:130px;height:150px;}
+  body{font-size:14px;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr;}
+  .pred-grid{grid-template-columns:repeat(2,1fr);}
+  .logo span{display:none;}
+}
 </style>
 </head>
 <body>
@@ -2194,18 +2209,43 @@ function renderChaosEvents() {
     </div>`).join('');
 }
 
+function scoreChaosPredictions() {
+  let changed = false;
+  CHAOS_REAL.forEach(r => {
+    if (r.scored || !r.price0 || !r.ts) return;
+    if (Date.now() - r.ts < 24*3600*1000) return;
+    const a = ASSETS.find(x => x.ticker === r.asset);
+    if (!a || !a.price) return;
+    r.realizedPct = parseFloat(((a.price - r.price0) / r.price0 * 100).toFixed(2));
+    r.correct = r.signal === 'BUY' ? r.realizedPct > 0
+              : r.signal === 'SELL' ? r.realizedPct < 0
+              : Math.abs(r.realizedPct) < 1.5;
+    r.scored = true; changed = true;
+  });
+  if (changed) {
+    try { localStorage.setItem('rose_chaos_history', JSON.stringify(CHAOS_REAL)); } catch(e) {}
+    renderChaosHistory();
+  }
+}
+
 function renderChaosHistory() {
   const div = document.getElementById('chaos-history');
   const items = CHAOS_REAL.length ? CHAOS_REAL : CHAOS_HISTORY;
-  div.innerHTML = items.map(h => {
-    const isUp = h.pnl >= 0;
+  const done = items.filter(h => h.scored);
+  const wins = done.filter(h => h.correct).length;
+  const tally = done.length
+    ? '<div style="font-size:11px;color:var(--muted);padding:4px 0 8px">Trump was right ' + wins + '/' + done.length + ' times (scored 24h later)</div>' : '';
+  div.innerHTML = tally + items.map(h => {
+    const val  = h.scored ? h.realizedPct : h.pnl;
+    const mark = h.ts ? (h.scored ? (h.correct ? ' ✓' : ' ✗') : ' ⏳') : '';
+    const isUp = val >= 0;
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--surface3)">
       <div>
         <div style="font-size:12px;font-weight:600;color:var(--text)">${esc(h.event)}</div>
         <div style="font-family:var(--font-m);font-size:10px;color:var(--muted)">${esc(h.date)} · ${esc(h.asset)}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-family:var(--font-m);font-size:12px;font-weight:700;color:${isUp?'var(--green)':'var(--red)'}">${isUp?'+':''}${h.pnl}%</div>
+        <div style="font-family:var(--font-m);font-size:12px;font-weight:700;color:${isUp?'var(--green)':'var(--red)'}">${isUp?'+':''}${val}%${mark}</div>
         <div class="pred-signal ${h.signal==='BUY'?'signal-buy':h.signal==='SELL'?'signal-sell':'signal-hold'}" style="font-size:9px;padding:1px 6px">${h.signal}</div>
       </div>
     </div>`;
@@ -2356,12 +2396,15 @@ async function runChaosPredict() {
     document.getElementById('pred-event-label').textContent = 'Based on: "' + input.substring(0,40) + '..."';
     if (window._lastPreds && window._lastPreds.length) {
       const best = window._lastPreds.reduce((a,b) => (parseInt(b.confidence)||0) > (parseInt(a.confidence)||0) ? b : a);
+      const baseAsset = ASSETS.find(a => a.ticker === (best.ticker || ''));
       CHAOS_REAL.unshift({
         event: input.substring(0, 40),
         date: new Date().toLocaleDateString(undefined, {month:'short', day:'numeric'}),
         asset: best.ticker || '?',
         pnl: parseFloat(best.pct) || 0,
-        signal: String(best.signal || 'HOLD').toUpperCase()
+        signal: String(best.signal || 'HOLD').toUpperCase(),
+        price0: baseAsset ? baseAsset.price : null,
+        ts: Date.now(), scored: false
       });
       if (CHAOS_REAL.length > 20) CHAOS_REAL.length = 20;
       try { localStorage.setItem('rose_chaos_history', JSON.stringify(CHAOS_REAL)); } catch(e) {}
@@ -2500,6 +2543,7 @@ async function refreshAllPrices() {
   if (sp)  { const el = document.getElementById('sp500-val'); if(el) el.textContent = sp.price.toFixed(2); }
   if (qqq) { const el = document.getElementById('ndx-val');   if(el) el.textContent = qqq.price.toFixed(2); }
   if (btc) { const el = document.getElementById('btc-val');   if(el) el.textContent = '$' + Math.round(btc.price).toLocaleString(); }
+  scoreChaosPredictions();
   const ds = document.getElementById('data-stamp');
   if (ds) ds.textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
   showLiveBadge();
