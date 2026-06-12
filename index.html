@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>ROSE ALPHA — Multi-Asset Intelligence</title>
+<script src="config.local.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 :root {
@@ -2407,7 +2408,7 @@ setInterval(animateChaosIndex, 4000);
 // ══════════════════════════════════════════════
 // FINNHUB — LIVE MARKET DATA
 // ══════════════════════════════════════════════
-let FINNHUB_API_KEY = 'REDACTED_FINNHUB_KEY';
+let FINNHUB_API_KEY = (window.LOCAL_KEYS && window.LOCAL_KEYS.finnhub) || '';
 const FH_BASE = 'https://finnhub.io/api/v1';
 
 const CRYPTO_MAP = { BTC:'BINANCE:BTCUSDT', ETH:'BINANCE:ETHUSDT', SOL:'BINANCE:SOLUSDT' };
