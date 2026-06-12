@@ -2104,6 +2104,9 @@ const CHAOS_EVENTS = [
    text:'Just signed an EXECUTIVE ORDER making Bitcoin part of our Strategic Reserve. America will be the CRYPTO CAPITAL of the world. China is jealous — VERY jealous. I always said crypto was going to be BIG. Maybe the biggest thing ever. You\'re welcome, Bitcoin people!'},
 ];
 
+let CHAOS_REAL = [];
+try { CHAOS_REAL = JSON.parse(localStorage.getItem('rose_chaos_history')) || []; } catch(e) {}
+
 const CHAOS_HISTORY = [
   {event:'China Tariff 145%', date:'May 2026', asset:'SPY',  pnl:-8.4, signal:'SELL'},
   {event:'Crypto EO Signed',  date:'Mar 2026', asset:'BTC',  pnl:+22.1, signal:'BUY'},
@@ -2193,12 +2196,13 @@ function renderChaosEvents() {
 
 function renderChaosHistory() {
   const div = document.getElementById('chaos-history');
-  div.innerHTML = CHAOS_HISTORY.map(h => {
+  const items = CHAOS_REAL.length ? CHAOS_REAL : CHAOS_HISTORY;
+  div.innerHTML = items.map(h => {
     const isUp = h.pnl >= 0;
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--surface3)">
       <div>
-        <div style="font-size:12px;font-weight:600;color:var(--text)">${h.event}</div>
-        <div style="font-family:var(--font-m);font-size:10px;color:var(--muted)">${h.date} · ${h.asset}</div>
+        <div style="font-size:12px;font-weight:600;color:var(--text)">${esc(h.event)}</div>
+        <div style="font-family:var(--font-m);font-size:10px;color:var(--muted)">${esc(h.date)} · ${esc(h.asset)}</div>
       </div>
       <div style="text-align:right">
         <div style="font-family:var(--font-m);font-size:12px;font-weight:700;color:${isUp?'var(--green)':'var(--red)'}">${isUp?'+':''}${h.pnl}%</div>
@@ -2259,6 +2263,7 @@ function tryParsePredictions(text, isFinal = false) {
     catch (e2) { return; }
   }
   if (!Array.isArray(preds) || preds.length === 0) return;
+  window._lastPreds = preds;
 
   const grid = document.getElementById('pred-grid');
   grid.innerHTML = preds.map(p => {
@@ -2349,6 +2354,19 @@ async function runChaosPredict() {
     }
 
     document.getElementById('pred-event-label').textContent = 'Based on: "' + input.substring(0,40) + '..."';
+    if (window._lastPreds && window._lastPreds.length) {
+      const best = window._lastPreds.reduce((a,b) => (parseInt(b.confidence)||0) > (parseInt(a.confidence)||0) ? b : a);
+      CHAOS_REAL.unshift({
+        event: input.substring(0, 40),
+        date: new Date().toLocaleDateString(undefined, {month:'short', day:'numeric'}),
+        asset: best.ticker || '?',
+        pnl: parseFloat(best.pct) || 0,
+        signal: String(best.signal || 'HOLD').toUpperCase()
+      });
+      if (CHAOS_REAL.length > 20) CHAOS_REAL.length = 20;
+      try { localStorage.setItem('rose_chaos_history', JSON.stringify(CHAOS_REAL)); } catch(e) {}
+      renderChaosHistory();
+    }
     chaosSessionPnl += Math.floor((Math.random()-0.3)*800);
     document.getElementById('chaos-pnl').textContent = (chaosSessionPnl>=0?'+$':'-$') + Math.abs(chaosSessionPnl/1000).toFixed(1)+'K';
 
