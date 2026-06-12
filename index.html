@@ -1201,8 +1201,8 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
             </div>
             <div style="width:1px;height:36px;background:var(--border)"></div>
             <div class="chaos-score-item">
-              <div class="chaos-score-val" style="color:var(--green)" id="chaos-pnl">+$4.2K</div>
-              <div class="chaos-score-lbl">Chaos P&L</div>
+              <div class="chaos-score-val" style="color:var(--green)" id="chaos-pnl" title="Paper P&L: hypothetical $1,000 per scored signal, long BUY / short SELL, marked at the 24h scoring price">+$0</div>
+              <div class="chaos-score-lbl">Paper P&L</div>
             </div>
           </div>
 
@@ -2188,7 +2188,6 @@ const TRUMP_QUIPS = [
 ];
 
 let currentChaosEvent = null;
-let chaosSessionPnl    = 4200;
 let isTrumpTalking     = false;
 
 function renderChaosEvents() {
@@ -2209,6 +2208,25 @@ function renderChaosEvents() {
     </div>`).join('');
 }
 
+function computeChaosPnl() {
+  const POSITION = 1000;
+  let pnl = 0;
+  CHAOS_REAL.forEach(r => {
+    if (!r.scored) return;
+    const dir = r.signal === 'BUY' ? 1 : r.signal === 'SELL' ? -1 : 0;
+    pnl += POSITION * dir * (r.realizedPct / 100);
+  });
+  return pnl;
+}
+function renderChaosPnl() {
+  const el = document.getElementById('chaos-pnl');
+  if (!el) return;
+  const v = computeChaosPnl();
+  const a = Math.abs(v);
+  el.textContent = (v >= 0 ? '+$' : '-$') + (a >= 1000 ? (a/1000).toFixed(1) + 'K' : a.toFixed(0));
+  el.style.color = v >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
 function scoreChaosPredictions() {
   let changed = false;
   CHAOS_REAL.forEach(r => {
@@ -2225,6 +2243,7 @@ function scoreChaosPredictions() {
   if (changed) {
     try { localStorage.setItem('rose_chaos_history', JSON.stringify(CHAOS_REAL)); } catch(e) {}
     renderChaosHistory();
+    renderChaosPnl();
   }
 }
 
@@ -2410,8 +2429,7 @@ async function runChaosPredict() {
       try { localStorage.setItem('rose_chaos_history', JSON.stringify(CHAOS_REAL)); } catch(e) {}
       renderChaosHistory();
     }
-    chaosSessionPnl += Math.floor((Math.random()-0.3)*800);
-    document.getElementById('chaos-pnl').textContent = (chaosSessionPnl>=0?'+$':'-$') + Math.abs(chaosSessionPnl/1000).toFixed(1)+'K';
+    renderChaosPnl();
 
   } catch(e) {
     speechDiv.textContent = 'I had technical difficulties. SAD! Error: ' + e.message;
@@ -2707,7 +2725,7 @@ if (FINNHUB_API_KEY) setTimeout(startLiveData, 600);
   } catch(e) {}
 })();
 renderMarket(); renderSectors(); renderPortfolio();
-renderChaosEvents(); renderChaosHistory();
+renderChaosEvents(); renderChaosHistory(); renderChaosPnl();
 // Apply restored keys
 setTimeout(function() {
   updateStatusBar();
