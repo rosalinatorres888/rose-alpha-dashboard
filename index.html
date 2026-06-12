@@ -969,7 +969,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   <div id="section-charts" style="display:none">
     <div class="card fadeIn">
       <div class="card-header">
-        <div class="card-title">Price Chart</div>
+        <div class="card-title">Price Chart <span class="data-stamp" id="chart-src" style="text-transform:none;letter-spacing:.02em;margin-left:6px"></span></div>
         <div style="display:flex;gap:6px;align-items:center">
           <button class="chart-type-btn active" id="btn-candlestick" onclick="setChartType('candlestick')">Candlestick</button>
           <button class="chart-type-btn" id="btn-line" onclick="setChartType('line')">Line</button>
@@ -2495,13 +2495,29 @@ async function fetchLiveCandles(ticker, period) {
   else if (period === '6M') { resolution = 'D';  from = now - 180*24*3600; }
   else                      { resolution = 'W';  from = now - 365*24*3600; }
   try {
-    let data;
-    const sym = CRYPTO_MAP[ticker];
-    if (sym) {
-      data = await fhFetch('/crypto/candle?symbol=' + sym + '&resolution=' + resolution + '&from=' + from + '&to=' + now);
-    } else {
-      data = await fhFetch('/stock/candle?symbol=' + ticker + '&resolution=' + resolution + '&from=' + from + '&to=' + now);
+    if (CRYPTO_MAP[ticker]) {
+      const days = {'1W':7,'1M':30,'3M':90,'6M':180,'1Y':365}[period] || 30;
+      const id = COINGECKO_IDS[ticker];
+      if (!id) return null;
+      const base = 'https://api.coingecko.com/api/v3/coins/' + id;
+      const [ohlcRes, mcRes] = await Promise.all([
+        fetch(base + '/ohlc?vs_currency=usd&days=' + days),
+        fetch(base + '/market_chart?vs_currency=usd&days=' + days)
+      ]);
+      if (!ohlcRes.ok) return null;
+      const ohlc = await ohlcRes.json();
+      if (!Array.isArray(ohlc) || ohlc.length < 2) return null;
+      let vols = [];
+      if (mcRes.ok) {
+        const mc = await mcRes.json();
+        vols = (mc.total_volumes || []).map(v => v[1]);
+      }
+      return ohlc.map((c, i) => ({
+        open: c[1], high: c[2], low: c[3], close: c[4],
+        vol: vols.length ? vols[Math.min(vols.length - 1, Math.floor(i * vols.length / ohlc.length))] : 0
+      }));
     }
+    const data = await fhFetch('/stock/candle?symbol=' + ticker + '&resolution=' + resolution + '&from=' + from + '&to=' + now);
     if (!data || data.s !== 'ok' || !data.c || !data.c.length) return null;
     return data.t.map(function(t, i) {
       return { open: data.o[i], high: data.h[i], low: data.l[i], close: data.c[i], vol: data.v[i] };
@@ -2580,12 +2596,14 @@ getChartData = function() {
 // Override drawChart to fetch live candles first (same assignment pattern)
 const _origDrawChart = drawChart;
 drawChart = async function() {
-  if (FINNHUB_API_KEY) {
-    try {
-      const candles = await fetchLiveCandles(chartSymbol, chartPeriod);
-      window._liveCandles = (candles && candles.length > 1) ? candles : null;
-    } catch(e) { window._liveCandles = null; }
-  }
+  let src = 'simulated · anchored to live quote';
+  try {
+    const candles = await fetchLiveCandles(chartSymbol, chartPeriod);
+    window._liveCandles = (candles && candles.length > 1) ? candles : null;
+    if (window._liveCandles) src = CRYPTO_MAP[chartSymbol] ? 'live · coingecko' : 'live · finnhub';
+  } catch(e) { window._liveCandles = null; }
+  const tag = document.getElementById('chart-src');
+  if (tag) tag.textContent = src;
   _origDrawChart();
   window._liveCandles = null;
 };
