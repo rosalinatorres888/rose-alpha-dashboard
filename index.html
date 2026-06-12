@@ -1270,7 +1270,12 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         <div style="padding:0 18px 12px;font-size:12px;color:var(--muted2)">Pearson correlation of daily log returns, 90d, equity-calendar aligned. Teal = positive, rose = negative.</div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">Risk Metrics</div></div>
+        <div class="card-header"><div class="card-title">Risk Metrics</div>
+          <div style="display:flex;gap:8px">
+            <a class="card-action" href="file:///Users/rosalinatorres/Documents/mission-control/quant-analytics/notebooks/risk_factor_analysis.html" target="_blank" style="text-decoration:none" title="Full Python analysis — regenerate anytime with the 'quant' terminal command">📓 Full Quant Report</a>
+            <a class="card-action" href="https://github.com/rosalinatorres888/quant-analytics/blob/main/notebooks/risk_factor_analysis.ipynb" target="_blank" style="text-decoration:none" title="GitHub-rendered notebook (works from any machine)">GitHub ↗</a>
+          </div>
+        </div>
         <div id="risk-table" style="padding:8px 18px 14px"></div>
         <div style="padding:0 18px 12px;font-size:12px;color:var(--muted2)">Vol: 30d stdev of log returns, annualized √252. Beta: OLS vs SPY daily returns. Full methodology: quant-analytics repo.</div>
       </div>
