@@ -28,3 +28,13 @@ Inter font, semi-dark gray Obama panel in light mode.
 
 **Quant analytics:** see `../prds/PRD-Quant-Analytics.md` — risk/factor work
 goes to a Python project; only realized vol + max drawdown get added here.
+
+## Checkpoint — 2026-06-12 evening (session 2 continued)
+Risk Analytics tab (correlation heatmap + vol/DD/beta, cached, 17→18px fonts),
+viewport-fit on all tabs, AI Research history + starter cards + autosaving notes,
+quant-analytics repo verified (51 tests, import-workflow removed, notebook executed
+and committed with outputs), Twelve Data stock candles live, fonts 18px base.
+Aliases: `rose` (dashboard), `quant` (regenerate+open risk report).
+LinkedIn: caption drafted; record Market→Charts→Risk→AI Research; skip Chaos Alpha
+and Portfolio in the video. quant-analytics safe to make public as-is.
+Still pending: key proxy + history rewrite before dashboard goes public.
