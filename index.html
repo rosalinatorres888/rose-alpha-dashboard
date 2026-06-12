@@ -2104,7 +2104,21 @@ function renderResearchHistory() {
   const el = document.getElementById('research-history');
   if (!el) return;
   if (!RESEARCH_HISTORY.length) {
-    el.innerHTML = '<div style="color:var(--muted2);font-size:13px;padding:6px 0">Reports you run are saved here — click any to re-read it.</div>';
+    const starters = [
+      ['🔥','Crypto-equity decoupling','BTC correlates only ~0.25 with SPY right now. Analyze whether crypto still works as a portfolio diversifier in 2026.'],
+      ['⚡','SOL volatility deep dive','SOL shows ~55% annualized volatility with a -36% drawdown. Is the risk/reward still attractive vs ETH and BTC?'],
+      ['📈','High-beta positioning','TSLA and NVDA carry betas near 1.9 to SPY. How should a long-term investor size high-beta tech positions late in a cycle?'],
+      ['🛡️','Drawdown defense','Which assets and strategies best protect a tech-heavy portfolio against a 15%+ drawdown scenario?'],
+      ['🏦','Rate-cut playbook','If the Fed begins cutting rates, which of AAPL, NVDA, MSFT, SPY, QQQ, BTC historically benefit most, and why?'],
+      ['🌍','Concentration check','My portfolio is heavily US mega-cap tech. Analyze concentration risk and concrete diversification options.']
+    ];
+    el.innerHTML = '<div style="color:var(--muted2);font-size:13px;padding:2px 0 8px">No saved reports yet — run one below, or start from a scenario. Reports save here automatically.</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px">' +
+      starters.map(s =>
+        '<div onclick="deepResearch(this.dataset.q)" data-q="' + s[2].replace(/"/g,'&quot;') + '" style="border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;background:var(--surface2);transition:border-color .15s" onmouseenter="this.style.borderColor=\'var(--blue)\'" onmouseleave="this.style.borderColor=\'var(--border)\'">' +
+        '<div style="font-size:15px;font-weight:600;margin-bottom:5px">' + s[0] + ' ' + s[1] + '</div>' +
+        '<div style="font-size:13px;color:var(--muted);line-height:1.5">' + s[2] + '</div></div>'
+      ).join('') + '</div>';
     return;
   }
   el.innerHTML = '';
