@@ -799,6 +799,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   <div class="nav-item" onclick="setTab('watchlist')"><span class="icon">◈</span>Watchlist</div>
   <div class="nav-item" onclick="setTab('research')"><span class="icon">✦</span>AI Research</div>
   <div class="nav-item" onclick="setTab('portfolio')"><span class="icon">◎</span>Portfolio</div>
+  <div class="nav-item" onclick="setTab('risk')"><span class="icon">◬</span>Risk Analytics</div>
   <div class="nav-item" onclick="setTab('chaos')"><span class="icon">🔥</span>Chaos Alpha</div>
   <div class="nav-sl" style="margin-top:8px">Watchlist</div>
   <div class="watchlist-items" id="watchlist-sidebar"></div>
@@ -823,6 +824,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
     <div class="tab"        id="tab-watchlist" onclick="showSection('watchlist')">Watchlist</div>
     <div class="tab"        id="tab-research"  onclick="showSection('research')">AI Research</div>
     <div class="tab"        id="tab-portfolio" onclick="showSection('portfolio')">Portfolio</div>
+    <div class="tab"        id="tab-risk"      onclick="showSection('risk')">Risk</div>
     <div class="tab"        id="tab-chaos"     onclick="showSection('chaos')">🔥 Chaos Alpha</div>
   </div>
 
@@ -1257,6 +1259,24 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   </div>
 
   <!-- ══ PORTFOLIO ══ -->
+  <div id="section-risk" style="display:none">
+    <div class="full-row fadeIn">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Correlation Matrix <span class="data-stamp" id="risk-stamp" style="text-transform:none;letter-spacing:.02em;margin-left:6px"></span></div>
+          <span class="card-action" onclick="loadRisk(true)">↻ Refresh</span>
+        </div>
+        <div id="risk-corr" style="padding:14px 18px;overflow-x:auto"></div>
+        <div style="padding:0 18px 12px;font-size:10px;color:var(--muted2)">Pearson correlation of daily log returns, 90d, equity-calendar aligned. Teal = positive, rose = negative.</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Risk Metrics</div></div>
+        <div id="risk-table" style="padding:8px 18px 14px"></div>
+        <div style="padding:0 18px 12px;font-size:10px;color:var(--muted2)">Vol: 30d stdev of log returns, annualized √252. Beta: OLS vs SPY daily returns. Full methodology: quant-analytics repo.</div>
+      </div>
+    </div>
+  </div>
+
   <div id="section-portfolio" style="display:none">
     <div class="stats-row fadeIn">
       <div class="stat-card green"><div class="stat-label">Total Value</div><div class="stat-value">$84,320</div><div class="stat-sub up">▲ +$2,140 today</div></div>
@@ -1878,7 +1898,7 @@ function buildTicker() {
 // SECTION SWITCHING
 // ══════════════════════════════════════════════
 function showSection(name) {
-  ['market','charts','news','watchlist','research','portfolio','chaos'].forEach(s=>{
+  ['market','charts','news','watchlist','research','portfolio','chaos','risk'].forEach(s=>{
     document.getElementById('section-'+s).style.display = s===name?'':'none';
     document.getElementById('tab-'+s).classList.toggle('active', s===name);
   });
@@ -1888,6 +1908,7 @@ function showSection(name) {
   if (name==='charts') { buildChartSymbols(); setTimeout(drawChart, 80); }
   if (name==='news')   renderNews(filteredNews);
   if (name==='watchlist') renderWatchlistFull();
+  if (name==='risk') loadRisk();
 }
 function setTab(name){showSection(name);}
 
@@ -2773,6 +2794,104 @@ if (!FINNHUB_API_KEY) setInterval(jitter, 3500);
 window.addEventListener('resize',()=>{
   if(document.getElementById('section-charts').style.display!=='none') drawChart();
 });
+
+// ══════════════════════════════════════════════
+// RISK ANALYTICS — client-side mirror of quant-analytics methodology
+// ══════════════════════════════════════════════
+const RISK_STOCKS = ['AAPL','NVDA','MSFT','TSLA','GOOGL','SPY','QQQ','VTI'];
+const RISK_CRYPTO = ['BTC','ETH','SOL'];
+let riskState = null;
+
+async function loadRisk(force) {
+  if (riskState && !force) { renderRisk(); return; }
+  const corrEl = document.getElementById('risk-corr');
+  corrEl.innerHTML = '<div style="color:var(--muted);font-size:12px">Loading 90 days of closes for 11 assets…</div>';
+  try {
+    const series = {};
+    const TD = window.LOCAL_KEYS && window.LOCAL_KEYS.twelvedata;
+    if (!TD) throw new Error('Twelve Data key required (config.local.js)');
+    const res = await fetch('https://api.twelvedata.com/time_series?symbol=' + RISK_STOCKS.join(',') + '&interval=1day&outputsize=90&apikey=' + TD);
+    const td = await res.json();
+    RISK_STOCKS.forEach(s => {
+      const v = td[s] && td[s].values;
+      if (v) series[s] = new Map(v.slice().reverse().map(r => [r.datetime, +r.close]));
+    });
+    for (const c of RISK_CRYPTO) {
+      const r = await fetch('https://api.coingecko.com/api/v3/coins/' + COINGECKO_IDS[c] + '/market_chart?vs_currency=usd&days=90&interval=daily');
+      if (r.ok) {
+        const mc = await r.json();
+        series[c] = new Map((mc.prices || []).map(p => [new Date(p[0]).toISOString().slice(0,10), p[1]]));
+      }
+      await new Promise(w => setTimeout(w, 400));
+    }
+    if (!series.SPY) throw new Error('SPY series unavailable');
+    const dates = [...series.SPY.keys()].sort();
+    const tickers = [...RISK_STOCKS, ...RISK_CRYPTO].filter(t => series[t] && series[t].size > 30);
+    const rets = {};
+    tickers.forEach(t => {
+      const arr = [];
+      for (let i = 1; i < dates.length; i++) {
+        const a = series[t].get(dates[i-1]), b = series[t].get(dates[i]);
+        arr.push(a && b ? Math.log(b / a) : null);
+      }
+      rets[t] = arr;
+    });
+    riskState = { tickers, rets, series, asOf: new Date() };
+  } catch(e) {
+    corrEl.innerHTML = '<div style="color:var(--red);font-size:12px">Risk data unavailable: ' + esc(e.message) + '</div>';
+    return;
+  }
+  renderRisk();
+}
+
+function pairStats(a, b) {
+  const xs = [], ys = [];
+  for (let i = 0; i < a.length; i++) if (a[i] !== null && b[i] !== null) { xs.push(a[i]); ys.push(b[i]); }
+  const n = xs.length;
+  if (n < 10) return [null, null];
+  const mx = xs.reduce((p,c)=>p+c,0)/n, my = ys.reduce((p,c)=>p+c,0)/n;
+  let cov = 0, vx = 0, vy = 0;
+  for (let i = 0; i < n; i++) { cov += (xs[i]-mx)*(ys[i]-my); vx += (xs[i]-mx)**2; vy += (ys[i]-my)**2; }
+  return [cov / Math.sqrt(vx*vy), cov / vy];
+}
+
+function renderRisk() {
+  const { tickers, rets, series, asOf } = riskState;
+  const st = document.getElementById('risk-stamp');
+  if (st) st.textContent = 'as of ' + asOf.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  let h = '<table style="border-collapse:collapse;font-family:var(--font-m);font-size:9px"><tr><td></td>' +
+    tickers.map(t => '<td style="padding:3px 4px;color:var(--muted)">' + t + '</td>').join('') + '</tr>';
+  tickers.forEach(a => {
+    h += '<tr><td style="padding:3px 6px;color:var(--muted)">' + a + '</td>';
+    tickers.forEach(b => {
+      const c = a === b ? 1 : pairStats(rets[a], rets[b])[0];
+      const bg = c === null ? 'transparent' : c >= 0 ? 'rgba(79,209,197,' + (c*0.75).toFixed(2) + ')' : 'rgba(244,114,182,' + (-c*0.75).toFixed(2) + ')';
+      h += '<td style="padding:3px 4px;text-align:center;background:' + bg + ';color:var(--text);border:1px solid var(--surface3)">' + (c === null ? '–' : c.toFixed(2)) + '</td>';
+    });
+    h += '</tr>';
+  });
+  document.getElementById('risk-corr').innerHTML = h + '</table>';
+  const rows = tickers.map(t => {
+    const r = rets[t].filter(x => x !== null).slice(-30);
+    const m = r.reduce((p,c)=>p+c,0)/r.length;
+    const vol = Math.sqrt(r.reduce((p,c)=>p+(c-m)**2,0)/(r.length-1)) * Math.sqrt(252) * 100;
+    const closes = [...series[t].values()];
+    let peak = closes[0], dd = 0;
+    closes.forEach(c => { if (c > peak) peak = c; dd = Math.max(dd, (peak-c)/peak); });
+    return { t, vol, dd: dd*100, beta: t === 'SPY' ? 1 : pairStats(rets[t], rets.SPY)[1] };
+  }).sort((x,y) => y.vol - x.vol);
+  const maxV = Math.max(...rows.map(r => r.vol));
+  const head = '<div style="color:var(--muted);font-family:var(--font-m);font-size:9px">';
+  document.getElementById('risk-table').innerHTML =
+    '<div style="display:grid;grid-template-columns:54px 1fr 76px 70px;gap:7px 10px;font-size:11px;align-items:center">' +
+    head + 'ASSET</div>' + head + 'REALIZED VOL 30D</div>' + head + 'MAX DD 90D</div>' + head + 'BETA (SPY)</div>' +
+    rows.map(r =>
+      '<div style="font-weight:600">' + r.t + '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:5px;background:var(--surface3);border-radius:3px"><div style="width:' + (r.vol/maxV*100).toFixed(0) + '%;height:100%;border-radius:3px;background:var(--blue)"></div></div><span style="font-family:var(--font-m)">' + r.vol.toFixed(1) + '%</span></div>' +
+      '<div style="color:var(--red);font-family:var(--font-m)">-' + r.dd.toFixed(1) + '%</div>' +
+      '<div style="font-family:var(--font-m)">' + (r.beta === null ? '–' : r.beta.toFixed(2)) + '</div>'
+    ).join('') + '</div>';
+}
 
 // ══════════════════════════════════════════════
 // THEME TOGGLE (dark obsidian ↔ light)
