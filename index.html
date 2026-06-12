@@ -1579,7 +1579,25 @@ function drawChart() {
   span.textContent = (isUp?'▲ +':'▼ ')+pct+'%';
   span.style.color = isUp ? 'var(--green)' : 'var(--red)';
 
-  // key stats
+  // key stats — realized vol (stdev of log returns, annualized by candle
+  // frequency estimated from the period) and max drawdown over the series
+  const rets = [];
+  for (let i = 1; i < data.length; i++) {
+    if (data[i-1].close > 0 && data[i].close > 0) rets.push(Math.log(data[i].close / data[i-1].close));
+  }
+  let annVol = null;
+  if (rets.length > 2) {
+    const mean = rets.reduce((a,b) => a+b, 0) / rets.length;
+    const sd = Math.sqrt(rets.reduce((a,b) => a+(b-mean)*(b-mean), 0) / (rets.length-1));
+    const periodDays = {'1W':7,'1M':30,'3M':90,'6M':180,'1Y':365}[chartPeriod] || 30;
+    annVol = sd * Math.sqrt(data.length * 365 / periodDays) * 100;
+  }
+  let peak = data[0].close, maxDD = 0;
+  data.forEach(d => {
+    if (d.close > peak) peak = d.close;
+    const dd = (peak - d.close) / peak;
+    if (dd > maxDD) maxDD = dd;
+  });
   const statsDiv = document.getElementById('chart-stats');
   statsDiv.innerHTML = [
     ['Open',   '$'+data[0].open.toLocaleString(undefined,{maximumFractionDigits:2})],
@@ -1587,8 +1605,9 @@ function drawChart() {
     ['High',   '$'+Math.max(...data.map(d=>d.high)).toLocaleString(undefined,{maximumFractionDigits:2})],
     ['Low',    '$'+Math.min(...data.map(d=>d.low)).toLocaleString(undefined,{maximumFractionDigits:2})],
     ['Change', (isUp?'+':'')+pct+'%'],
-    ['Volatility', (Math.abs(parseFloat(pct))/data.length*7).toFixed(2)+'%/day'],
-  ].map(([k,v])=>`<div><div style="font-family:var(--font-m);font-size:10px;color:var(--muted);margin-bottom:2px">${k}</div><div style="font-weight:600;font-size:13px;color:${k==='Change'?(isUp?'var(--green)':'var(--red)'):'var(--text)'}">${v}</div></div>`).join('');
+    ['Realized vol', annVol === null ? '—' : annVol.toFixed(1)+'% ann.', 'Stdev of log returns over the displayed candles, annualized by estimated candle frequency. Rigorous version: quant-analytics repo.'],
+    ['Max drawdown', '-'+(maxDD*100).toFixed(1)+'%', 'Largest peak-to-trough decline in close prices over the displayed period.'],
+  ].map(([k,v,t])=>`<div${t?` title="${t}"`:''}><div style="font-family:var(--font-m);font-size:10px;color:var(--muted);margin-bottom:2px">${k}</div><div style="font-weight:600;font-size:13px;color:${k==='Change'?(isUp?'var(--green)':'var(--red)'):k==='Max drawdown'?'var(--red)':'var(--text)'}">${v}</div></div>`).join('');
 
   drawVolume(data);
 }
