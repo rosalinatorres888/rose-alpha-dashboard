@@ -2647,7 +2647,7 @@ if (FINNHUB_API_KEY) setTimeout(startLiveData, 600);
 // Restore saved API keys from localStorage
 (function restoreKeys() {
   try {
-    const savedAnthro = localStorage.getItem('apex_anthropic_key');
+    const savedAnthro = (window.LOCAL_KEYS && window.LOCAL_KEYS.anthropic) || localStorage.getItem('apex_anthropic_key');
     const savedFH     = localStorage.getItem('apex_finnhub_key');
     if (savedAnthro) {
       ANTHROPIC_API_KEY = savedAnthro;
