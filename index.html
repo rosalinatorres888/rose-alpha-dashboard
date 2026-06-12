@@ -701,6 +701,14 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   .pred-grid{grid-template-columns:repeat(2,1fr);}
   .logo span{display:none;}
 }
+
+/* ── VIEWPORT FIT — short tabs stretch to fill the page like Market ── */
+#section-news > .card{display:flex;flex-direction:column;min-height:calc(100vh - 255px);}
+#section-news .news-list{flex:1;max-height:none;}
+#section-watchlist > .card{display:flex;flex-direction:column;min-height:calc(100vh - 255px);}
+#section-research > .card{display:flex;flex-direction:column;min-height:calc(100vh - 255px);}
+#section-research #deep-result{flex:1;}
+#section-portfolio > .card{display:flex;flex-direction:column;min-height:calc(100vh - 380px);}
 </style>
 </head>
 <body>
