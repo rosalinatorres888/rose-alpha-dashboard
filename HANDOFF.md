@@ -25,3 +25,6 @@ chaos prediction track record with 24h outcome scoring + computed paper P&L
 
 **Brand decisions (locked):** rose-pink for negatives (not red), teal accent,
 Inter font, semi-dark gray Obama panel in light mode.
+
+**Quant analytics:** see `../prds/PRD-Quant-Analytics.md` — risk/factor work
+goes to a Python project; only realized vol + max drawdown get added here.
