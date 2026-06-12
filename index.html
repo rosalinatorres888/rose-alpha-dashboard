@@ -681,6 +681,10 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 /* ── OBAMA PANEL SPACING — stage absorbs spare height, chat hugs content ── */
 .obama-stage{flex:1;justify-content:center;}
 .obama-chat{flex:0 0 auto;}
+
+/* ── SAFE TEXT RENDERING ── */
+.obama-bubble{white-space:pre-wrap;}
+.data-stamp{font-size:11px;color:var(--muted);letter-spacing:.04em;}
 </style>
 </head>
 <body>
@@ -763,6 +767,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 <header class="topbar">
   <div class="logo"><svg class="logo-rose" width="57" height="65" viewBox="0 0 96 110" style="vertical-align:-26px;margin-right:10px;filter:drop-shadow(0 3px 6px rgba(226,132,159,.45))" aria-hidden="true"><defs><radialGradient id="rgOut" cx="40%" cy="22%" r="85%"><stop offset="0%" stop-color="#fde4e9"/><stop offset="50%" stop-color="#f6b6c6"/><stop offset="100%" stop-color="#dd7f9c"/></radialGradient><radialGradient id="rgCup" cx="45%" cy="25%" r="85%"><stop offset="0%" stop-color="#fcd9e1"/><stop offset="100%" stop-color="#ef9fb5"/></radialGradient><radialGradient id="rgBud" cx="45%" cy="30%" r="85%"><stop offset="0%" stop-color="#f9c4d1"/><stop offset="100%" stop-color="#e2849f"/></radialGradient><linearGradient id="rgWrap" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ef9db4"/><stop offset="100%" stop-color="#d3708f"/></linearGradient><linearGradient id="rgStem" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#93c96c"/><stop offset="100%" stop-color="#558c3c"/></linearGradient><radialGradient id="rgLeaf" cx="35%" cy="30%" r="85%"><stop offset="0%" stop-color="#bce392"/><stop offset="100%" stop-color="#67a046"/></radialGradient></defs><path d="M52 62 C55 76 58 90 59 106" stroke="url(#rgStem)" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M56 92 C47 82 33 80 24 86 C29 97 44 101 56 96 Z" fill="url(#rgLeaf)" stroke="#558c3c" stroke-width="1.2"/><path d="M27 87.5 C36 87 47 89.5 54 94" stroke="#4d8136" stroke-width="1.1" fill="none" stroke-linecap="round"/><g class="rose-bloom"><path d="M24 28 C14 18 26 6 42 9 C38 16 34 23 33 30 C30 30 26 29 24 28 Z" fill="url(#rgOut)" stroke="#d77792" stroke-width=".9"/><path d="M72 26 C82 15 70 4 54 8 C58 15 61 22 62 29 C66 29 70 28 72 26 Z" fill="url(#rgOut)" stroke="#d77792" stroke-width=".9"/><path d="M22 38 C8 42 6 58 20 66 C30 71 40 68 42 62 C32 60 26 50 26 42 C25 40 23 38 22 38 Z" fill="url(#rgOut)" stroke="#d77792" stroke-width=".9"/><path d="M74 38 C88 42 90 58 76 66 C66 71 56 68 54 62 C64 60 70 50 70 42 C71 40 73 38 74 38 Z" fill="url(#rgOut)" stroke="#d77792" stroke-width=".9"/><path d="M30 58 C28 72 42 80 52 79 C64 78 70 68 66 58 C58 64 40 64 30 58 Z" fill="url(#rgOut)" stroke="#d77792" stroke-width=".9"/><path d="M8 48 C10 58 18 64 27 66" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M88 48 C86 58 78 64 69 66" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M34 73 C43 78 56 78 63 71" stroke="rgba(255,255,255,.5)" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M30 22 C18 28 16 46 28 56 C36 61 44 58 46 50 C38 47 32 36 32 24 Z" fill="url(#rgCup)" stroke="#d77792" stroke-width=".9"/><path d="M66 22 C78 28 80 46 68 56 C60 61 52 58 50 50 C58 47 64 36 64 24 Z" fill="url(#rgCup)" stroke="#d77792" stroke-width=".9"/><path d="M19 33 C16 41 18 49 25 54" stroke="rgba(255,255,255,.45)" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M77 33 C80 41 78 49 71 54" stroke="rgba(255,255,255,.45)" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M37 16 C32 30 34 46 48 50 C62 46 64 30 59 16 C53 8 43 8 37 16 Z" fill="url(#rgBud)" stroke="#c9628a" stroke-width="1"/><path d="M37 16 C33 28 35 42 46 48 C41 36 39 24 41 13 Z" fill="url(#rgWrap)"/><path d="M59 16 C63 28 61 42 50 48 C55 36 57 24 55 13 Z" fill="url(#rgWrap)" opacity=".8"/><ellipse cx="44" cy="26" rx="5" ry="11" fill="rgba(255,255,255,.28)" transform="rotate(-12 44 26)"/><path d="M40 14 C42 9.5 47 7.5 52 9.5" stroke="rgba(255,255,255,.55)" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M48 12 C44 12 41 15 42 19 C43 22 46 24 49 23 C52 22 53 19 51 17 C50 15 47 16 47 18" stroke="#c25b80" stroke-width="1.5" fill="none" stroke-linecap="round"/></g></svg>ROSE ALPHA <span>Multi-asset intelligence</span></div>
   <div class="topbar-right">
+    <span class="data-stamp" id="data-stamp"></span>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light / dark theme" aria-label="Toggle light / dark theme">☾</button>
     <div class="market-pill"><div class="dot"></div>LIVE FEED</div>
     <div class="api-badge">Claude · claude-fable-5</div>
@@ -1670,13 +1675,13 @@ function renderNews(items) {
   list.innerHTML = items.map(n => `
     <div class="news-item">
       <div class="news-meta">
-        <span class="news-source tag ${SOURCE_COLORS[n.source]||'badge-blue'}">${n.source}</span>
+        <span class="news-source tag ${SOURCE_COLORS[n.source]||'badge-blue'}">${esc(n.source)}</span>
         <span class="news-time">${n.time}</span>
         <span class="news-sentiment ${n.sentiment}">${n.sentiment==='bull'?'▲ Bullish':n.sentiment==='bear'?'▼ Bearish':'● Neutral'}</span>
       </div>
-      <div class="news-headline">${n.headline}</div>
-      <div class="news-summary">${n.summary}</div>
-      <div class="news-tags">${n.tags.map(t=>`<span class="news-tag">${t}</span>`).join('')}</div>
+      <div class="news-headline">${esc(n.headline)}</div>
+      <div class="news-summary">${esc(n.summary)}</div>
+      <div class="news-tags">${n.tags.map(t=>`<span class="news-tag">${esc(t)}</span>`).join('')}</div>
     </div>`).join('');
 }
 
@@ -1867,7 +1872,7 @@ async function callClaude(msg, maxTokens=500, customSystem=null) {
       model: 'claude-fable-5',
       max_tokens: maxTokens,
       system: customSystem || SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: msg }]
+      messages: Array.isArray(msg) ? msg : [{ role: 'user', content: msg }]
     })
   });
   const data = await res.json();
@@ -1885,7 +1890,7 @@ async function callClaudeStream(msg, onChunk, maxTokens=600, customSystem=null) 
       max_tokens: maxTokens,
       stream: true,
       system: customSystem || SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: msg }]
+      messages: Array.isArray(msg) ? msg : [{ role: 'user', content: msg }]
     })
   });
   if (!res.ok) {
@@ -1950,6 +1955,8 @@ function buildMarketContext() {
     `For anything not covered above, note that you're relying on general knowledge.\n\nQUESTION: `;
 }
 
+let researchHistory = [];
+
 async function sendResearch(){
   if (!ANTHROPIC_API_KEY) { showApiModal(); return; }
   const inp = document.getElementById('research-input');
@@ -1968,7 +1975,9 @@ async function sendResearch(){
   const history = document.getElementById('chat-history');
   const userDiv = document.createElement('div');
   userDiv.className = 'msg user fadeIn';
-  userDiv.innerHTML = '<div class="obama-msg-label user">YOU</div><div class="obama-bubble user">' + q + '</div>';
+  const uLabel = document.createElement('div'); uLabel.className = 'obama-msg-label user'; uLabel.textContent = 'YOU';
+  const uBubble = document.createElement('div'); uBubble.className = 'obama-bubble user'; uBubble.textContent = q;
+  userDiv.appendChild(uLabel); userDiv.appendChild(uBubble);
   history.appendChild(userDiv);
 
   // Obama streaming bubble
@@ -1984,17 +1993,21 @@ async function sendResearch(){
   let started  = false;
 
   try {
-    await callClaudeStream(buildMarketContext() + q, (chunk) => {
-      if (!started) { bubble.innerHTML = ''; started = true; }
+    await callClaudeStream([...researchHistory, { role: 'user', content: buildMarketContext() + q }], (chunk) => {
+      if (!started) { bubble.textContent = ''; started = true; }
       fullText += chunk;
-      bubble.innerHTML = fullText.replace(/\n/g, '<br>');
+      bubble.textContent = fullText;
       // Mirror first sentence to speech bubble
       const firstSent = fullText.split(/[.!?]/)[0];
       if (firstSent && speechEl) speechEl.innerHTML = firstSent + '...';
       history.scrollTop = history.scrollHeight;
     }, 600, OBAMA_SYSTEM);
+    // Remember the turn (plain question, not the volatile market-context block)
+    researchHistory.push({ role: 'user', content: q });
+    researchHistory.push({ role: 'assistant', content: fullText });
+    if (researchHistory.length > 12) researchHistory.splice(0, researchHistory.length - 12);
   } catch(e) {
-    bubble.innerHTML = 'I must be transparent with you — ' + e.message;
+    bubble.textContent = 'I must be transparent with you — ' + e.message;
   }
 
   if (avatar) avatar.classList.remove('obama-speaking');
@@ -2165,10 +2178,10 @@ function renderChaosEvents() {
     <div class="chaos-event" onclick="loadChaosEvent(${i})">
       <div class="chaos-event-icon">${e.icon}</div>
       <div class="chaos-event-body">
-        <div class="chaos-event-headline">${e.headline}</div>
+        <div class="chaos-event-headline">${esc(e.headline)}</div>
         <div class="chaos-event-meta">
           <span class="chaos-event-time">${e.time}</span>
-          <span class="chaos-event-type tag badge-amber">${e.type}</span>
+          <span class="chaos-event-type tag badge-amber">${esc(e.type)}</span>
           <span class="chaos-impact ${e.impact==='HIGH'?'impact-high':e.impact==='MED'?'impact-med':'impact-low'}">
             ${e.impact==='HIGH'?'🔥 HIGH IMPACT':e.impact==='MED'?'⚡ MED IMPACT':'💤 LOW'}
           </span>
@@ -2221,6 +2234,10 @@ function trumpTalk() {
   setTimeout(trumpAnimStop, 3000);
 }
 
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 function tryParsePredictions(text, isFinal = false) {
   // Extract the JSON array from (possibly incomplete) streamed text.
   const start = text.indexOf('[');
@@ -2251,12 +2268,12 @@ function tryParsePredictions(text, isFinal = false) {
     const pctColor = pct.startsWith('-') ? 'var(--red)' : pct === '—' ? 'var(--muted)' : 'var(--green)';
     const conf = Math.max(0, Math.min(100, parseInt(p.confidence, 10) || 0));
     return `<div class="pred-card ${cardClass}">
-      <div class="pred-ticker">${p.ticker || '?'}</div>
-      <div class="pred-signal ${badgeClass}">${signal}</div>
-      <div class="pred-pct" style="color:${pctColor}">${pct}%</div>
+      <div class="pred-ticker">${esc(p.ticker || '?')}</div>
+      <div class="pred-signal ${badgeClass}">${esc(signal)}</div>
+      <div class="pred-pct" style="color:${pctColor}">${esc(pct)}%</div>
       <div class="pred-conf">Confidence: ${conf}%</div>
       <div class="pred-conf-bar"><div class="pred-conf-fill" style="width:${conf}%"></div></div>
-      ${p.reason ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4">${p.reason}</div>` : ''}
+      ${p.reason ? `<div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4">${esc(p.reason)}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -2464,6 +2481,8 @@ async function refreshAllPrices() {
   if (sp)  { const el = document.getElementById('sp500-val'); if(el) el.textContent = sp.price.toFixed(2); }
   if (qqq) { const el = document.getElementById('ndx-val');   if(el) el.textContent = qqq.price.toFixed(2); }
   if (btc) { const el = document.getElementById('btc-val');   if(el) el.textContent = '$' + Math.round(btc.price).toLocaleString(); }
+  const ds = document.getElementById('data-stamp');
+  if (ds) ds.textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
   showLiveBadge();
 }
 
