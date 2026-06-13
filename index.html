@@ -967,6 +967,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           <div class="obama-input-area">
             <input class="obama-input" id="research-input" placeholder="Ask the analyst..." onkeydown="if(event.key==='Enter')sendResearch()"/>
             <button class="obama-ask-btn" id="research-btn" onclick="sendResearch()">Ask Obama</button>
+            <button onclick="_briefFired=false; runMorningBrief()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;margin-left:6px" title="Re-run morning brief">↻ Brief</button>
           </div>
         </div>
     </div>
@@ -1403,6 +1404,7 @@ function saveApiKey() {
 
   // Start live data if Finnhub key available
   if (FINNHUB_API_KEY) startLiveData();
+  setTimeout(runMorningBrief, 800);
 }
 
 function skipApiKey() {
@@ -2076,6 +2078,25 @@ function renderSignalCard(signal) {
   </div>`;
 }
 
+// ── PORTFOLIO CONTEXT ─────────────────────────────────────────────────────
+function buildPortfolioContext() {
+  const lines = PORTFOLIO.map(p => {
+    const pnlPct  = (((p.current - p.avg) / p.avg) * 100).toFixed(1);
+    const pnlSign = pnlPct >= 0 ? '+' : '';
+    const posValue = (p.shares * p.current).toLocaleString(undefined, {maximumFractionDigits:0});
+    return `${p.ticker}: ${p.shares} ${p.type==='CRYPTO'?'units':'shares'} @ avg $${p.avg} → current $${p.current} (${pnlSign}${pnlPct}%, value $${posValue})`;
+  });
+  const totalValue = PORTFOLIO.reduce((s,p) => s + p.shares * p.current, 0);
+  const totalCost  = PORTFOLIO.reduce((s,p) => s + p.shares * p.avg, 0);
+  const totalPnl   = (((totalValue - totalCost) / totalCost) * 100).toFixed(1);
+  const largest    = PORTFOLIO.reduce((mx,p) => {
+    const v = p.shares * p.current;
+    return v > mx.v ? { ticker: p.ticker, v } : mx;
+  }, { ticker:'', v:0 });
+  const concPct = ((largest.v / totalValue) * 100).toFixed(1);
+  return `PORTFOLIO SNAPSHOT:\n${lines.join('\n')}\nTotal value: $${totalValue.toLocaleString(undefined,{maximumFractionDigits:0})} | Total P&L: ${totalPnl>=0?'+':''}${totalPnl}%\nLargest position: ${largest.ticker} at ${concPct}% of portfolio`;
+}
+
 // ── LIVE MARKET CONTEXT — grounds AI research in real dashboard data ──────
 function buildMarketContext() {
   const prices = ASSETS.map(a =>
@@ -2091,6 +2112,49 @@ function buildMarketContext() {
 }
 
 let researchHistory = [];
+
+// ── MORNING BRIEF ─────────────────────────────────────────────────────────
+let _briefFired = false;
+
+async function runMorningBrief() {
+  if (_briefFired || !ANTHROPIC_API_KEY) return;
+  _briefFired = true;
+
+  const history = document.getElementById('chat-history');
+  const botDiv  = document.createElement('div');
+  botDiv.className = 'msg ai fadeIn';
+  botDiv.innerHTML = `<div class="obama-msg-label bot">ANALYST OBAMA</div>
+    <div class="obama-bubble bot" id="brief-bubble">
+      <div class="typing"><span></span><span></span><span></span></div>
+    </div>`;
+  history.appendChild(botDiv);
+  history.scrollTop = history.scrollHeight;
+
+  const bubble   = document.getElementById('brief-bubble');
+  const speechEl = document.getElementById('obama-speech');
+
+  const briefPrompt = `${buildPortfolioContext()}\n\n${buildMarketContext()}Do not wait for a question. Proactively surface the 3 most important things I should know about my portfolio RIGHT NOW. Lead with the most urgent. Be direct, specific, and cite exact prices and percentages from the data above. End with your JSON signal block as instructed.`;
+
+  let fullText = '';
+  let started  = false;
+
+  try {
+    await callClaudeStream(briefPrompt, (chunk) => {
+      if (!started) { bubble.innerHTML = ''; started = true; }
+      fullText += chunk;
+      bubble.innerHTML = stripJsonBlock(fullText).replace(/\n/g, '<br>');
+      if (speechEl) speechEl.innerHTML = (fullText.split(/[.!?]/)[0] || '') + '...';
+      history.scrollTop = history.scrollHeight;
+    }, 600, OBAMA_SYSTEM);
+
+    const signal    = parseObamaSignal(fullText);
+    const cleanText = stripJsonBlock(fullText);
+    bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+    researchHistory.push({ role: 'assistant', content: cleanText });
+  } catch(e) {
+    bubble.textContent = 'Good morning — I was unable to retrieve your brief: ' + e.message;
+  }
+}
 
 async function sendResearch(){
   if (!ANTHROPIC_API_KEY) { showApiModal(); return; }
@@ -2947,6 +3011,7 @@ if (FINNHUB_API_KEY) setTimeout(startLiveData, 600);
     if (savedFH) {
       FINNHUB_API_KEY = savedFH;
     }
+    if (savedAnthro) setTimeout(runMorningBrief, 1200);
   } catch(e) {}
 })();
 renderMarket(); renderSectors(); renderPortfolio();
