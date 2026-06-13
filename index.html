@@ -709,6 +709,18 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 #section-research > .card{display:flex;flex-direction:column;min-height:calc(100vh - 255px);}
 #section-research #deep-result{flex:1;}
 #section-portfolio > .card{display:flex;flex-direction:column;min-height:calc(100vh - 380px);}
+.signal-card{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;flex-direction:column;gap:8px;font-family:'Inter',sans-serif;font-size:13px}
+.signal-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+.signal-badge.bullish{background:#d1fae5;color:#065f46}
+.signal-badge.bearish{background:#fee2e2;color:#991b1b}
+.signal-badge.neutral{background:#fef9c3;color:#854d0e}
+.confidence-bar-wrap{display:flex;align-items:center;gap:8px}
+.confidence-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px}
+.confidence-bar-fill{height:6px;border-radius:3px;background:#3b82f6;transition:width .5s ease}
+.chip-row{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500}
+.chip.catalyst{background:#eff6ff;color:#1d4ed8}
+.chip.risk{background:#fff7ed;color:#c2410c}
 </style>
 </head>
 <body>
@@ -720,7 +732,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         <div style="width:36px;height:36px;background:#e8f0ff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px">🔑</div>
         <div>
           <div style="font-family:'Inter',sans-serif;font-size:18px;font-weight:700;color:#111827">Connect Anthropic API</div>
-          <div style="font-size:16px;color:#6b7280;margin-top:1px">Required for AI features · claude-fable-5</div>
+          <div style="font-size:16px;color:#6b7280;margin-top:1px">Required for AI features · claude-haiku-4-5</div>
         </div>
       </div>
     </div>
@@ -745,7 +757,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
       <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f5f6f9;border-radius:8px;border:1px solid #eceef2;margin-bottom:18px">
         <span style="font-size:17px">⚡</span>
         <div>
-          <div style="font-size:16px;font-weight:600;color:#111827">claude-fable-5</div>
+          <div style="font-size:16px;font-weight:600;color:#111827">claude-haiku-4-5</div>
           <div style="font-size:15px;color:#6b7280">Streaming enabled · 1M context window · Best speed + intelligence</div>
         </div>
       </div>
@@ -781,7 +793,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 <div id="api-status-bar" style="display:none;position:fixed;bottom:16px;right:16px;z-index:1000;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;box-shadow:0 4px 16px rgba(0,0,0,.1);align-items:center;gap:10px;font-family:'Inter',sans-serif;font-size:16px;">
   <span style="width:8px;height:8px;background:#00c853;border-radius:50%;display:inline-block;box-shadow:0 0 6px rgba(0,200,83,.6);flex-shrink:0"></span>
   <span style="color:#374151;white-space:nowrap">API Connected</span>
-  <span style="font-family:'DM Mono',monospace;font-size:14px;color:#9ca3af">claude-fable-5</span>
+  <span style="font-family:'DM Mono',monospace;font-size:14px;color:#9ca3af">claude-haiku-4-5</span>
   <button onclick="showApiModal()" style="background:none;border:1px solid #dde1e8;border-radius:5px;color:#6b7280;cursor:pointer;font-size:15px;padding:2px 8px;margin-left:4px;font-family:'Inter',sans-serif;">⚙ Change</button>
 </div>
 
@@ -794,7 +806,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
     <span class="data-stamp" id="data-stamp"></span>
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light / dark theme" aria-label="Toggle light / dark theme">☾</button>
     <div class="market-pill"><div class="dot"></div>LIVE FEED</div>
-    <div class="api-badge">Claude · claude-fable-5</div>
+    <div class="api-badge">Claude · claude-haiku-4-5</div>
   </div>
 </header>
 
@@ -1096,7 +1108,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
     <div class="card fadeIn">
       <div class="card-header">
         <div class="card-title">Deep Research — Powered by Claude</div>
-        <span class="api-badge">claude-fable-5</span>
+        <span class="api-badge">claude-haiku-4-5</span>
       </div>
       <div style="padding:18px;display:flex;flex-direction:column;gap:14px">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
@@ -1406,7 +1418,7 @@ function updateStatusBar() {
   bar.style.display = 'flex';
   const modelSpan = document.getElementById('status-model');
   if (modelSpan) {
-    modelSpan.textContent = 'claude-fable-5' + (hasFH ? ' · Finnhub LIVE' : '');
+    modelSpan.textContent = 'claude-haiku-4-5' + (hasFH ? ' · Finnhub LIVE' : '');
     modelSpan.style.color = hasFH ? 'var(--green)' : '#9ca3af';
   }
 }
@@ -1948,15 +1960,16 @@ const SYSTEM_PROMPT=`You are ROSE ALPHA, an elite investment analyst AI. Cover e
 Rules: be precise and direct, lead with insights, no fabricated prices, use bullet points for multi-part answers, keep to 150-250 words unless deep research requested, include opportunity + risk + recommendation, acknowledge knowledge cutoff for recent events.`;
 
 // ── STREAMING API CALL ────────────────────────────────────────────────────
-async function callClaude(msg, maxTokens=500, customSystem=null) {
+async function callClaude(msg, maxTokens=400, customSystem=null) {
   // Non-streaming fallback for chart analysis & deep research
+  const sysText = customSystem || SYSTEM_PROMPT;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({
-      model: 'claude-fable-5',
+      model: 'claude-haiku-4-5',
       max_tokens: maxTokens,
-      system: customSystem || SYSTEM_PROMPT,
+      system: [{ type: 'text', text: sysText, cache_control: { type: 'ephemeral' } }],
       messages: Array.isArray(msg) ? msg : [{ role: 'user', content: msg }]
     })
   });
@@ -1965,16 +1978,17 @@ async function callClaude(msg, maxTokens=500, customSystem=null) {
   throw new Error(data.error?.message || 'API error');
 }
 
-async function callClaudeStream(msg, onChunk, maxTokens=600, customSystem=null) {
+async function callClaudeStream(msg, onChunk, maxTokens=400, customSystem=null) {
   // Streaming version — calls onChunk(text) for each delta
+  const sysText = customSystem || SYSTEM_PROMPT;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
     body: JSON.stringify({
-      model: 'claude-fable-5',
+      model: 'claude-haiku-4-5',
       max_tokens: maxTokens,
       stream: true,
-      system: customSystem || SYSTEM_PROMPT,
+      system: [{ type: 'text', text: sysText, cache_control: { type: 'ephemeral' } }],
       messages: Array.isArray(msg) ? msg : [{ role: 'user', content: msg }]
     })
   });
@@ -2024,6 +2038,42 @@ function addTyping(){
   d.className = 'msg ai fadeIn'; d.id = 'typing-indicator';
   d.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>';
   h.appendChild(d); h.scrollTop = h.scrollHeight;
+}
+
+// ── SIGNAL PARSING UTILITIES ──────────────────────────────────────────────
+function parseObamaSignal(text) {
+  try {
+    const match = text.match(/```json\s*([\s\S]*?)```/);
+    if (!match) return null;
+    return JSON.parse(match[1].trim());
+  } catch(e) { return null; }
+}
+
+function stripJsonBlock(text) {
+  return text.replace(/```json[\s\S]*?```/g, '').trim();
+}
+
+function renderSignalCard(signal) {
+  if (!signal) return '';
+  const icons = { bullish: '▲', bearish: '▼', neutral: '◆' };
+  const catalystChips = (signal.catalysts || []).map(c =>
+    `<span class="chip catalyst">${c}</span>`).join('');
+  const riskChips = (signal.risks || []).map(r =>
+    `<span class="chip risk">⚠ ${r}</span>`).join('');
+  const confPct = Math.round((signal.confidence || 0) * 100);
+  return `<div class="signal-card">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="signal-badge ${signal.signal}">${icons[signal.signal] || '◆'} ${signal.signal}</span>
+      <div class="confidence-bar-wrap" style="flex:1">
+        <div class="confidence-bar-track">
+          <div class="confidence-bar-fill" style="width:${confPct}%"></div>
+        </div>
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap">${confPct}% confidence</span>
+      </div>
+    </div>
+    ${catalystChips ? `<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px">CATALYSTS</div><div class="chip-row">${catalystChips}</div></div>` : ''}
+    ${riskChips ? `<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px">RISKS</div><div class="chip-row">${riskChips}</div></div>` : ''}
+  </div>`;
 }
 
 // ── LIVE MARKET CONTEXT — grounds AI research in real dashboard data ──────
@@ -2079,17 +2129,23 @@ async function sendResearch(){
 
   try {
     await callClaudeStream([...researchHistory, { role: 'user', content: buildMarketContext() + q }], (chunk) => {
-      if (!started) { bubble.textContent = ''; started = true; }
+      if (!started) { bubble.innerHTML = ''; started = true; }
       fullText += chunk;
-      bubble.textContent = fullText;
-      // Mirror first sentence to speech bubble
+      // Strip partial json block while streaming so it doesn't flash raw JSON
+      bubble.innerHTML = stripJsonBlock(fullText).replace(/\n/g, '<br>');
       const firstSent = fullText.split(/[.!?]/)[0];
       if (firstSent && speechEl) speechEl.innerHTML = firstSent + '...';
       history.scrollTop = history.scrollHeight;
     }, 600, OBAMA_SYSTEM);
-    // Remember the turn (plain question, not the volatile market-context block)
+
+    // After stream: parse signal and render card
+    const signal    = parseObamaSignal(fullText);
+    const cleanText = stripJsonBlock(fullText);
+    bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+
+    // Save clean text to history (not the json block)
     researchHistory.push({ role: 'user', content: q });
-    researchHistory.push({ role: 'assistant', content: fullText });
+    researchHistory.push({ role: 'assistant', content: cleanText });
     if (researchHistory.length > 12) researchHistory.splice(0, researchHistory.length - 12);
   } catch(e) {
     bubble.textContent = 'I must be transparent with you — ' + e.message;
@@ -2292,7 +2348,15 @@ The markets are going CRAZY because of my INCREDIBLE deal. The fake news won't t
 [{"ticker":"AAPL","signal":"BUY","pct":"+2.1","confidence":72,"reason":"tech benefits from deal"},{"ticker":"NVDA","signal":"BUY","pct":"+3.4","confidence":80,"reason":"AI demand surges"},{"ticker":"MSFT","signal":"BUY","pct":"+1.8","confidence":68,"reason":"cloud positive"},{"ticker":"TSLA","signal":"HOLD","pct":"+0.5","confidence":55,"reason":"neutral impact"},{"ticker":"BTC","signal":"BUY","pct":"+4.2","confidence":75,"reason":"risk-on sentiment"},{"ticker":"ETH","signal":"BUY","pct":"+3.1","confidence":70,"reason":"follows BTC"},{"ticker":"SPY","signal":"BUY","pct":"+1.2","confidence":78,"reason":"broad market up"},{"ticker":"QQQ","signal":"BUY","pct":"+1.9","confidence":74,"reason":"tech heavy"},{"ticker":"VTI","signal":"BUY","pct":"+1.1","confidence":71,"reason":"total market up"},{"ticker":"SOL","signal":"HOLD","pct":"+0.8","confidence":52,"reason":"limited impact"}]`;
 
 // ── OBAMA SYSTEM PROMPT ───────────────────────────────────────────────────────
-const OBAMA_SYSTEM = `You are Barack Obama — 44th President of the United States, Harvard Law graduate, and AI investment analyst. Speak in Obama's exact style: measured, intellectual, professorial, uses phrases like "Let me be clear", "Here is the thing", "Make no mistake", "The arc of", references data and nuance, complete well-structured sentences, occasionally references his presidency or Chicago. Be specific, data-driven, and insightful. 120-200 words per response. Always end with an optimistic but realistic note.`;
+const OBAMA_SYSTEM = `You are Barack Obama — 44th President of the United States, Harvard Law graduate, and AI investment analyst. Speak in Obama's exact style: measured, intellectual, professorial, uses phrases like "Let me be clear", "Here is the thing", "Make no mistake", "The arc of", references data and nuance, complete well-structured sentences, occasionally references his presidency or Chicago. Be specific, data-driven, and insightful. 120-200 words per response. Always end with an optimistic but realistic note.
+
+CRITICAL FORMATTING RULE: Every response MUST end with a JSON block on its own line, exactly like this — no exceptions:
+\`\`\`json
+{"signal":"bullish","confidence":0.74,"catalysts":["strong earnings beat","Fed pivot expected"],"risks":["valuation stretched","macro uncertainty"]}
+\`\`\`
+The signal must be one of: "bullish", "bearish", "neutral".
+Confidence is 0.0–1.0. Catalysts and risks are arrays of 1–3 short strings each.
+Write your narrative first, then the JSON block last.`;
 
 // ── OBAMA QUIPS ───────────────────────────────────────────────────────────────
 const OBAMA_QUIPS = [
