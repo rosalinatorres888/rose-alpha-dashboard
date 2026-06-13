@@ -951,6 +951,11 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
                 </svg>
               </div>
           </div>
+          <div id="thread-bar" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--surface);">
+            <span style="font-size:10px;color:var(--muted);font-weight:600;margin-right:2px">THREADS</span>
+            <div id="thread-tabs" style="display:flex;gap:5px;flex-wrap:wrap;flex:1"></div>
+            <button onclick="promptNewThread()" style="font-size:11px;padding:2px 8px;border:1px dashed var(--border);border-radius:12px;background:none;color:var(--muted);cursor:pointer">+ New</button>
+          </div>
           <div class="obama-chat" id="chat-history">
             <div class="msg ai fadeIn">
               <div class="obama-msg-label bot">ANALYST OBAMA</div>
@@ -2111,7 +2116,84 @@ function buildMarketContext() {
     `For anything not covered above, note that you're relying on general knowledge.\n\nQUESTION: `;
 }
 
-let researchHistory = [];
+// ── RESEARCH THREADS ──────────────────────────────────────────────────────
+const THREAD_STORE_KEY = 'rose_research_threads';
+let _threads      = {};
+let _activeThread = 'general';
+
+function loadThreads() {
+  try { _threads = JSON.parse(localStorage.getItem(THREAD_STORE_KEY)) || {}; } catch(e) { _threads = {}; }
+  if (!_threads['general']) _threads['general'] = { label: 'General', history: [] };
+}
+
+function saveThreads() {
+  try { localStorage.setItem(THREAD_STORE_KEY, JSON.stringify(_threads)); } catch(e) {}
+}
+
+function getActiveHistory() { return (_threads[_activeThread] || { history: [] }).history; }
+
+function pushToThread(role, content) {
+  if (!_threads[_activeThread]) _threads[_activeThread] = { label: _activeThread, history: [] };
+  _threads[_activeThread].history.push({ role, content });
+  if (_threads[_activeThread].history.length > 12)
+    _threads[_activeThread].history.splice(0, _threads[_activeThread].history.length - 12);
+  saveThreads();
+}
+
+function createThread(id, label) {
+  if (!_threads[id]) _threads[id] = { label, history: [] };
+  saveThreads();
+}
+
+function renderThreadTabs() {
+  const container = document.getElementById('thread-tabs');
+  if (!container) return;
+  container.innerHTML = '';
+  Object.entries(_threads).forEach(([id, thread]) => {
+    const btn = document.createElement('button');
+    btn.textContent = thread.label;
+    btn.style.cssText = `font-size:11px;padding:2px 10px;border-radius:12px;cursor:pointer;border:1px solid var(--border);font-family:'Inter',sans-serif;transition:all .15s;`;
+    if (id === _activeThread) {
+      btn.style.background = '#3b82f6';
+      btn.style.color = '#fff';
+      btn.style.borderColor = '#3b82f6';
+    } else {
+      btn.style.background = 'var(--surface)';
+      btn.style.color = 'var(--muted)';
+    }
+    btn.onclick = () => switchThread(id);
+    container.appendChild(btn);
+  });
+}
+
+function switchThread(id) {
+  _activeThread = id;
+  renderThreadTabs();
+  const history = document.getElementById('chat-history');
+  history.innerHTML = '';
+  getActiveHistory().forEach(msg => {
+    const div = document.createElement('div');
+    div.className = `msg ${msg.role === 'user' ? 'user' : 'ai'} fadeIn`;
+    div.innerHTML = `<div class="obama-msg-label ${msg.role === 'user' ? 'user' : 'bot'}">${msg.role === 'user' ? 'YOU' : 'ANALYST OBAMA'}</div>
+      <div class="obama-bubble ${msg.role === 'user' ? 'user' : 'bot'}">${msg.content.replace(/\n/g, '<br>')}</div>`;
+    history.appendChild(div);
+  });
+  history.scrollTop = history.scrollHeight;
+}
+
+function promptNewThread() {
+  const label = prompt('Thread name (e.g. "NVDA deep-dive", "Macro 2026"):');
+  if (!label) return;
+  const id = label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  createThread(id, label);
+  _activeThread = id;
+  document.getElementById('chat-history').innerHTML = '';
+  renderThreadTabs();
+}
+
+loadThreads();
+// Render tabs after DOM is ready
+document.addEventListener('DOMContentLoaded', renderThreadTabs);
 
 // ── MORNING BRIEF ─────────────────────────────────────────────────────────
 let _briefFired = false;
@@ -2192,7 +2274,7 @@ async function sendResearch(){
   let started  = false;
 
   try {
-    await callClaudeStream([...researchHistory, { role: 'user', content: buildMarketContext() + q }], (chunk) => {
+    await callClaudeStream([...getActiveHistory(), { role: 'user', content: buildMarketContext() + q }], (chunk) => {
       if (!started) { bubble.innerHTML = ''; started = true; }
       fullText += chunk;
       // Strip partial json block while streaming so it doesn't flash raw JSON
@@ -2207,10 +2289,9 @@ async function sendResearch(){
     const cleanText = stripJsonBlock(fullText);
     bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
 
-    // Save clean text to history (not the json block)
-    researchHistory.push({ role: 'user', content: q });
-    researchHistory.push({ role: 'assistant', content: cleanText });
-    if (researchHistory.length > 12) researchHistory.splice(0, researchHistory.length - 12);
+    // Save clean text to active thread (not the json block)
+    pushToThread('user', q);
+    pushToThread('assistant', cleanText);
   } catch(e) {
     bubble.textContent = 'I must be transparent with you — ' + e.message;
   }
