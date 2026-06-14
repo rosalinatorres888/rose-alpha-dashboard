@@ -2935,6 +2935,17 @@ const AGENT_TOOLS = [
     input_schema: { type: 'object', properties: {}, required: [] }
   },
   {
+    name: 'get_earnings_calendar',
+    description: 'Get upcoming earnings dates for portfolio holdings or specific tickers within the next 21 days. Returns date, EPS estimate, and revenue estimate.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        tickers: { type: 'array', items: { type: 'string' }, description: 'Optional list of tickers to filter. If empty, returns all portfolio holdings.' }
+      },
+      required: []
+    }
+  },
+  {
     name: 'validate_hypothesis',
     description: 'Record a hypothesis you are testing, the metric checked, threshold, actual computed value, and verdict. Use after calling calculate or get_price to confirm or reject a claim with data.',
     input_schema: {
@@ -3017,13 +3028,11 @@ async function executeTool(name, input) {
   if (name === 'get_price') {
     const asset = ASSETS.find(a => a.ticker.toUpperCase() === input.ticker.toUpperCase());
     if (asset) return { ticker: asset.ticker, price: asset.price, change_24h: asset.change, source: 'dashboard_live' };
-    if (FINNHUB_API_KEY) {
-      try {
-        const r = await fetch(`${PROXY_BASE}/proxy/finnhub/quote?symbol=${input.ticker}`);
-        const d = await r.json();
-        if (d.c) return { ticker: input.ticker, price: d.c, change_24h: d.dp, source: 'finnhub' };
-      } catch(e) {}
-    }
+    try {
+      const r = await fetch(`${PROXY_BASE}/proxy/finnhub/quote?symbol=${input.ticker}`);
+      const d = await r.json();
+      if (d.c) return { ticker: input.ticker, price: d.c, change_24h: d.dp, source: 'finnhub' };
+    } catch(e) {}
     return { error: `Ticker ${input.ticker} not found` };
   }
 
@@ -3032,16 +3041,32 @@ async function executeTool(name, input) {
       .filter(n => n.headline.toLowerCase().includes(input.query.toLowerCase()))
       .slice(0, 5);
     if (local.length) return { headlines: local.map(n => ({ headline: n.headline, source: n.source, time: n.time })) };
-    if (FINNHUB_API_KEY) {
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        const week  = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
-        const r = await fetch(`${PROXY_BASE}/proxy/finnhub/company-news?symbol=${input.query}&from=${week}&to=${today}`);
-        const d = await r.json();
-        return { headlines: d.slice(0,5).map(n => ({ headline: n.headline, source: n.source, time: new Date(n.datetime*1000).toLocaleDateString() })) };
-      } catch(e) {}
-    }
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const week  = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
+      const r = await fetch(`${PROXY_BASE}/proxy/finnhub/company-news?symbol=${input.query.toUpperCase()}&from=${week}&to=${today}`);
+      const d = await r.json();
+      if (Array.isArray(d) && d.length) return { headlines: d.slice(0,5).map(n => ({ headline: n.headline, source: n.source, time: new Date(n.datetime*1000).toLocaleDateString() })) };
+    } catch(e) {}
     return { error: 'No news found for: ' + input.query };
+  }
+
+  if (name === 'get_earnings_calendar') {
+    if (_earningsCache && (Date.now() - _earningsCacheTs) < EARNINGS_TTL)
+      return { earnings: _earningsCache.slice(0, 8) };
+    try {
+      const today = new Date();
+      const end   = new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000);
+      const fmt   = d => d.toISOString().split('T')[0];
+      const r     = await fetch(`${PROXY_BASE}/proxy/finnhub/calendar/earnings?from=${fmt(today)}&to=${fmt(end)}`);
+      const data  = await r.json();
+      const tickers = new Set([...(input.tickers || []), ...PORTFOLIO.map(p => p.ticker)]);
+      const hits  = (data.earningsCalendar || []).filter(e => !tickers.size || tickers.has(e.symbol)).slice(0, 8);
+      _earningsCache = hits; _earningsCacheTs = Date.now();
+      return { earnings: hits.map(e => ({ ticker: e.symbol, date: e.date, eps_estimate: e.epsEstimate, revenue_estimate: e.revenueEstimate })) };
+    } catch(e) {
+      return { error: 'Earnings calendar unavailable: ' + e.message };
+    }
   }
 
   if (name === 'validate_hypothesis') {
@@ -3950,10 +3975,6 @@ async function loadEarningsCalendar(force) {
   if (!el) return;
   if (!force && _earningsCache && (Date.now() - _earningsCacheTs) < EARNINGS_TTL) {
     renderEarnings(_earningsCache);
-    return;
-  }
-  if (!FINNHUB_API_KEY) {
-    el.innerHTML = '<span style="color:var(--muted)">Add Finnhub key to enable earnings data.</span>';
     return;
   }
   el.innerHTML = '<span style="color:var(--muted)">Fetching earnings calendar…</span>';
