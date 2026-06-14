@@ -1,5 +1,7 @@
 # ROSE ALPHA — Multi-Asset Intelligence Dashboard
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-rosalinatorres888.github.io-blue?style=for-the-badge&logo=github)](https://rosalinatorres888.github.io/rose-alpha-dashboard/)
+
 > Single-file investment dashboard. No build step, no dependencies — open `index.html` in a browser.
 
 A personal AI-powered market intelligence terminal built around two analyst personas: **Obama** (investment analyst, market research, agentic tool use) and **Trump** (chaos event predictor, volatility signals). Runs entirely client-side with live market data and direct Claude API calls.
