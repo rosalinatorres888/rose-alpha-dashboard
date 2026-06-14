@@ -1299,6 +1299,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
               🔥 Paste a Trump headline or click a quick event to generate predictions
             </div>
           </div>
+          <div id="chaos-portfolio-impact" style="display:none"></div>
         </div>
       </div>
 
@@ -3069,6 +3070,61 @@ function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+function renderChaosPortfolioImpact(preds, eventText) {
+  const container = document.getElementById('chaos-portfolio-impact');
+  if (!container) return;
+
+  const rows = PORTFOLIO.map(pos => {
+    const pred = preds.find(p => p.ticker && p.ticker.toUpperCase() === pos.ticker.toUpperCase());
+    if (!pred) return null;
+    const pct   = parseFloat(pred.pct) || 0;
+    const value = pos.shares * pos.current;
+    const delta = value * pct / 100;
+    return { ticker: pos.ticker, pct, delta, signal: String(pred.signal || 'HOLD').toUpperCase(), value };
+  }).filter(Boolean);
+
+  if (!rows.length) { container.style.display = 'none'; return; }
+
+  const total = rows.reduce((s, r) => s + r.delta, 0);
+  const totalColor = total >= 0 ? 'var(--green)' : 'var(--red)';
+  const sign = v => v >= 0 ? '+' : '';
+
+  const rowHtml = rows
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    .map(r => {
+      const c = r.delta >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-weight:600;font-size:12px">${r.ticker}</span>
+        <span style="font-size:12px;color:${c}">${sign(r.pct)}${r.pct}% &nbsp; ${sign(r.delta)}$${Math.abs(r.delta).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
+      </div>`;
+    }).join('');
+
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div style="padding:12px 18px 4px;border-top:1px solid var(--border)">
+      <div style="font-family:var(--font-m);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">YOUR PORTFOLIO IMPACT</div>
+      ${rowHtml}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;margin-top:2px">
+        <span style="font-weight:700;font-size:13px">TOTAL EXPOSURE</span>
+        <span style="font-weight:700;font-size:14px;color:${totalColor}">${sign(total)}$${Math.abs(total).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
+      </div>
+      <button onclick="sendChaosToObama(${JSON.stringify(eventText).replace(/</g,'&lt;')})"
+        style="margin-top:8px;width:100%;padding:7px 0;background:var(--blue-bg);border:1px solid rgba(41,121,255,.4);border-radius:7px;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.04em">
+        🎙 Ask Obama about this event
+      </button>
+    </div>`;
+}
+
+function sendChaosToObama(eventText) {
+  AGENT_MODE = true;
+  const toggle = document.getElementById('agent-toggle');
+  if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
+  const q = `Trump just made this move: "${eventText}". Given my actual portfolio holdings, what should I do right now? Use search_web if needed for latest context, then give me a clear action plan.`;
+  document.getElementById('research-input').value = q;
+  showSection('market');
+  sendResearch();
+}
+
 function tryParsePredictions(text, isFinal = false) {
   // Extract the JSON array from (possibly incomplete) streamed text.
   const start = text.indexOf('[');
@@ -3180,6 +3236,7 @@ async function runChaosPredict() {
     }
 
     document.getElementById('pred-event-label').textContent = 'Based on: "' + input.substring(0,40) + '..."';
+    if (window._lastPreds) renderChaosPortfolioImpact(window._lastPreds, input);
     if (window._lastPreds && window._lastPreds.length) {
       const best = window._lastPreds.reduce((a,b) => (parseInt(b.confidence)||0) > (parseInt(a.confidence)||0) ? b : a);
       const baseAsset = ASSETS.find(a => a.ticker === (best.ticker || ''));
