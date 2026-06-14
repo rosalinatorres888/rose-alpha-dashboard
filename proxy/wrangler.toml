@@ -1,0 +1,9 @@
+name = "rose-alpha-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Secrets are NOT set here — use: wrangler secret put KEY_NAME
+# ANTHROPIC_API_KEY → wrangler secret put ANTHROPIC_API_KEY
+# FINNHUB_API_KEY   → wrangler secret put FINNHUB_API_KEY
+# TAVILY_API_KEY    → wrangler secret put TAVILY_API_KEY
