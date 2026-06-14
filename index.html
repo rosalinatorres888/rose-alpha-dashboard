@@ -854,6 +854,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
     <div class="tab"        id="tab-risk"      onclick="showSection('risk')">Risk</div>
     <div class="tab"        id="tab-chaos"     onclick="showSection('chaos')">🔥 Chaos Alpha</div>
     <div class="tab"        id="tab-journal"   onclick="showSection('journal')">📓 Journal</div>
+    <div class="tab"        id="tab-stress"    onclick="showSection('stress')">💥 Stress</div>
   </div>
 
   <!-- ══ REGIME BANNER ══ -->
@@ -1365,6 +1366,53 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           <div style="font-family:var(--font-m);font-size:14px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Historical Chaos Trades</div>
           <div id="chaos-history" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STRESS REPLAY ══ -->
+  <div id="section-stress" style="display:none">
+    <div class="full-row fadeIn" style="gap:16px">
+      <div class="card" style="padding:18px 22px">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:var(--text)">💥 Portfolio Stress Replay</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">How would your exact holdings have performed in historical crashes?</div>
+          </div>
+        </div>
+
+        <!-- Scenario selector -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px" id="stress-scenario-btns"></div>
+
+        <!-- Results area -->
+        <div id="stress-result" style="display:none">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px" id="stress-kpi-row"></div>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:16px" id="stress-table">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="text-align:left;padding:7px 12px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Holding</th>
+                <th style="text-align:right;padding:7px 12px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Position Value</th>
+                <th style="text-align:right;padding:7px 12px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Crash Return</th>
+                <th style="text-align:right;padding:7px 12px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Dollar Impact</th>
+              </tr>
+            </thead>
+            <tbody id="stress-tbody"></tbody>
+          </table>
+          <!-- Obama narration -->
+          <div id="stress-obama-wrap" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="font-size:22px">🎙</span>
+              <span style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Obama's Lesson</span>
+            </div>
+            <div id="stress-obama-text" style="font-size:14px;color:var(--text2);line-height:1.6"></div>
+          </div>
+        </div>
+
+        <div id="stress-placeholder" style="color:var(--muted);font-size:14px;text-align:center;padding:40px">
+          Select a historical crash above to simulate your current portfolio's performance.
+        </div>
+
       </div>
     </div>
   </div>
@@ -2076,7 +2124,7 @@ function buildTicker() {
 // SECTION SWITCHING
 // ══════════════════════════════════════════════
 function showSection(name) {
-  ['market','charts','news','watchlist','research','portfolio','chaos','risk','journal'].forEach(s=>{
+  ['market','charts','news','watchlist','research','portfolio','chaos','risk','journal','stress'].forEach(s=>{
     document.getElementById('section-'+s).style.display = s===name?'':'none';
     document.getElementById('tab-'+s).classList.toggle('active', s===name);
   });
@@ -2092,6 +2140,7 @@ function showSection(name) {
   if (name==='chaos') { restoreLastChaosPred(); updateChaosIndex(); }
   if (name==='portfolio') { renderPortfolioStats(); renderPortfolio(); }
   if (name==='journal')   { renderJournal(); }
+  if (name==='stress')    { initStressReplay(); }
 }
 function setTab(name){showSection(name);}
 
@@ -3425,6 +3474,205 @@ function getRegimeContext() {
   const meta = REGIME_META[_currentRegime.label] || {};
   const signals = (_currentRegime.keySignals || []).join(', ');
   return `\n[MACRO REGIME: ${_currentRegime.label} (${Math.round((_currentRegime.confidence||0.5)*100)}% confidence) — ${_currentRegime.rationale}. Implications: ${_currentRegime.implications}${signals ? '. Key signals: ' + signals : ''}. Frame your analysis through this regime lens.]\n`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PORTFOLIO STRESS REPLAY
+// Simulates current holdings against historical crash drawdowns (per-asset).
+// Obama narrates the lesson via a fast non-streaming Claude call.
+// ══════════════════════════════════════════════════════════════════════════════
+
+const CRASH_SCENARIOS = [
+  {
+    id: 'covid2020',
+    label: '🦠 COVID Crash',
+    date: 'Feb–Mar 2020',
+    duration: '33 days',
+    context: 'Global pandemic panic. S&P fell 34% in 33 days — fastest bear market in history.',
+    drawdowns: { AAPL:-31, NVDA:-36, MSFT:-29, TSLA:-60, GOOGL:-30, BTC:-63, ETH:-70, SOL:null, SPY:-34, QQQ:-30, VTI:-34 },
+  },
+  {
+    id: 'svb2023',
+    label: '🏦 SVB Collapse',
+    date: 'Mar 2023',
+    duration: '2 weeks',
+    context: 'Silicon Valley Bank failed in 48 hours triggering regional bank contagion. Tech and crypto hit hardest.',
+    drawdowns: { AAPL:-10, NVDA:-12, MSFT:-9, TSLA:-15, GOOGL:-10, BTC:-27, ETH:-22, SOL:-34, SPY:-8, QQQ:-11, VTI:-8 },
+  },
+  {
+    id: 'gfc2008',
+    label: '💣 GFC 2008',
+    date: 'Sep 2008–Mar 2009',
+    duration: '6 months',
+    context: 'Lehman Brothers collapse triggered global financial crisis. S&P fell 57% peak to trough.',
+    drawdowns: { AAPL:-60, NVDA:-78, MSFT:-55, TSLA:null, GOOGL:-65, BTC:null, ETH:null, SOL:null, SPY:-57, QQQ:-54, VTI:-57 },
+  },
+  {
+    id: 'dotcom2000',
+    label: '💻 Dot-com Bust',
+    date: 'Mar 2000–Oct 2002',
+    duration: '30 months',
+    context: 'Tech bubble burst. NASDAQ fell 78%. Only value stocks survived. No crypto yet.',
+    drawdowns: { AAPL:-81, NVDA:-88, MSFT:-67, TSLA:null, GOOGL:null, BTC:null, ETH:null, SOL:null, SPY:-49, QQQ:-83, VTI:-48 },
+  },
+  {
+    id: 'crypto2022',
+    label: '₿ Crypto Winter',
+    date: 'Nov 2021–Nov 2022',
+    duration: '12 months',
+    context: 'FTX collapse + Fed rate hikes obliterated crypto. BTC fell 77%, ETH 80%, SOL 97%.',
+    drawdowns: { AAPL:-28, NVDA:-66, MSFT:-30, TSLA:-73, GOOGL:-40, BTC:-77, ETH:-80, SOL:-97, SPY:-25, QQQ:-35, VTI:-25 },
+  },
+  {
+    id: 'inflation2022',
+    label: '📈 Rate Shock 2022',
+    date: 'Jan–Oct 2022',
+    duration: '9 months',
+    context: 'Fed hiked 425bps. Bonds and growth stocks both crashed simultaneously — nowhere to hide.',
+    drawdowns: { AAPL:-27, NVDA:-66, MSFT:-32, TSLA:-73, GOOGL:-44, BTC:-64, ETH:-68, SOL:-94, SPY:-25, QQQ:-35, VTI:-25 },
+  },
+];
+
+let _stressInit = false;
+
+function initStressReplay() {
+  if (_stressInit) return;
+  _stressInit = true;
+  const btn = document.getElementById('stress-scenario-btns');
+  if (!btn) return;
+  btn.innerHTML = CRASH_SCENARIOS.map(s =>
+    `<button onclick="runStressScenario('${s.id}')"
+      style="padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+             color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s"
+      onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'"
+    >${s.label}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${s.date}</span></button>`
+  ).join('');
+}
+
+async function runStressScenario(id) {
+  const scenario = CRASH_SCENARIOS.find(s => s.id === id);
+  if (!scenario) return;
+
+  // Highlight active button
+  document.querySelectorAll('#stress-scenario-btns button').forEach(b => {
+    const active = b.getAttribute('onclick') === `runStressScenario('${id}')`;
+    b.style.background     = active ? 'var(--blue-bg)' : 'var(--surface)';
+    b.style.borderColor    = active ? 'var(--blue)'    : 'var(--border)';
+    b.style.color          = active ? 'var(--blue)'    : 'var(--text2)';
+  });
+
+  document.getElementById('stress-placeholder').style.display = 'none';
+  document.getElementById('stress-result').style.display      = 'block';
+  document.getElementById('stress-obama-wrap').style.display  = 'none';
+  document.getElementById('stress-obama-text').textContent    = '';
+
+  // Build per-holding impact rows
+  const rows = PORTFOLIO.map(p => {
+    const dd = scenario.drawdowns[p.ticker];
+    const posValue   = p.shares * p.current;
+    const crashPct   = dd != null ? dd : estimateDrawdown(p.ticker, scenario);
+    const dollarImpact = posValue * (crashPct / 100);
+    return { ...p, posValue, crashPct, dollarImpact, estimated: dd == null };
+  }).sort((a, b) => a.dollarImpact - b.dollarImpact);
+
+  const totalValue  = rows.reduce((s, r) => s + r.posValue, 0);
+  const totalImpact = rows.reduce((s, r) => s + r.dollarImpact, 0);
+  const totalPct    = (totalImpact / totalValue) * 100;
+  const worstRow    = rows[0];
+  const bestRow     = rows[rows.length - 1];
+
+  // KPI strip
+  const fmt = (n, dec=1) => (n >= 0 ? '+' : '') + n.toFixed(dec) + '%';
+  const fmtD = n => (n >= 0 ? '+$' : '-$') + Math.abs(n).toLocaleString(undefined, {maximumFractionDigits:0});
+  document.getElementById('stress-kpi-row').innerHTML = `
+    <div class="chaos-score-card">
+      <div class="chaos-score-label">PORTFOLIO IMPACT</div>
+      <div class="chaos-score-val" style="color:${totalImpact < 0 ? 'var(--red)' : 'var(--green)'}">${fmtD(totalImpact)}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${fmt(totalPct)} total</div>
+    </div>
+    <div class="chaos-score-card">
+      <div class="chaos-score-label">WORST HOLDING</div>
+      <div class="chaos-score-val" style="font-size:14px;color:var(--red)">${worstRow.ticker} ${fmt(worstRow.crashPct)}${worstRow.estimated?' ≈':''}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${fmtD(worstRow.dollarImpact)}</div>
+    </div>
+    <div class="chaos-score-card">
+      <div class="chaos-score-label">BEST HELD</div>
+      <div class="chaos-score-val" style="font-size:14px;color:${bestRow.crashPct >= 0 ? 'var(--green)' : 'var(--amber)'}">${bestRow.ticker} ${fmt(bestRow.crashPct)}${bestRow.estimated?' ≈':''}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${fmtD(bestRow.dollarImpact)}</div>
+    </div>`;
+
+  // Table rows
+  document.getElementById('stress-tbody').innerHTML = rows.map(r => {
+    const col = r.crashPct < -20 ? 'var(--red)' : r.crashPct < -5 ? 'var(--amber)' : 'var(--green)';
+    return `<tr style="border-bottom:1px solid var(--surface3)">
+      <td style="padding:9px 12px;font-weight:600;color:var(--text)">${r.ticker}
+        <span style="font-weight:400;color:var(--muted);font-size:12px;margin-left:4px">${r.name}</span>
+        ${r.estimated ? '<span style="font-size:10px;color:var(--muted);margin-left:4px" title="Estimated — asset didn\'t exist during this event">≈est</span>' : ''}
+      </td>
+      <td style="padding:9px 12px;text-align:right;color:var(--text2)">$${r.posValue.toLocaleString(undefined,{maximumFractionDigits:0})}</td>
+      <td style="padding:9px 12px;text-align:right;font-weight:700;color:${col}">${fmt(r.crashPct)}</td>
+      <td style="padding:9px 12px;text-align:right;font-weight:700;color:${r.dollarImpact < 0 ? 'var(--red)' : 'var(--green)'}">${fmtD(r.dollarImpact)}</td>
+    </tr>`;
+  }).join('') + `<tr style="border-top:2px solid var(--border)">
+    <td style="padding:9px 12px;font-weight:700;color:var(--text)" colspan="2">TOTAL PORTFOLIO</td>
+    <td style="padding:9px 12px;text-align:right;font-weight:700;color:${totalPct<0?'var(--red)':'var(--green)'}">${fmt(totalPct)}</td>
+    <td style="padding:9px 12px;text-align:right;font-weight:700;color:${totalImpact<0?'var(--red)':'var(--green)'}">${fmtD(totalImpact)}</td>
+  </tr>`;
+
+  // Ask Obama for the lesson
+  askObamaStressLesson(scenario, rows, totalPct, totalImpact);
+}
+
+// Estimate drawdown for assets that didn't exist (e.g. SOL in 2008)
+// Uses asset type beta heuristics vs the scenario's SPY drawdown
+function estimateDrawdown(ticker, scenario) {
+  const spyDd = scenario.drawdowns['SPY'] || -30;
+  const asset  = ASSETS.find(a => a.ticker === ticker);
+  if (!asset) return spyDd;
+  if (asset.type === 'CRYPTO') return spyDd * 2.5;
+  if (asset.type === 'ETF')    return spyDd * 0.95;
+  return spyDd * 1.2; // generic stock
+}
+
+async function askObamaStressLesson(scenario, rows, totalPct, totalImpact) {
+  if (!ANTHROPIC_API_KEY) return;
+  const wrap = document.getElementById('stress-obama-wrap');
+  const el   = document.getElementById('stress-obama-text');
+  wrap.style.display = 'block';
+  el.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+  const worstHolding = rows[0];
+  const prompt = `You are Barack Obama analyzing a portfolio stress test.
+
+Scenario: ${scenario.label} — ${scenario.context}
+Portfolio total impact: ${totalPct.toFixed(1)}% (${totalImpact >= 0 ? '+' : ''}$${Math.abs(totalImpact).toLocaleString(undefined,{maximumFractionDigits:0})})
+Worst holding: ${worstHolding.ticker} at ${worstHolding.crashPct}% (${worstHolding.dollarImpact >= 0 ? '+' : ''}$${Math.abs(worstHolding.dollarImpact).toLocaleString(undefined,{maximumFractionDigits:0})})
+${getRegimeContext()}
+
+In 100–140 words, deliver ONE clear lesson from this historical crash that applies specifically to this portfolio's composition today. Be direct, cite the exact numbers above, and end with one concrete protective action the investor should consider. Speak as Obama — measured, data-driven, slightly professorial.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const data = await resp.json();
+    const text = (data.content && data.content[0]?.text) || 'Unable to generate lesson.';
+    el.innerHTML = text.replace(/\n/g, '<br>');
+  } catch(e) {
+    el.innerHTML = 'Unable to generate lesson: ' + e.message;
+  }
 }
 
 // ── OBAMA QUIPS ───────────────────────────────────────────────────────────────
