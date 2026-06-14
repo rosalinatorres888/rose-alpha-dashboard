@@ -252,7 +252,7 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 .wl-full-list{display:flex;flex-direction:column;max-height:500px;overflow-y:auto;}
 .wl-full-list::-webkit-scrollbar{width:3px;}
 .wl-full-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.wl-row{display:grid;grid-template-columns:36px 1fr auto auto auto 36px;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--surface3);transition:background .12s;cursor:pointer;}
+.wl-row{display:grid;grid-template-columns:36px 1fr auto auto auto 28px 28px;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid var(--surface3);transition:background .12s;cursor:pointer;}
 .wl-row:last-child{border-bottom:none;}
 .wl-row:hover{background:var(--surface2);}
 .wl-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
@@ -266,6 +266,33 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 .wl-del:hover{background:var(--red-bg);border-color:rgba(255,23,68,.4);color:var(--red);}
 .wl-sparkwrap{width:60px;height:26px;}
 .wl-empty{padding:32px;text-align:center;color:var(--muted);font-size:16px;}
+.wl-alert-btn{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:15px;padding:4px;border-radius:6px;transition:color .2s,background .2s;width:28px;height:28px;display:flex;align-items:center;justify-content:center;}
+.wl-alert-btn:hover{background:rgba(255,193,7,.12);color:#ffc107;}
+.wl-alert-btn.has-alert{color:#ffc107;}
+.wl-alert-badge{font-size:10px;color:#ffc107;font-family:var(--font-m);letter-spacing:.03em;line-height:1;}
+#wl-alert-panel{position:fixed;z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;width:260px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none;}
+.wl-ap-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.wl-ap-price{font-size:11px;color:var(--muted);margin-bottom:10px;font-family:var(--font-m);}
+.wl-ap-input{width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:var(--font-m);font-size:14px;outline:none;margin-bottom:10px;}
+.wl-ap-dir{display:flex;gap:6px;margin-bottom:12px;}
+.wl-ap-dir button{flex:1;padding:7px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--font-m);font-size:13px;cursor:pointer;transition:all .2s;}
+.wl-ap-dir button.sel-above{background:rgba(0,200,83,.15);border-color:rgba(0,200,83,.4);color:#00c853;}
+.wl-ap-dir button.sel-below{background:rgba(255,23,68,.12);border-color:rgba(255,23,68,.3);color:#ff5370;}
+.wl-ap-save{width:100%;padding:9px;background:var(--blue);border:none;border-radius:8px;color:#fff;font-family:var(--font-m);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px;}
+.wl-ap-save:hover{background:#1565c0;}
+.wl-active-alerts{display:flex;flex-direction:column;gap:4px;max-height:110px;overflow-y:auto;}
+.wl-al-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:var(--surface2);border-radius:6px;}
+.wl-al-chip{font-size:11px;font-family:var(--font-m);font-weight:700;padding:2px 7px;border-radius:4px;}
+.wl-al-chip.above{background:rgba(0,200,83,.15);color:#00c853;}
+.wl-al-chip.below{background:rgba(255,23,68,.12);color:#ff5370;}
+.wl-al-del{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:15px;padding:0 3px;border-radius:4px;line-height:1;}
+.wl-al-del:hover{color:#ff5370;}
+.alert-toast{position:fixed;bottom:24px;right:24px;z-index:10000;background:var(--surface);border:1px solid rgba(255,193,7,.5);border-radius:12px;padding:14px 18px;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:toastIn .3s ease;display:flex;align-items:flex-start;gap:12px;}
+.toast-icon{font-size:22px;line-height:1;}
+.toast-title{font-size:14px;font-weight:700;color:#ffc107;margin-bottom:3px;}
+.toast-msg{font-size:13px;color:var(--text2);line-height:1.4;}
+.toast-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;margin-left:6px;align-self:flex-start;}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 
 /* FOOTER */
 .footer-note{font-family:var(--font-m);font-size:14px;color:var(--muted2);text-align:center;padding:10px;border-top:1px solid var(--border);background:var(--surface2);margin:0 -24px -20px;}
@@ -1186,17 +1213,21 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         <input class="wl-input" id="wl-search" placeholder="Add ticker (e.g. AAPL, BTC, QQQ)..." onkeydown="if(event.key==='Enter')addToWatchlist()"/>
         <button class="wl-add-btn" onclick="addToWatchlist()">+ Add</button>
       </div>
-      <div style="display:grid;grid-template-columns:36px 1fr auto auto auto 36px;gap:10px;padding:8px 18px 6px;border-bottom:1px solid var(--border);background:var(--surface2)">
+      <div style="display:grid;grid-template-columns:36px 1fr auto auto auto 28px 28px;gap:10px;padding:8px 18px 6px;border-bottom:1px solid var(--border);background:var(--surface2)">
         <div></div>
         <div style="font-family:var(--font-m);font-size:14px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Asset</div>
         <div style="font-family:var(--font-m);font-size:14px;color:var(--muted);text-align:right;letter-spacing:.08em;text-transform:uppercase">Price</div>
         <div style="font-family:var(--font-m);font-size:14px;color:var(--muted);text-align:right;letter-spacing:.08em;text-transform:uppercase">24h</div>
         <div style="font-family:var(--font-m);font-size:14px;color:var(--muted);text-align:right;letter-spacing:.08em;text-transform:uppercase">Mkt Cap</div>
+        <div title="Alerts" style="font-size:13px;text-align:center;color:var(--muted)">🔔</div>
         <div></div>
       </div>
       <div class="wl-full-list" id="wl-full-list"></div>
     </div>
   </div>
+
+  <!-- ══ WATCHLIST ALERT PANEL (floating) ══ -->
+  <div id="wl-alert-panel"></div>
 
   <!-- ══ AI RESEARCH ══ -->
   <div id="section-research" style="display:none">
@@ -2171,12 +2202,16 @@ function renderWatchlistFull() {
     const a = getAsset(sym);
     const isUp = a.change >= 0;
     const bars = a.trend.map(h=>`<span style="display:inline-block;width:4px;height:${h*2.2}px;background:${isUp?'rgba(0,200,83,.6)':'rgba(255,23,68,.5)'};border-radius:2px 2px 0 0;vertical-align:bottom"></span>`).join('');
+    const alerts = watchlistAlerts[sym] || [];
+    const hasAlert = alerts.length > 0;
+    const alertBadge = hasAlert ? `<div class="wl-alert-badge">${alerts.length}</div>` : '';
     return `<div class="wl-row" onclick="openChart('${a.ticker}')">
       <div class="wl-icon" style="background:${a.bg};color:${a.fg}">${a.icon}</div>
-      <div class="wl-info"><div class="wl-ticker">${a.ticker}</div><div class="wl-name">${a.name}</div></div>
+      <div class="wl-info"><div class="wl-ticker">${a.ticker}</div><div class="wl-name">${a.name}</div>${alertBadge}</div>
       <div class="wl-price">$${a.price.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
       <div class="wl-chg ${isUp?'up':'down'}">${isUp?'+':''}${a.change}%</div>
       <div style="display:flex;align-items:flex-end;gap:1px;height:22px;min-width:60px;justify-content:flex-end">${bars}</div>
+      <button class="wl-alert-btn ${hasAlert?'has-alert':''}" onclick="event.stopPropagation();openAlertPanel('${a.ticker}',this)" title="Set price alert">🔔</button>
       <button class="wl-del" onclick="event.stopPropagation();removeFromWatchlist('${a.ticker}')" title="Remove">×</button>
     </div>`;
   }).join('');
@@ -2210,6 +2245,137 @@ function removeFromWatchlist(sym) {
   watchlist = watchlist.filter(s=>s!==sym);
   renderWatchlistFull();
   renderWatchlistSidebar();
+}
+
+// ── WATCHLIST ALERTS ─────────────────────────────────
+let watchlistAlerts = {};
+let _apTicker = null;
+let _apDir = 'above';
+const _firedAlertIds = new Set();
+
+function loadWatchlistAlerts() {
+  try { watchlistAlerts = JSON.parse(localStorage.getItem('rose_wl_alerts') || '{}'); } catch(e) { watchlistAlerts = {}; }
+}
+function saveWatchlistAlerts() {
+  try { localStorage.setItem('rose_wl_alerts', JSON.stringify(watchlistAlerts)); } catch(e) {}
+}
+
+function openAlertPanel(ticker, btnEl) {
+  _apTicker = ticker;
+  _apDir = 'above';
+  const panel = document.getElementById('wl-alert-panel');
+  const rect = btnEl.getBoundingClientRect();
+  const a = getAsset(ticker);
+  let left = rect.left + window.scrollX - 210;
+  let top  = rect.bottom + window.scrollY + 6;
+  if (left < 8) left = 8;
+  if (top + 300 > window.innerHeight + window.scrollY) top = rect.top + window.scrollY - 300;
+  panel.style.left = left + 'px';
+  panel.style.top  = top  + 'px';
+  _renderAlertPanel(ticker, a.price);
+  panel.style.display = 'block';
+  setTimeout(() => document.addEventListener('click', _apClickOutside, {once:true}), 10);
+}
+
+function _apClickOutside(e) {
+  const panel = document.getElementById('wl-alert-panel');
+  if (panel && !panel.contains(e.target)) { panel.style.display = 'none'; }
+  else { setTimeout(() => document.addEventListener('click', _apClickOutside, {once:true}), 10); }
+}
+
+function _renderAlertPanel(ticker, currentPrice) {
+  const alerts = watchlistAlerts[ticker] || [];
+  const panel  = document.getElementById('wl-alert-panel');
+  const activeHtml = alerts.length ? `
+    <div style="font-size:11px;color:var(--muted);margin-bottom:5px;font-family:var(--font-m)">Active alerts:</div>
+    <div class="wl-active-alerts">${alerts.map(al => `
+      <div class="wl-al-row">
+        <span class="wl-al-chip ${al.direction}">${al.direction==='above'?'▲':'▼'} $${al.targetPrice.toLocaleString(undefined,{maximumFractionDigits:2})}</span>
+        <button class="wl-al-del" onclick="_deleteAlert('${ticker}','${al.id}')">×</button>
+      </div>`).join('')}
+    </div>` : '';
+  panel.innerHTML = `
+    <div class="wl-ap-title">
+      <span>🔔 Alert — ${ticker}</span>
+      <button onclick="document.getElementById('wl-alert-panel').style.display='none'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:17px;line-height:1">×</button>
+    </div>
+    <div class="wl-ap-price">Current: $${currentPrice.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+    <input class="wl-ap-input" id="wl-ap-price-input" type="number" placeholder="Target price…" step="0.01" min="0"/>
+    <div class="wl-ap-dir">
+      <button id="wl-ap-above" class="sel-above" onclick="_apSetDir('above')">▲ Above</button>
+      <button id="wl-ap-below" onclick="_apSetDir('below')">▼ Below</button>
+    </div>
+    <button class="wl-ap-save" onclick="_apSave()">Set Alert</button>
+    ${activeHtml}
+  `;
+}
+
+function _apSetDir(dir) {
+  _apDir = dir;
+  const a = document.getElementById('wl-ap-above');
+  const b = document.getElementById('wl-ap-below');
+  if (!a||!b) return;
+  a.className = dir==='above' ? 'sel-above' : '';
+  b.className = dir==='below' ? 'sel-below' : '';
+}
+
+function _apSave() {
+  const input = document.getElementById('wl-ap-price-input');
+  const price = parseFloat(input.value);
+  if (!price || price <= 0 || !_apTicker) return;
+  if (!watchlistAlerts[_apTicker]) watchlistAlerts[_apTicker] = [];
+  watchlistAlerts[_apTicker].push({ id: Date.now().toString(), targetPrice: price, direction: _apDir, createdAt: new Date().toISOString() });
+  saveWatchlistAlerts();
+  input.value = '';
+  _renderAlertPanel(_apTicker, getAsset(_apTicker).price);
+  renderWatchlistFull();
+}
+
+function _deleteAlert(ticker, id) {
+  if (!watchlistAlerts[ticker]) return;
+  watchlistAlerts[ticker] = watchlistAlerts[ticker].filter(a => a.id !== id);
+  if (!watchlistAlerts[ticker].length) delete watchlistAlerts[ticker];
+  saveWatchlistAlerts();
+  _renderAlertPanel(ticker, getAsset(ticker).price);
+  renderWatchlistFull();
+}
+
+function checkWatchlistAlerts() {
+  const triggered = [];
+  for (const sym of watchlist) {
+    const alerts = watchlistAlerts[sym];
+    if (!alerts || !alerts.length) continue;
+    const a = getAsset(sym);
+    if (!a || !a.price) continue;
+    for (const al of alerts) {
+      if (_firedAlertIds.has(al.id)) continue;
+      const hit = (al.direction === 'above' && a.price >= al.targetPrice) ||
+                  (al.direction === 'below' && a.price <= al.targetPrice);
+      if (hit) {
+        _firedAlertIds.add(al.id);
+        triggered.push({ sym, price: a.price, targetPrice: al.targetPrice, direction: al.direction });
+      }
+    }
+  }
+  triggered.forEach(t => _showAlertToast(t));
+  if (triggered.length) {
+    const summary = triggered.map(t => `${t.sym} ${t.direction==='above'?'broke above':'dropped below'} $${t.targetPrice.toLocaleString(undefined,{maximumFractionDigits:2})} (now $${t.price.toLocaleString(undefined,{maximumFractionDigits:2})})`).join('; ');
+    quickResearchAgent(`⚡ PRICE ALERT: ${summary}. Briefly comment on what this level crossing might mean for the position — 2-3 sentences, signal card format.`, true);
+  }
+}
+
+function _showAlertToast({ sym, price, targetPrice, direction }) {
+  const id  = 'toast-' + Date.now() + '-' + sym;
+  const dir = direction === 'above' ? '🟢 crossed above' : '🔴 dropped below';
+  const el  = document.createElement('div');
+  el.className = 'alert-toast';
+  el.id = id;
+  el.innerHTML = `<div class="toast-icon">🔔</div>
+    <div style="flex:1"><div class="toast-title">${sym} Alert Triggered</div>
+    <div class="toast-msg">${sym} ${dir} $${targetPrice.toLocaleString(undefined,{maximumFractionDigits:2})} — now $${price.toLocaleString(undefined,{maximumFractionDigits:2})}</div></div>
+    <button class="toast-close" onclick="document.getElementById('${id}').remove()">×</button>`;
+  document.body.appendChild(el);
+  setTimeout(() => { const e = document.getElementById(id); if(e) e.remove(); }, 9000);
 }
 
 // ══════════════════════════════════════════════
@@ -4829,6 +4995,7 @@ async function refreshAllPrices() {
   const ds = document.getElementById('data-stamp');
   if (ds) ds.textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
   showLiveBadge();
+  checkWatchlistAlerts();
   // Silent background alert scan — fires Obama unprompted if something noteworthy
   setTimeout(checkProactiveAlerts, 2000);
 }
@@ -5014,7 +5181,7 @@ setTimeout(function() {
   updateStatusBar();
   startLiveData();
 }, 400);
-renderWatchlistSidebar(); renderWatchlistFull();
+loadWatchlistAlerts(); renderWatchlistSidebar(); renderWatchlistFull();
 buildTicker(); renderNews(filteredNews);
 window.addEventListener('resize',()=>{
   if(document.getElementById('section-charts').style.display!=='none') drawChart();
