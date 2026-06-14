@@ -4599,11 +4599,10 @@ async function fetchLiveCandles(ticker, period) {
         vol: vols.length ? vols[Math.min(vols.length - 1, Math.floor(i * vols.length / ohlc.length))] : 0
       }));
     }
-    const TD = window.LOCAL_KEYS && window.LOCAL_KEYS.twelvedata;
-    if (TD) {
+    {
       const map = {'1W':['1h',60],'1M':['1day',30],'3M':['1day',90],'6M':['1day',180],'1Y':['1day',250]};
       const pair = map[period] || ['1day',30];
-      const res = await fetch('https://api.twelvedata.com/time_series?symbol=' + ticker + '&interval=' + pair[0] + '&outputsize=' + pair[1] + '&apikey=' + TD);
+      const res = await fetch(PROXY_BASE + '/proxy/twelvedata/time_series?symbol=' + ticker + '&interval=' + pair[0] + '&outputsize=' + pair[1]);
       if (res.ok) {
         const td = await res.json();
         if (td && td.status !== 'error' && Array.isArray(td.values) && td.values.length > 1) {
@@ -4781,9 +4780,7 @@ async function loadRisk(force) {
   corrEl.innerHTML = '<div style="color:var(--muted);font-size:16px">Loading 90 days of closes for 11 assets…</div>';
   try {
     const series = {};
-    const TD = window.LOCAL_KEYS && window.LOCAL_KEYS.twelvedata;
-    if (!TD) throw new Error('Twelve Data key required (config.local.js)');
-    const res = await fetch('https://api.twelvedata.com/time_series?symbol=' + RISK_STOCKS.join(',') + '&interval=1day&outputsize=90&apikey=' + TD);
+    const res = await fetch(PROXY_BASE + '/proxy/twelvedata/time_series?symbol=' + RISK_STOCKS.join(',') + '&interval=1day&outputsize=90');
     const td = await res.json();
     RISK_STOCKS.forEach(s => {
       const v = td[s] && td[s].values;

@@ -5,9 +5,10 @@
  *   POST /proxy/anthropic   → https://api.anthropic.com/v1/messages
  *   GET  /proxy/finnhub     → https://finnhub.io/api/v1/*
  *   POST /proxy/tavily      → https://api.tavily.com/search
+ *   GET  /proxy/twelvedata  → https://api.twelvedata.com/*
  *
  * Keys stored as Cloudflare Worker Secrets (never in code):
- *   ANTHROPIC_API_KEY, FINNHUB_API_KEY, TAVILY_API_KEY
+ *   ANTHROPIC_API_KEY, FINNHUB_API_KEY, TAVILY_API_KEY, TWELVEDATA_API_KEY
  *
  * Deploy:
  *   1. npm install -g wrangler
@@ -16,6 +17,7 @@
  *   4. wrangler secret put ANTHROPIC_API_KEY
  *   5. wrangler secret put FINNHUB_API_KEY
  *   6. wrangler secret put TAVILY_API_KEY
+ *   7. wrangler secret put TWELVEDATA_API_KEY
  */
 
 const ALLOWED_ORIGIN = 'https://rosalinatorres888.github.io';
@@ -47,6 +49,10 @@ export default {
 
     if (path === '/proxy/tavily' && request.method === 'POST') {
       return proxyTavily(request, env);
+    }
+
+    if (path.startsWith('/proxy/twelvedata') && request.method === 'GET') {
+      return proxyTwelveData(url, env);
     }
 
     return corsResponse(JSON.stringify({ error: 'Not found' }), 404);
@@ -88,6 +94,16 @@ async function proxyTavily(request, env) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+  const data = await resp.text();
+  return corsResponse(data, resp.status, 'application/json');
+}
+
+async function proxyTwelveData(url, env) {
+  const tdPath = url.pathname.replace('/proxy/twelvedata', '') || '/time_series';
+  const params = new URLSearchParams(url.search);
+  params.set('apikey', env.TWELVEDATA_API_KEY);
+  const tdUrl = `https://api.twelvedata.com${tdPath}?${params.toString()}`;
+  const resp = await fetch(tdUrl);
   const data = await resp.text();
   return corsResponse(data, resp.status, 'application/json');
 }
