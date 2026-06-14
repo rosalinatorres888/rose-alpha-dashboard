@@ -280,7 +280,28 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 .badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(213,0,249,.35);}
 
 @media(max-width:1100px){.two-col{grid-template-columns:1fr;}.stats-row{grid-template-columns:repeat(2,1fr);}.full-row{grid-template-columns:1fr;}.three-col{grid-template-columns:1fr;}}
-@media(max-width:720px){.shell{grid-template-columns:1fr;}.sidebar{display:none;}.main{padding:14px;}}
+@media(max-width:720px){
+  .shell{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .main{padding:10px;}
+  .card{padding:0;}
+  .card-header{padding:12px 14px 10px;}
+  canvas#mainChart{height:220px!important;}
+  .chart-canvas-wrap canvas{height:220px!important;}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .three-col{grid-template-columns:1fr;gap:8px;}
+  .two-col{grid-template-columns:1fr;gap:8px;}
+  .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{padding:10px 14px;font-size:14px;white-space:nowrap;}
+  .topbar{padding:0 12px;height:48px;}
+  .logo{font-size:15px;}
+  #chart-stats{grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 12px;}
+  .obama-stage{padding:16px 12px 10px;}
+  .obama-chat{max-height:260px;}
+  .chart-toolbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:6px 10px;}
+  .chart-toolbar::-webkit-scrollbar{display:none;}
+}
 
 /* ─── CHAOS ALPHA ────────────────────────────────────────────────── */
 .trump-stage{display:flex;flex-direction:column;align-items:center;padding:24px 20px 16px;background:linear-gradient(160deg,#fff9f0 0%,#fff3e0 100%);border-bottom:1px solid #ffe0b2;position:relative;overflow:hidden;}
@@ -700,6 +721,12 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   .stats-row{grid-template-columns:1fr;}
   .pred-grid{grid-template-columns:repeat(2,1fr);}
   .logo span{display:none;}
+  #chart-stats{grid-template-columns:repeat(2,1fr);}
+  .main{padding:8px;}
+  .stat-card{padding:12px 14px;}
+  .stat-val{font-size:20px;}
+  .obama-chat{max-height:200px;}
+  .chart-type-btn{padding:4px 8px;font-size:12px;}
 }
 
 /* ── VIEWPORT FIT — short tabs stretch to fill the page like Market ── */
@@ -1837,6 +1864,26 @@ function drawChart() {
         ctx.fillRect(x - candleW/2, y1, candleW, bh);
       }
     });
+  }
+
+  // ── x-axis date labels ──────────────────────────────────────────────
+  if (data[0] && data[0].datetime) {
+    const labelCount = Math.min(6, n);
+    const step = Math.floor(n / labelCount);
+    ctx.fillStyle = themeVar('--muted2');
+    ctx.font = '10px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    for (let i = 0; i < n; i += step) {
+      const dt = data[i].datetime;
+      const d  = new Date(dt);
+      let label;
+      if      (chartPeriod === '1W') label = d.toLocaleDateString([], {month:'short', day:'numeric'});
+      else if (chartPeriod === '1M') label = d.toLocaleDateString([], {month:'short', day:'numeric'});
+      else if (chartPeriod === '1Y') label = d.toLocaleDateString([], {month:'short', year:'2-digit'});
+      else                           label = d.toLocaleDateString([], {month:'short', day:'numeric'});
+      const x = PAD.l + i * bw + bw / 2;
+      ctx.fillText(label, x, H - 6);
+    }
   }
 
   // crosshair label
@@ -4665,7 +4712,8 @@ async function fetchLiveCandles(ticker, period) {
       window._candleSrc = 'live · coingecko';
       return ohlc.map((c, i) => ({
         open: c[1], high: c[2], low: c[3], close: c[4],
-        vol: vols.length ? vols[Math.min(vols.length - 1, Math.floor(i * vols.length / ohlc.length))] : 0
+        vol: vols.length ? vols[Math.min(vols.length - 1, Math.floor(i * vols.length / ohlc.length))] : 0,
+        datetime: new Date(c[0]).toISOString().slice(0, 16)
       }));
     }
     {
@@ -4677,7 +4725,8 @@ async function fetchLiveCandles(ticker, period) {
         if (td && td.status !== 'error' && Array.isArray(td.values) && td.values.length > 1) {
           window._candleSrc = 'live · twelvedata';
           return td.values.slice().reverse().map(v => ({
-            open: +v.open, high: +v.high, low: +v.low, close: +v.close, vol: +v.volume || 0
+            open: +v.open, high: +v.high, low: +v.low, close: +v.close, vol: +v.volume || 0,
+            datetime: v.datetime
           }));
         }
       }
@@ -4685,7 +4734,7 @@ async function fetchLiveCandles(ticker, period) {
     const data = await fhFetch('/stock/candle?symbol=' + ticker + '&resolution=' + resolution + '&from=' + from + '&to=' + now);
     if (!data || data.s !== 'ok' || !data.c || !data.c.length) return null;
     return data.t.map(function(t, i) {
-      return { open: data.o[i], high: data.h[i], low: data.l[i], close: data.c[i], vol: data.v[i] };
+      return { open: data.o[i], high: data.h[i], low: data.l[i], close: data.c[i], vol: data.v[i], datetime: new Date(t * 1000).toISOString().slice(0, 16) };
     });
   } catch(e) { return null; }
 }
