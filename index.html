@@ -1986,6 +1986,7 @@ function showSection(name) {
   if (name==='risk') loadRisk();
   if (name==='market') { renderThreadTabs(); renderObamaQuickPrompts(); }
   if (name==='research') { renderThreadTabs(); renderObamaQuickPrompts(); }
+  if (name==='chaos') { restoreLastChaosPred(); updateChaosIndex(); }
 }
 function setTab(name){showSection(name);}
 
@@ -3043,8 +3044,40 @@ function loadChaosEvent(idx) {
   const e = CHAOS_EVENTS[idx];
   document.getElementById('chaos-input').value = e.text;
   currentChaosEvent = e;
+  // #6: Show cached prediction instantly if available, skip API call
+  window._predCache = window._predCache || {};
+  const cached = window._predCache[e.text];
+  if (cached) {
+    window._lastPreds = cached;
+    tryParsePredictions(JSON.stringify(cached), true);
+    renderChaosPortfolioImpact(cached, e.text);
+    document.getElementById('pred-event-label').textContent = 'Based on: "' + e.text.substring(0,40) + '..." (cached)';
+    return;
+  }
   runChaosPredict();
 }
+
+// #2: Restore last prediction when user navigates back to Chaos Alpha
+function restoreLastChaosPred() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('rose_last_chaos_pred'));
+    if (!saved || !saved.preds) return;
+    window._lastPreds = saved.preds;
+    window._predCache = window._predCache || {};
+    window._predCache[saved.input] = saved.preds;
+    document.getElementById('chaos-input').value = saved.input || '';
+    tryParsePredictions(JSON.stringify(saved.preds), true);
+    renderChaosPortfolioImpact(saved.preds, saved.input);
+    if (saved.speech) document.getElementById('trump-speech').textContent = saved.speech;
+    if (saved.label) document.getElementById('pred-event-label').textContent = saved.label;
+  } catch(e) { /* nothing to restore */ }
+}
+
+// #5: Auto-score P&L — runs every 10 min; marks trades as scored once 24h elapses
+setInterval(() => {
+  scoreChaosPredictions();
+  updateChaosIndex();
+}, 10 * 60 * 1000);
 
 function trumpAnimStart() {
   document.getElementById('trump-avatar').classList.add('trump-speaking');
@@ -3239,6 +3272,24 @@ async function runChaosPredict() {
 
     document.getElementById('pred-event-label').textContent = 'Based on: "' + input.substring(0,40) + '..."';
     if (window._lastPreds) renderChaosPortfolioImpact(window._lastPreds, input);
+
+    // #2: Persist prediction so navigating away and back restores it
+    if (window._lastPreds) {
+      try {
+        localStorage.setItem('rose_last_chaos_pred', JSON.stringify({
+          input,
+          preds: window._lastPreds,
+          speech: document.getElementById('trump-speech').textContent,
+          label: document.getElementById('pred-event-label').textContent
+        }));
+      } catch(e) { /* storage full */ }
+    }
+
+    // #6: Save into prediction cache keyed by event text for instant replay
+    if (window._lastPreds) {
+      window._predCache = window._predCache || {};
+      window._predCache[input] = window._lastPreds;
+    }
     if (window._lastPreds && window._lastPreds.length) {
       const best = window._lastPreds.reduce((a,b) => (parseInt(b.confidence)||0) > (parseInt(a.confidence)||0) ? b : a);
       const baseAsset = ASSETS.find(a => a.ticker === (best.ticker || ''));
@@ -3299,14 +3350,33 @@ async function generateMoreChaos() {
 }
 
 // Chaos index animation
-function animateChaosIndex() {
+// ── #3: Live Chaos Index — calculated from real signals ──────────────────
+function computeLiveChaosIndex() {
+  // Component 1: HIGH-impact events in feed (0–40 pts)
+  const highCount = CHAOS_EVENTS.filter(e => e.impact === 'HIGH').length;
+  const eventScore = Math.min(40, highCount * 8);
+
+  // Component 2: Average absolute portfolio change today (0–40 pts)
+  const avgMove = ASSETS.length
+    ? ASSETS.reduce((s, a) => s + Math.abs(a.change || 0), 0) / ASSETS.length
+    : 0;
+  const volatilityScore = Math.min(40, Math.round(avgMove * 6));
+
+  // Component 3: Pending (unscored) chaos trades — more open bets = more chaos (0–20 pts)
+  const openBets = CHAOS_REAL.filter(r => !r.scored).length;
+  const betScore = Math.min(20, openBets * 4);
+
+  return Math.max(10, Math.min(99, eventScore + volatilityScore + betScore));
+}
+
+function updateChaosIndex() {
   const el = document.getElementById('chaos-index');
   if (!el) return;
-  const base = 87;
-  const jitter = Math.floor((Math.random()-0.5)*6);
-  el.textContent = Math.min(99, Math.max(60, base+jitter));
+  const val = computeLiveChaosIndex();
+  el.textContent = val;
+  el.style.color = val >= 80 ? 'var(--red)' : val >= 60 ? 'var(--amber)' : 'var(--green)';
 }
-setInterval(animateChaosIndex, 4000);
+setInterval(updateChaosIndex, 5000);
 
 
 
