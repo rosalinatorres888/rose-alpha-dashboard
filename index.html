@@ -855,6 +855,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
     <div class="tab"        id="tab-chaos"     onclick="showSection('chaos')">🔥 Chaos Alpha</div>
     <div class="tab"        id="tab-journal"   onclick="showSection('journal')">📓 Journal</div>
     <div class="tab"        id="tab-stress"    onclick="showSection('stress')">💥 Stress</div>
+    <div class="tab"        id="tab-trades"    onclick="showSection('trades')">🗒 Trades</div>
   </div>
 
   <!-- ══ REGIME BANNER ══ -->
@@ -1037,6 +1038,27 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
             <div id="alloc-insight" style="font-size:16px;color:var(--text2);line-height:1.5">Click "Optimize" for AI-powered allocation recommendations.</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Earnings Watch + Correlation Alerts row -->
+    <div class="full-row fadeIn" style="margin-top:16px">
+      <!-- EARNINGS WATCH -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📅 Earnings Watch</div>
+          <span class="card-action" id="earnings-refresh-btn" onclick="loadEarningsCalendar()">↻ Refresh</span>
+        </div>
+        <div id="earnings-list" style="padding:10px 18px 14px;font-size:14px;color:var(--muted)">Loading earnings calendar…</div>
+      </div>
+
+      <!-- CORRELATION ALERTS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ Correlation Alerts</div>
+          <span class="card-action" onclick="runCorrelationAlerts()">↻ Scan</span>
+        </div>
+        <div id="corr-alerts-list" style="padding:10px 18px 14px;font-size:14px;color:var(--muted)">Scanning for divergences…</div>
       </div>
     </div>
   </div>
@@ -1367,6 +1389,52 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           <div id="chaos-history" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ TRADE JOURNAL ══ -->
+  <div id="section-trades" style="display:none">
+    <div class="full-row fadeIn" style="gap:16px">
+
+      <!-- Left: entry form + log -->
+      <div class="card" style="padding:18px 22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:var(--text)">🗒 Trade Journal</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Log trades in plain English · Obama audits for emotional bias</div>
+          </div>
+          <button onclick="requestBiasAudit()" style="font-size:12px;padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-weight:600">🎙 Bias Audit</button>
+        </div>
+
+        <!-- Input -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <input id="trade-input" placeholder='e.g. "Trimmed NVDA — felt overextended after 8% run"'
+            style="flex:1;padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:14px;outline:none"
+            onkeydown="if(event.key==='Enter')logTrade()"
+          />
+          <button onclick="logTrade()" style="padding:9px 18px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-weight:700;font-size:13px;cursor:pointer">Log</button>
+        </div>
+
+        <!-- Entry list -->
+        <div id="trade-list" style="display:flex;flex-direction:column;gap:8px;max-height:480px;overflow-y:auto">
+          <div style="color:var(--muted);font-size:14px;text-align:center;padding:24px">No trades logged yet. Type a trade above — plain English, no special format needed.</div>
+        </div>
+      </div>
+
+      <!-- Right: bias audit output -->
+      <div class="card" style="padding:18px 22px;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+          <span style="font-size:22px">🎙</span>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--text)">Obama's Bias Audit</div>
+            <div style="font-size:12px;color:var(--muted)">Patterns in your decision-making — updated on demand</div>
+          </div>
+        </div>
+        <div id="bias-audit-output" style="flex:1;font-size:14px;color:var(--muted);line-height:1.6;padding:8px 0">
+          Click <strong>Bias Audit</strong> after logging a few trades to get Obama's read on your decision patterns.
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2124,7 +2192,7 @@ function buildTicker() {
 // SECTION SWITCHING
 // ══════════════════════════════════════════════
 function showSection(name) {
-  ['market','charts','news','watchlist','research','portfolio','chaos','risk','journal','stress'].forEach(s=>{
+  ['market','charts','news','watchlist','research','portfolio','chaos','risk','journal','stress','trades'].forEach(s=>{
     document.getElementById('section-'+s).style.display = s===name?'':'none';
     document.getElementById('tab-'+s).classList.toggle('active', s===name);
   });
@@ -2141,6 +2209,8 @@ function showSection(name) {
   if (name==='portfolio') { renderPortfolioStats(); renderPortfolio(); }
   if (name==='journal')   { renderJournal(); }
   if (name==='stress')    { initStressReplay(); }
+  if (name==='trades')    { renderTradeLog(); }
+  if (name==='market')    { loadEarningsCalendar(); runCorrelationAlerts(); }
 }
 function setTab(name){showSection(name);}
 
@@ -3675,6 +3745,295 @@ In 100–140 words, deliver ONE clear lesson from this historical crash that app
   }
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// #4 EARNINGS WATCH
+// Fetches upcoming earnings for portfolio holdings via Finnhub calendar API.
+// Shows days-until, expected move %, and fires a pre-earnings brief to Obama.
+// ══════════════════════════════════════════════════════════════════════════════
+let _earningsCache = null;
+let _earningsCacheTs = 0;
+const EARNINGS_TTL = 60 * 60 * 1000; // 1h
+
+async function loadEarningsCalendar(force) {
+  const el = document.getElementById('earnings-list');
+  if (!el) return;
+  if (!force && _earningsCache && (Date.now() - _earningsCacheTs) < EARNINGS_TTL) {
+    renderEarnings(_earningsCache);
+    return;
+  }
+  if (!FINNHUB_API_KEY) {
+    el.innerHTML = '<span style="color:var(--muted)">Add Finnhub key to enable earnings data.</span>';
+    return;
+  }
+  el.innerHTML = '<span style="color:var(--muted)">Fetching earnings calendar…</span>';
+  try {
+    const today = new Date();
+    const end   = new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000);
+    const fmt   = d => d.toISOString().split('T')[0];
+    const r     = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${fmt(today)}&to=${fmt(end)}&token=${FINNHUB_API_KEY}`);
+    const data  = await r.json();
+    const tickers = new Set(PORTFOLIO.map(p => p.ticker));
+    const hits  = (data.earningsCalendar || []).filter(e => tickers.has(e.symbol));
+    _earningsCache   = hits;
+    _earningsCacheTs = Date.now();
+    renderEarnings(hits);
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--muted)">Unable to load earnings calendar.</span>';
+  }
+}
+
+function renderEarnings(events) {
+  const el = document.getElementById('earnings-list');
+  if (!el) return;
+  if (!events || !events.length) {
+    el.innerHTML = '<div style="color:var(--muted);padding:8px 0">No upcoming earnings for your holdings in the next 21 days.</div>';
+    return;
+  }
+  const now = Date.now();
+  el.innerHTML = events.map(e => {
+    const daysOut = Math.ceil((new Date(e.date).getTime() - now) / (24*60*60*1000));
+    const urgency = daysOut <= 3 ? 'var(--red)' : daysOut <= 7 ? 'var(--amber)' : 'var(--text2)';
+    const eps     = e.epsEstimate != null ? `EPS est. $${e.epsEstimate.toFixed(2)}` : '';
+    const rev     = e.revenueEstimate != null ? ` · Rev est. $${(e.revenueEstimate/1e9).toFixed(1)}B` : '';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--surface3)">
+      <div>
+        <span style="font-weight:700;color:var(--text)">${e.symbol}</span>
+        <span style="color:var(--muted);font-size:12px;margin-left:6px">${e.date}${e.hour === 'bmo' ? ' · pre-mkt' : e.hour === 'amc' ? ' · after-close' : ''}</span>
+        ${eps || rev ? `<div style="font-size:11px;color:var(--muted);margin-top:1px">${eps}${rev}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-weight:700;color:${urgency};font-size:13px">${daysOut}d</span>
+        <button onclick="earningsBrief('${e.symbol}','${e.date}',${e.epsEstimate||'null'})"
+          style="font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer">Brief</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function earningsBrief(ticker, date, epsEst) {
+  const asset = ASSETS.find(a => a.ticker === ticker);
+  const pos   = PORTFOLIO.find(p => p.ticker === ticker);
+  if (!asset) return;
+  const q = `Pre-earnings brief for ${ticker} (${asset.name}). Reports on ${date}.${epsEst ? ` Consensus EPS estimate: $${epsEst}.` : ''} Current price $${asset.price.toLocaleString()}, ${asset.change >= 0 ? '+' : ''}${asset.change}% today.${pos ? ` I hold ${pos.shares} shares (avg $${pos.avg}, current $${pos.current}).` : ''} What should I watch for? What could cause a gap up or down? What's the options market implying for the move? Should I hold through earnings or reduce?`;
+  AGENT_MODE = true;
+  const toggle = document.getElementById('agent-toggle');
+  if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
+  document.getElementById('research-input').value = q;
+  showSection('market');
+  sendResearch();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// #5 CORRELATION BREAKDOWN ALERTS
+// Detects when portfolio pairs that historically move together are diverging.
+// Uses 5-day rolling change% as a fast proxy for correlation breakdown.
+// ══════════════════════════════════════════════════════════════════════════════
+const CORR_PAIRS = [
+  { a: 'NVDA', b: 'QQQ',  label: 'NVDA vs QQQ',   threshold: 8,  note: 'NVDA typically leads QQQ' },
+  { a: 'BTC',  b: 'ETH',  label: 'BTC vs ETH',    threshold: 10, note: 'crypto pair usually tracks tight' },
+  { a: 'AAPL', b: 'MSFT', label: 'AAPL vs MSFT',  threshold: 6,  note: 'mega-cap tech pair' },
+  { a: 'SPY',  b: 'QQQ',  label: 'SPY vs QQQ',    threshold: 5,  note: 'broad vs growth divergence signals regime shift' },
+  { a: 'BTC',  b: 'NVDA', label: 'BTC vs NVDA',   threshold: 15, note: 'risk-on proxies' },
+  { a: 'ETH',  b: 'SOL',  label: 'ETH vs SOL',    threshold: 12, note: 'L1 crypto pair' },
+];
+
+function runCorrelationAlerts() {
+  const el = document.getElementById('corr-alerts-list');
+  if (!el) return;
+
+  const alerts = [];
+  for (const pair of CORR_PAIRS) {
+    const assetA = ASSETS.find(a => a.ticker === pair.a);
+    const assetB = ASSETS.find(a => a.ticker === pair.b);
+    if (!assetA || !assetB) continue;
+    const divergence = Math.abs(assetA.change - assetB.change);
+    if (divergence >= pair.threshold) {
+      const leader  = Math.abs(assetA.change) > Math.abs(assetB.change) ? assetA : assetB;
+      const lagger  = leader.ticker === assetA.ticker ? assetB : assetA;
+      alerts.push({ ...pair, divergence, leader, lagger, assetA, assetB });
+    }
+  }
+
+  if (!alerts.length) {
+    el.innerHTML = '<div style="color:var(--muted);padding:8px 0">✓ No significant divergences detected in monitored pairs.</div>';
+    return;
+  }
+
+  el.innerHTML = alerts.map(a => {
+    const severity = a.divergence >= a.threshold * 1.5 ? 'var(--red)' : 'var(--amber)';
+    return `<div style="padding:8px 0;border-bottom:1px solid var(--surface3)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <span style="color:${severity};font-weight:700;font-size:13px">⚡ ${a.label}</span>
+          <span style="color:var(--muted);font-size:11px;margin-left:6px">${a.divergence.toFixed(1)}% spread</span>
+        </div>
+        <button onclick="correlationDeepDive('${a.a}','${a.b}','${a.label.replace(/'/g,'')}',${a.divergence.toFixed(1)})"
+          style="font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer">Ask Obama</button>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-top:3px">
+        <span style="color:var(--green)">${a.leader.ticker} ${a.leader.change >= 0 ? '+' : ''}${a.leader.change}%</span>
+        <span style="color:var(--muted);margin:0 5px">vs</span>
+        <span style="color:var(--red)">${a.lagger.ticker} ${a.lagger.change >= 0 ? '+' : ''}${a.lagger.change}%</span>
+        <span style="color:var(--muted);margin-left:6px;font-size:11px">· ${a.note}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function correlationDeepDive(tickerA, tickerB, label, divergence) {
+  const a = ASSETS.find(x => x.ticker === tickerA);
+  const b = ASSETS.find(x => x.ticker === tickerB);
+  if (!a || !b) return;
+  const q = `Correlation breakdown alert: ${label} — ${a.ticker} is ${a.change >= 0 ? '+' : ''}${a.change}% while ${b.ticker} is ${b.change >= 0 ? '+' : ''}${b.change}% today, a ${divergence}% spread. These two historically move together. What's driving the divergence? Is this a signal I should act on, or noise? What does this tell us about the current market regime?`;
+  AGENT_MODE = true;
+  const toggle = document.getElementById('agent-toggle');
+  if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
+  document.getElementById('research-input').value = q;
+  showSection('market');
+  sendResearch();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// #6 TRADE JOURNAL
+// Plain-English trade log. Obama parses intent, tags emotion, audits bias.
+// ══════════════════════════════════════════════════════════════════════════════
+const TRADE_LOG_KEY = 'rose_trade_log';
+let _tradeLog = [];
+try { _tradeLog = JSON.parse(localStorage.getItem(TRADE_LOG_KEY)) || []; } catch(e) { _tradeLog = []; }
+
+function saveTradeLog() {
+  try { localStorage.setItem(TRADE_LOG_KEY, JSON.stringify(_tradeLog)); } catch(e) {}
+}
+
+const BIAS_TAGS = {
+  fear:         { color: 'var(--red)',   keywords: ['scared','worried','nervous','afraid','panic','crash','drop','fall','risk'] },
+  fomo:         { color: 'var(--amber)', keywords: ['missing','fomo','everyone','moon','pump','run','rally','surge','explode'] },
+  greed:        { color: '#f59e0b',      keywords: ['easy','sure','guaranteed','can\'t lose','obvious','no-brainer'] },
+  overconfident:{ color: 'var(--purple)',keywords: ['definitely','certain','obviously','always','never','100%'] },
+  revenge:      { color: 'var(--red)',   keywords: ['make it back','average down','double','recover','prove'] },
+  disciplined:  { color: 'var(--green)', keywords: ['plan','target','stop loss','thesis','rebalance','trim','allocation','rule'] },
+};
+
+function detectBiasTags(text) {
+  const lower = text.toLowerCase();
+  return Object.entries(BIAS_TAGS)
+    .filter(([, v]) => v.keywords.some(kw => lower.includes(kw)))
+    .map(([tag]) => tag);
+}
+
+function logTrade() {
+  const inp  = document.getElementById('trade-input');
+  const text = (inp.value || '').trim();
+  if (!text) return;
+  inp.value = '';
+
+  const tags   = detectBiasTags(text);
+  const ticker = (() => {
+    const m = text.match(/\b([A-Z]{2,5})\b/);
+    return m ? m[1] : null;
+  })();
+  const asset  = ticker ? ASSETS.find(a => a.ticker === ticker) : null;
+
+  const entry = {
+    id:        Date.now(),
+    ts:        Date.now(),
+    text,
+    ticker,
+    priceAtLog: asset ? asset.price : null,
+    tags,
+    regime:    _currentRegime ? _currentRegime.label : null,
+  };
+  _tradeLog.unshift(entry);
+  if (_tradeLog.length > 300) _tradeLog = _tradeLog.slice(0, 300);
+  saveTradeLog();
+  renderTradeLog();
+}
+
+function renderTradeLog() {
+  const el = document.getElementById('trade-list');
+  if (!el) return;
+  if (!_tradeLog.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:24px">No trades logged yet. Type a trade above — plain English, no special format needed.</div>';
+    return;
+  }
+  el.innerHTML = _tradeLog.map(e => {
+    const date = new Date(e.ts).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    const time = new Date(e.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const tagChips = (e.tags || []).map(tag => {
+      const meta = BIAS_TAGS[tag];
+      return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:${meta.color}22;color:${meta.color};text-transform:uppercase;letter-spacing:.05em">${tag}</span>`;
+    }).join('');
+    const tickerBadge = e.ticker
+      ? `<span style="font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 7px;border-radius:4px">${e.ticker}${e.priceAtLog ? ' $' + e.priceAtLog.toLocaleString(undefined,{maximumFractionDigits:0}) : ''}</span>`
+      : '';
+    const regimeBadge = e.regime
+      ? `<span style="font-size:10px;color:var(--muted);padding:1px 5px;border:1px solid var(--border);border-radius:4px">${e.regime}</span>`
+      : '';
+    return `<div style="border:1px solid var(--border);border-radius:9px;padding:10px 14px;background:var(--surface)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:6px">${e.text}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">${tickerBadge}${tagChips}${regimeBadge}</div>
+        </div>
+        <div style="text-align:right;white-space:nowrap;flex-shrink:0">
+          <div style="font-size:11px;color:var(--muted)">${date}</div>
+          <div style="font-size:11px;color:var(--muted)">${time}</div>
+          <button onclick="deleteTrade(${e.id})" style="font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:3px">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteTrade(id) {
+  _tradeLog = _tradeLog.filter(e => e.id !== id);
+  saveTradeLog();
+  renderTradeLog();
+}
+
+async function requestBiasAudit() {
+  if (!ANTHROPIC_API_KEY) { showApiModal(); return; }
+  if (!_tradeLog.length) {
+    document.getElementById('bias-audit-output').innerHTML = '<span style="color:var(--muted)">Log at least one trade first.</span>';
+    return;
+  }
+  const el = document.getElementById('bias-audit-output');
+  el.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+  const entries = _tradeLog.slice(0, 20).map((e, i) =>
+    `${i+1}. [${new Date(e.ts).toLocaleDateString('en-US',{month:'short',day:'numeric'})}]${e.ticker?' '+e.ticker:''} — "${e.text}"${e.tags?.length?' (auto-tagged: '+e.tags.join(', ')+')'  :''}`
+  ).join('\n');
+
+  const prompt = `You are Barack Obama reviewing this investor's trade journal. Here are their recent trades:
+
+${entries}
+
+${getRegimeContext()}
+Analyze their decision-making patterns in 150–180 words. Identify: (1) the dominant emotional bias you detect, if any; (2) one trading pattern that is working in their favor; (3) one specific behavioral trap they keep falling into; (4) one concrete rule they should adopt to improve discipline. Be direct, cite specific trades from the log, and speak as Obama — measured, data-driven, slightly professorial. Do not sugarcoat.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const data = await resp.json();
+    const text = (data.content && data.content[0]?.text) || 'Unable to generate audit.';
+    el.innerHTML = text.replace(/\n/g, '<br>');
+  } catch(e) {
+    el.innerHTML = 'Unable to generate audit: ' + e.message;
+  }
+}
+
 // ── OBAMA QUIPS ───────────────────────────────────────────────────────────────
 const OBAMA_QUIPS = [
   "Let me be clear — this market is not going to fix itself. We need smart, data-driven decisions. That is what I believe in.",
@@ -4374,6 +4733,9 @@ if (FINNHUB_API_KEY) setTimeout(startLiveData, 600);
 
 // Score any pending journal entries on load (quietly, after prices are live)
 setTimeout(() => scoreJournalEntries(), 5000);
+
+// Earnings + correlation alerts on initial load
+setTimeout(() => { loadEarningsCalendar(); runCorrelationAlerts(); }, 3000);
 
 // Detect macro regime on load (after prices settle), refresh every 6h
 setTimeout(() => detectRegime(false), 8000);
