@@ -2704,13 +2704,14 @@ function quickResearch(q){
   sendResearch();
 }
 
-function runScenario(q) {
+function runScenario(scenarioDesc) {
   // Force agent mode on so run_scenario tool is available
   AGENT_MODE = true;
   const toggle = document.getElementById('agent-toggle');
-  if (toggle) { toggle.style.background='#2979ff'; toggle.style.color='#fff'; }
+  if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
+  // Explicit instruction ensures Claude calls run_scenario rather than just answering in text
+  const q = `Use the run_scenario tool to model this scenario across my portfolio holdings: ${scenarioDesc}. Assign realistic price_change_pct to each ticker I hold based on historical factor sensitivity, then summarize the total portfolio impact.`;
   document.getElementById('research-input').value = q;
-  showSection('market');
   sendResearch();
 }
 
