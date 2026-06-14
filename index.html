@@ -563,7 +563,7 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 .obama-input-area {
   padding:10px 12px;
   border-top:1px solid rgba(255,255,255,.08);
-  display:flex;gap:8px;
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;
   background:#060c1a;
 }
 .obama-input {
@@ -975,6 +975,14 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           </div>
           <div class="obama-quick-prompts">
             <div id="obama-quick-prompts-inner" style="display:contents"></div>
+          </div>
+          <div id="scenario-btns" style="display:flex;flex-wrap:wrap;gap:5px;padding:6px 12px 4px;background:var(--surface);border-top:1px solid var(--border)">
+            <span style="font-size:10px;color:var(--muted);align-self:center;margin-right:2px;letter-spacing:.06em;font-weight:600">SCENARIOS</span>
+            <button class="obama-quick-btn" onclick="runScenario('Fed cuts rates by 50bps — impact on my portfolio')">📉 Fed -50bps</button>
+            <button class="obama-quick-btn" onclick="runScenario('Bitcoin drops 30% — impact on my portfolio')">₿ BTC -30%</button>
+            <button class="obama-quick-btn" onclick="runScenario('NVDA misses earnings by 15% — impact on my portfolio')">📊 NVDA miss</button>
+            <button class="obama-quick-btn" onclick="runScenario('Recession hits — broad market down 25%')">🔻 Recession</button>
+            <button class="obama-quick-btn" onclick="runScenario('AI boom continues — tech sector up 40%')">🚀 AI Boom</button>
           </div>
           <div class="obama-input-area">
             <input class="obama-input" id="research-input" placeholder="Ask the analyst..." onkeydown="if(event.key==='Enter')sendResearch()"/>
@@ -2121,6 +2129,61 @@ function renderSignalCard(signal) {
   </div>`;
 }
 
+function renderHypothesisCard(toolResults) {
+  const hyp = toolResults.find(r => r.name === 'validate_hypothesis' && r.result && r.result.recorded);
+  if (!hyp) return '';
+  const d = hyp.result;
+  const styles = {
+    confirmed:    ['#d1fae5','#065f46','✓ CONFIRMED'],
+    rejected:     ['#fee2e2','#991b1b','✗ REJECTED'],
+    inconclusive: ['#fef9c3','#854d0e','~ INCONCLUSIVE']
+  };
+  const [bg, fg, label] = styles[d.verdict] || styles.inconclusive;
+  return `<div style="margin-top:8px;padding:10px 12px;border-radius:8px;background:${bg};border:1px solid ${fg}30">
+    <div style="font-size:10px;font-weight:700;color:${fg};letter-spacing:.06em;margin-bottom:4px">HYPOTHESIS TEST — ${label}</div>
+    <div style="font-size:12px;color:${fg};font-weight:600;margin-bottom:3px">${d.hypothesis}</div>
+    <div style="font-size:11px;color:${fg};opacity:.8">${d.metric}: actual <strong>${d.actual}</strong> vs threshold ${d.threshold}</div>
+  </div>`;
+}
+
+function renderScenarioTable(toolResults) {
+  const scen = toolResults.find(r => r.name === 'run_scenario' && r.result && r.result.scenario);
+  if (!scen) return '';
+  const d = scen.result;
+  const total = Number(d.total_portfolio_impact);
+  const totalColor = total >= 0 ? '#065f46' : '#991b1b';
+  const totalBg    = total >= 0 ? '#d1fae5' : '#fee2e2';
+  const rows = d.positions.map(p => {
+    if (p.dollar_impact === null) return '';
+    const impact = Number(p.dollar_impact);
+    const color  = impact >= 0 ? '#065f46' : '#991b1b';
+    const sign   = impact >= 0 ? '+' : '';
+    return `<tr>
+      <td style="padding:5px 8px;font-weight:600;font-size:12px">${p.ticker}</td>
+      <td style="padding:5px 8px;color:${color};font-size:12px">${p.price_change_pct >= 0 ? '+' : ''}${p.price_change_pct}%</td>
+      <td style="padding:5px 8px;color:${color};font-size:12px;font-weight:600">${sign}$${Math.abs(impact).toLocaleString()}</td>
+      <td style="padding:5px 8px;font-size:11px;color:var(--muted)">${p.rationale}</td>
+    </tr>`;
+  }).join('');
+  return `<div style="margin-top:10px;border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+    <div style="padding:7px 12px;background:var(--surface);font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em">
+      SCENARIO: ${d.scenario}
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:var(--surface)">
+        <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--muted)">TICKER</th>
+        <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--muted)">MOVE</th>
+        <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--muted)">IMPACT</th>
+        <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--muted)">RATIONALE</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="padding:7px 12px;background:${totalBg};color:${totalColor};font-size:12px;font-weight:700">
+      Total portfolio impact: ${total >= 0 ? '+' : ''}$${Math.abs(total).toLocaleString()}
+    </div>
+  </div>`;
+}
+
 // ── PORTFOLIO CONTEXT ─────────────────────────────────────────────────────
 function buildPortfolioContext() {
   const lines = PORTFOLIO.map(p => {
@@ -2326,7 +2389,7 @@ async function sendResearch(){
       const signal    = parseObamaSignal(text);
       const cleanText = stripJsonBlock(text);
       const toolLogHtml = toolLog ? `<div style="font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px">${toolLog}</div>` : '';
-      bubble.innerHTML = toolLogHtml + cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+      bubble.innerHTML = toolLogHtml + cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal) + renderHypothesisCard(toolResults) + renderScenarioTable(toolResults);
       if (speechEl) speechEl.innerHTML = (cleanText.split(/[.!?]/)[0] || '') + '...';
       fullText = cleanText;
     } else {
@@ -2429,6 +2492,44 @@ const AGENT_TOOLS = [
     name: 'get_portfolio_summary',
     description: 'Returns current portfolio holdings with P&L, concentration, and total value.',
     input_schema: { type: 'object', properties: {}, required: [] }
+  },
+  {
+    name: 'validate_hypothesis',
+    description: 'Record a hypothesis you are testing, the metric checked, threshold, actual computed value, and verdict. Use after calling calculate or get_price to confirm or reject a claim with data.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        hypothesis: { type: 'string', description: 'The claim being tested' },
+        metric:     { type: 'string', description: 'What numeric value was checked' },
+        threshold:  { type: 'string', description: 'The threshold the claim depends on' },
+        actual:     { type: 'number', description: 'The actual computed value' },
+        verdict:    { type: 'string', enum: ['confirmed', 'rejected', 'inconclusive'] }
+      },
+      required: ['hypothesis', 'metric', 'threshold', 'actual', 'verdict']
+    }
+  },
+  {
+    name: 'run_scenario',
+    description: 'Run a what-if scenario across portfolio holdings. Provide assumptions with estimated price impact per ticker and compute total portfolio dollar impact.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        scenario_name: { type: 'string', description: 'Name e.g. "Fed -50bps rate cut"' },
+        assumptions: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ticker:           { type: 'string' },
+              price_change_pct: { type: 'number', description: 'Estimated % price change under scenario' },
+              rationale:        { type: 'string', description: 'Why this asset moves this way' }
+            },
+            required: ['ticker', 'price_change_pct', 'rationale']
+          }
+        }
+      },
+      required: ['scenario_name', 'assumptions']
+    }
   }
 ];
 
@@ -2504,6 +2605,41 @@ async function executeTool(name, input) {
     return { error: 'No news found for: ' + input.query };
   }
 
+  if (name === 'validate_hypothesis') {
+    return {
+      recorded: true,
+      hypothesis: input.hypothesis,
+      verdict: input.verdict,
+      actual: input.actual,
+      threshold: input.threshold,
+      metric: input.metric
+    };
+  }
+
+  if (name === 'run_scenario') {
+    const results = input.assumptions.map(a => {
+      const position = PORTFOLIO.find(p => p.ticker.toUpperCase() === a.ticker.toUpperCase());
+      if (!position) return { ticker: a.ticker, dollar_impact: null, rationale: a.rationale, price_change_pct: a.price_change_pct };
+      const currentValue  = position.shares * position.current;
+      const scenarioValue = currentValue * (1 + a.price_change_pct / 100);
+      const dollarImpact  = scenarioValue - currentValue;
+      return {
+        ticker: a.ticker,
+        current_value: currentValue.toFixed(0),
+        price_change_pct: a.price_change_pct,
+        dollar_impact: dollarImpact.toFixed(0),
+        scenario_value: scenarioValue.toFixed(0),
+        rationale: a.rationale
+      };
+    });
+    const totalImpact = results.reduce((s, r) => s + (Number(r.dollar_impact) || 0), 0);
+    return {
+      scenario: input.scenario_name,
+      positions: results.sort((a, b) => Math.abs(Number(b.dollar_impact||0)) - Math.abs(Number(a.dollar_impact||0))),
+      total_portfolio_impact: totalImpact.toFixed(0)
+    };
+  }
+
   return { error: `Unknown tool: ${name}` };
 }
 
@@ -2564,6 +2700,16 @@ async function callClaudeWithTools(userMessage, onUpdate, systemPrompt) {
 
 function quickResearch(q){
   document.getElementById('research-input').value=q;
+  showSection('market');
+  sendResearch();
+}
+
+function runScenario(q) {
+  // Force agent mode on so run_scenario tool is available
+  AGENT_MODE = true;
+  const toggle = document.getElementById('agent-toggle');
+  if (toggle) { toggle.style.background='#2979ff'; toggle.style.color='#fff'; }
+  document.getElementById('research-input').value = q;
   showSection('market');
   sendResearch();
 }
