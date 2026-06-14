@@ -1074,8 +1074,9 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         <div id="chart-ai-analysis" style="padding:12px 18px;font-size:16px;color:var(--text2);line-height:1.6">
           Select an asset above then click <b>AI Analyze</b> to get a technical analysis.
         </div>
-        <div style="padding:0 18px 12px">
+        <div style="padding:0 18px 12px;display:flex;flex-direction:column;gap:6px">
           <button class="card-action" style="display:block;width:100%;text-align:center;padding:8px" onclick="analyzeCurrentChart()">⚡ AI Analyze Chart</button>
+          <button class="card-action" style="display:block;width:100%;text-align:center;padding:8px" onclick="askObamaAboutChart()">🎙 Ask Obama (deep dive)</button>
         </div>
       </div>
     </div>
@@ -1773,6 +1774,22 @@ function buildChartSymbols() {
     return '<button class="chart-period-btn' + active + '" onclick="setPeriod(\'' + p + '\')">' + p + '</button>';
   }).join('');
   wrap.innerHTML = symBtns + '<div class="chart-sep"></div>' + perBtns;
+}
+
+function askObamaAboutChart() {
+  const a = ASSETS.find(x => x.ticker === chartSymbol);
+  if (!a) return;
+  AGENT_MODE = true;
+  const toggle = document.getElementById('agent-toggle');
+  if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
+  const existing = document.getElementById('chart-ai-analysis').textContent.trim();
+  const context = existing && existing.length > 30
+    ? `\n\nLocal AI technical summary: "${existing.substring(0, 300)}"`
+    : '';
+  const q = `Deep dive on ${a.ticker} (${a.name}): current price $${a.price.toLocaleString()}, ${a.change >= 0 ? '+' : ''}${a.change}% today, chart period ${chartPeriod}.${context} Use search_web for latest news, earnings, analyst targets, and macro context. Then give me a full investment thesis — should I hold, add, or trim given my portfolio?`;
+  document.getElementById('research-input').value = q;
+  showSection('market');
+  sendResearch();
 }
 
 async function analyzeCurrentChart() {
@@ -3819,7 +3836,18 @@ function pairStats(a, b) {
 function renderRisk() {
   const { tickers, rets, series, asOf } = riskState;
   const st = document.getElementById('risk-stamp');
-  if (st) st.textContent = 'as of ' + asOf.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  if (st) {
+    const fetchedAt = asOf.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const msAgo = Date.now() - asOf.getTime();
+    const daysAgo = Math.floor(msAgo / (1000 * 60 * 60 * 24));
+    const hoursAgo = Math.floor(msAgo / (1000 * 60 * 60));
+    const age = daysAgo >= 2  ? `⚠ ${daysAgo}d old — refresh recommended`
+              : daysAgo === 1 ? '1d old'
+              : hoursAgo >= 1 ? `${hoursAgo}h old`
+              : 'just loaded';
+    st.textContent = `as of ${fetchedAt} · ${age}`;
+    st.style.color = daysAgo >= 2 ? 'var(--amber)' : 'var(--muted)';
+  }
   let h = '<table style="border-collapse:collapse;font-family:var(--font-m);font-size:18px;margin:0 auto"><tr><td></td>' +
     tickers.map(t => '<td style="width:70px;height:42px;color:var(--muted);text-align:center;font-size:17px">' + t + '</td>').join('') + '</tr>';
   tickers.forEach(a => {
