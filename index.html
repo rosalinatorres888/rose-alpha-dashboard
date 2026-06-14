@@ -856,6 +856,18 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
     <div class="tab"        id="tab-journal"   onclick="showSection('journal')">📓 Journal</div>
   </div>
 
+  <!-- ══ REGIME BANNER ══ -->
+  <div id="regime-banner" style="display:none;margin:8px 0 4px;padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;font-size:13px">
+    <span id="regime-icon" style="font-size:18px">🌐</span>
+    <div style="flex:1">
+      <span id="regime-label" style="font-weight:700;font-size:14px">Detecting regime…</span>
+      <span id="regime-desc" style="color:var(--muted);margin-left:8px"></span>
+    </div>
+    <span id="regime-implications" style="color:var(--muted);font-size:12px;max-width:320px;text-align:right"></span>
+    <span id="regime-age" style="color:var(--muted);font-size:11px;white-space:nowrap;margin-left:8px"></span>
+    <button onclick="detectRegime(true)" style="font-size:11px;padding:3px 9px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);cursor:pointer;white-space:nowrap" title="Re-detect regime now">↻</button>
+  </div>
+
   <!-- ══ MARKET ══ -->
   <div id="section-market">
     <div class="stats-row fadeIn">
@@ -2308,6 +2320,7 @@ function buildMarketContext() {
   return `[LIVE MARKET DATA — ${new Date().toLocaleString()}]\n` +
     `Current prices & 24h change: ${prices}\n` +
     (headlines ? `Latest headlines:\n${headlines}\n` : '') +
+    getRegimeContext() +
     `Ground your analysis in this live data and cite specific prices or headlines where relevant. ` +
     `For anything not covered above, note that you're relying on general knowledge.\n\nQUESTION: `;
 }
@@ -3253,6 +3266,167 @@ function renderJournal() {
   }).join('');
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// MACRO REGIME DETECTION
+// Classifies market regime every 6h using VIX, yields, DXY, portfolio moves.
+// Result is injected into every Obama response for regime-aware analysis.
+// ══════════════════════════════════════════════════════════════════════════════
+const REGIME_KEY     = 'rose_macro_regime';
+const REGIME_TTL_MS  = 6 * 60 * 60 * 1000;
+
+const REGIME_META = {
+  'Risk-On':      { icon: '🟢', color: 'var(--green)',  desc: 'Growth assets favored · tight spreads · low vol' },
+  'Risk-Off':     { icon: '🔴', color: 'var(--red)',    desc: 'Defensive rotation · flight to safety · high vol' },
+  'Stagflation':  { icon: '🟠', color: 'var(--amber)',  desc: 'High inflation + slowing growth · bonds & equities both pressured' },
+  'Goldilocks':   { icon: '🔵', color: '#60a5fa',       desc: 'Moderate growth + tame inflation · ideal for risk assets' },
+  'Transition':   { icon: '⚪', color: 'var(--muted)',  desc: 'Mixed signals · regime shift in progress' },
+};
+
+let _currentRegime = null;
+try {
+  const saved = JSON.parse(localStorage.getItem(REGIME_KEY));
+  if (saved && (Date.now() - saved.ts) < REGIME_TTL_MS) _currentRegime = saved;
+} catch(e) {}
+
+function saveRegime(r) {
+  try { localStorage.setItem(REGIME_KEY, JSON.stringify(r)); } catch(e) {}
+  _currentRegime = r;
+}
+
+// Fetch macro signal proxies via Finnhub quotes
+async function fetchMacroSignals() {
+  const proxies = { VIX: 'VIX', TNX: 'TNX', DXY: 'DXY', GLD: 'GLD', TLT: 'TLT' };
+  const results = {};
+  await Promise.allSettled(
+    Object.entries(proxies).map(async ([key, sym]) => {
+      try {
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_API_KEY}`);
+        const d = await r.json();
+        if (d && d.c > 0) results[key] = { price: d.c, change: d.dp || 0 };
+      } catch(e) {}
+    })
+  );
+  return results;
+}
+
+// Build a terse snapshot of portfolio-level moves for regime context
+function buildRegimePortfolioSnapshot() {
+  const totalChange = ASSETS.reduce((s, a) => s + (a.change || 0), 0) / (ASSETS.length || 1);
+  const riskyChanges  = ASSETS.filter(a => ['NVDA','TSLA','BTC','MSTR','ARKK'].includes(a.ticker));
+  const safeChanges   = ASSETS.filter(a => ['GLD','TLT','SPY'].includes(a.ticker));
+  const avgRisky = riskyChanges.length ? riskyChanges.reduce((s,a)=>s+a.change,0)/riskyChanges.length : null;
+  const avgSafe  = safeChanges.length  ? safeChanges.reduce((s,a)=>s+a.change,0)/safeChanges.length  : null;
+  return { totalChange: parseFloat(totalChange.toFixed(2)), avgRisky, avgSafe };
+}
+
+async function detectRegime(force) {
+  if (!ANTHROPIC_API_KEY) return;
+  if (!force && _currentRegime && (Date.now() - _currentRegime.ts) < REGIME_TTL_MS) {
+    renderRegimeBanner(_currentRegime);
+    return;
+  }
+
+  updateRegimeBanner({ label: 'Analyzing regime…', icon: '⟳', color: 'var(--muted)', desc: '', implications: '', age: '' });
+
+  const macro   = await fetchMacroSignals();
+  const port    = buildRegimePortfolioSnapshot();
+  const prices  = ASSETS.map(a => `${a.ticker} ${a.change >= 0 ? '+' : ''}${a.change}%`).join(', ');
+
+  const macroLines = Object.entries(macro).map(([k, v]) =>
+    `${k}: ${v.price.toFixed(2)} (${v.change >= 0 ? '+' : ''}${v.change.toFixed(2)}%)`
+  ).join(', ');
+
+  const prompt = `You are a macro strategist. Classify the current market regime based on the data below.
+
+Macro signals: ${macroLines || 'unavailable'}
+Portfolio 24h moves: ${prices}
+Avg portfolio change: ${port.totalChange}%${port.avgRisky != null ? `, risky assets avg: ${port.avgRisky.toFixed(1)}%` : ''}${port.avgSafe != null ? `, safe havens avg: ${port.avgSafe.toFixed(1)}%` : ''}
+
+Respond with ONLY valid JSON, no other text:
+{"regime":"<Risk-On|Risk-Off|Stagflation|Goldilocks|Transition>","confidence":0.0–1.0,"rationale":"<1 sentence>","implications":"<1 sentence on what this means for the portfolio>","keySignals":["<signal1>","<signal2>","<signal3>"]}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const data  = await resp.json();
+    const raw   = (data.content && data.content[0]?.text) || '';
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('no JSON in response');
+    const parsed = JSON.parse(match[0]);
+    const regime = {
+      label:       parsed.regime || 'Transition',
+      confidence:  parsed.confidence || 0.5,
+      rationale:   parsed.rationale  || '',
+      implications:parsed.implications || '',
+      keySignals:  parsed.keySignals  || [],
+      ts:          Date.now(),
+    };
+    saveRegime(regime);
+    renderRegimeBanner(regime);
+  } catch(e) {
+    console.warn('Regime detection failed:', e.message);
+    updateRegimeBanner({ label: 'Regime unknown', icon: '⚪', color: 'var(--muted)', desc: '', implications: '', age: '' });
+  }
+}
+
+function updateRegimeBanner({ label, icon, color, desc, implications, age }) {
+  const banner = document.getElementById('regime-banner');
+  if (!banner) return;
+  banner.style.display = 'flex';
+  const lEl = document.getElementById('regime-label');
+  const iEl = document.getElementById('regime-icon');
+  const dEl = document.getElementById('regime-desc');
+  const impEl = document.getElementById('regime-implications');
+  const ageEl = document.getElementById('regime-age');
+  if (lEl) { lEl.textContent = label; lEl.style.color = color; }
+  if (iEl)   iEl.textContent = icon;
+  if (dEl)   dEl.textContent = desc;
+  if (impEl) impEl.textContent = implications;
+  if (ageEl) ageEl.textContent = age;
+  if (banner) { banner.style.borderColor = color; banner.style.background = 'var(--surface)'; }
+}
+
+function renderRegimeBanner(regime) {
+  if (!regime) return;
+  const meta = REGIME_META[regime.label] || REGIME_META['Transition'];
+  const confPct = Math.round((regime.confidence || 0.5) * 100);
+  const ageMs = Date.now() - (regime.ts || Date.now());
+  const ageH  = Math.floor(ageMs / 3600000);
+  const ageM  = Math.floor((ageMs % 3600000) / 60000);
+  const ageStr = ageH > 0 ? `${ageH}h ${ageM}m ago` : `${ageM}m ago`;
+  updateRegimeBanner({
+    label:       `${meta.icon} ${regime.label}`,
+    icon:        '',
+    color:       meta.color,
+    desc:        `${confPct}% confidence · ${regime.rationale}`,
+    implications: regime.implications,
+    age:         ageStr,
+  });
+  // Update border color
+  const banner = document.getElementById('regime-banner');
+  if (banner) banner.style.borderColor = meta.color + '66';
+}
+
+// Returns a regime context string injected into every Obama prompt
+function getRegimeContext() {
+  if (!_currentRegime) return '';
+  const meta = REGIME_META[_currentRegime.label] || {};
+  const signals = (_currentRegime.keySignals || []).join(', ');
+  return `\n[MACRO REGIME: ${_currentRegime.label} (${Math.round((_currentRegime.confidence||0.5)*100)}% confidence) — ${_currentRegime.rationale}. Implications: ${_currentRegime.implications}${signals ? '. Key signals: ' + signals : ''}. Frame your analysis through this regime lens.]\n`;
+}
+
 // ── OBAMA QUIPS ───────────────────────────────────────────────────────────────
 const OBAMA_QUIPS = [
   "Let me be clear — this market is not going to fix itself. We need smart, data-driven decisions. That is what I believe in.",
@@ -3952,6 +4126,10 @@ if (FINNHUB_API_KEY) setTimeout(startLiveData, 600);
 
 // Score any pending journal entries on load (quietly, after prices are live)
 setTimeout(() => scoreJournalEntries(), 5000);
+
+// Detect macro regime on load (after prices settle), refresh every 6h
+setTimeout(() => detectRegime(false), 8000);
+setInterval(() => detectRegime(false), REGIME_TTL_MS);
 
 // ══════════════════════════════════════════════
 // INIT
