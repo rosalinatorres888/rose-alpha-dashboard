@@ -853,6 +853,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
     <div class="tab"        id="tab-portfolio" onclick="showSection('portfolio')">Portfolio</div>
     <div class="tab"        id="tab-risk"      onclick="showSection('risk')">Risk</div>
     <div class="tab"        id="tab-chaos"     onclick="showSection('chaos')">🔥 Chaos Alpha</div>
+    <div class="tab"        id="tab-journal"   onclick="showSection('journal')">📓 Journal</div>
   </div>
 
   <!-- ══ MARKET ══ -->
@@ -1172,6 +1173,41 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           <div id="research-history" style="display:flex;flex-direction:column;gap:6px"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ══ CONVICTION JOURNAL ══ -->
+  <div id="section-journal" style="display:none">
+    <div class="full-row fadeIn" style="gap:16px">
+
+      <!-- Scorecard strip -->
+      <div class="card" style="padding:18px 22px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:var(--text)">📓 Conviction Journal</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Obama's calls graded by real price movement · 7d &amp; 30d outcomes</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="scoreJournalEntries()" style="font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text2);cursor:pointer">⟳ Score Now</button>
+            <button onclick="clearJournal()" style="font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer">Clear</button>
+          </div>
+        </div>
+
+        <!-- KPI row -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px" id="journal-kpi">
+          <div class="chaos-score-card"><div class="chaos-score-label">CALLS LOGGED</div><div class="chaos-score-val" id="jkpi-total">—</div></div>
+          <div class="chaos-score-card"><div class="chaos-score-label">7D WIN RATE</div><div class="chaos-score-val" id="jkpi-7d">—</div></div>
+          <div class="chaos-score-card"><div class="chaos-score-label">30D WIN RATE</div><div class="chaos-score-val" id="jkpi-30d">—</div></div>
+          <div class="chaos-score-card"><div class="chaos-score-label">AVG CONFIDENCE</div><div class="chaos-score-val" id="jkpi-conf">—</div></div>
+          <div class="chaos-score-card"><div class="chaos-score-label">BEST CALL</div><div class="chaos-score-val" id="jkpi-best" style="font-size:13px">—</div></div>
+        </div>
+
+        <!-- Entry list -->
+        <div id="journal-list" style="display:flex;flex-direction:column;gap:10px">
+          <div style="color:var(--muted);font-size:14px;text-align:center;padding:32px">No calls logged yet — ask Obama a question and every signal he emits gets recorded here automatically.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -2028,7 +2064,7 @@ function buildTicker() {
 // SECTION SWITCHING
 // ══════════════════════════════════════════════
 function showSection(name) {
-  ['market','charts','news','watchlist','research','portfolio','chaos','risk'].forEach(s=>{
+  ['market','charts','news','watchlist','research','portfolio','chaos','risk','journal'].forEach(s=>{
     document.getElementById('section-'+s).style.display = s===name?'':'none';
     document.getElementById('tab-'+s).classList.toggle('active', s===name);
   });
@@ -2043,6 +2079,7 @@ function showSection(name) {
   if (name==='research') { renderThreadTabs(); renderObamaQuickPrompts(); restoreLastDeepResearch(); }
   if (name==='chaos') { restoreLastChaosPred(); updateChaosIndex(); }
   if (name==='portfolio') { renderPortfolioStats(); renderPortfolio(); }
+  if (name==='journal')   { renderJournal(); }
 }
 function setTab(name){showSection(name);}
 
@@ -2402,6 +2439,7 @@ async function runMorningBrief() {
     const cleanText = stripJsonBlock(fullText);
     bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
     pushToThread('assistant', cleanText);
+    if (signal) captureJournalEntry(signal, 'Morning brief');
   } catch(e) {
     bubble.textContent = 'Good morning — I was unable to retrieve your brief: ' + e.message;
   }
@@ -2460,6 +2498,7 @@ async function sendResearch(){
       bubble.innerHTML = toolLogHtml + cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal) + renderHypothesisCard(toolResults) + renderScenarioTable(toolResults);
       if (speechEl) speechEl.innerHTML = (cleanText.split(/[.!?]/)[0] || '') + '...';
       fullText = cleanText;
+      if (signal) captureJournalEntry(signal, q);
     } else {
       // Standard streaming mode
       await callClaudeStream([...getActiveHistory(), { role: 'user', content: buildMarketContext() + q }], (chunk) => {
@@ -2475,6 +2514,7 @@ async function sendResearch(){
       const cleanText = stripJsonBlock(fullText);
       bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
       fullText = cleanText;
+      if (signal) captureJournalEntry(signal, q);
     }
 
     pushToThread('user', q);
@@ -3019,6 +3059,199 @@ CRITICAL FORMATTING RULE: Every response MUST end with a JSON block on its own l
 The signal must be one of: "bullish", "bearish", "neutral".
 Confidence is 0.0–1.0. Catalysts and risks are arrays of 1–3 short strings each.
 Write your narrative first, then the JSON block last.`;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CONVICTION JOURNAL
+// Auto-captures every Obama signal, scores outcome vs actual price after 7/30d
+// ══════════════════════════════════════════════════════════════════════════════
+const JOURNAL_KEY = 'rose_conviction_journal';
+let _journal = [];
+try { _journal = JSON.parse(localStorage.getItem(JOURNAL_KEY)) || []; } catch(e) { _journal = []; }
+
+function saveJournal() {
+  try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(_journal)); } catch(e) {}
+}
+
+// Called after every Obama response that contains a signal
+function captureJournalEntry(signal, question, ticker) {
+  if (!signal || !signal.signal) return;
+
+  // Infer ticker from question or signal tickers array
+  const inferredTicker = ticker
+    || (signal.tickers && signal.tickers[0])
+    || (() => {
+      const t = (question || '').match(/\b([A-Z]{2,5})\b/);
+      return t ? t[1] : null;
+    })();
+
+  // Look up current price
+  const asset = inferredTicker
+    ? ASSETS.find(a => a.ticker === inferredTicker.toUpperCase())
+    : null;
+
+  const entry = {
+    id:         Date.now(),
+    ts:         Date.now(),
+    question:   (question || '').substring(0, 120),
+    signal:     signal.signal,           // bullish / bearish / neutral
+    confidence: signal.confidence || 0,
+    catalysts:  signal.catalysts || [],
+    risks:      signal.risks || [],
+    ticker:     asset ? asset.ticker : inferredTicker || null,
+    priceAtCall: asset ? asset.price : null,
+    outcome7d:  null,   // filled by scoreJournalEntries()
+    outcome30d: null,
+    scored7d:   false,
+    scored30d:  false,
+  };
+  _journal.unshift(entry);
+  if (_journal.length > 200) _journal = _journal.slice(0, 200);
+  saveJournal();
+}
+
+// Fetch current price via Finnhub and compare to entry price
+async function fetchCurrentPrice(ticker) {
+  if (!ticker || !FINNHUB_API_KEY) return null;
+  try {
+    const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_API_KEY}`);
+    const d = await r.json();
+    return d && d.c > 0 ? d.c : null;
+  } catch(e) { return null; }
+}
+
+function signalWon(signal, pctChange) {
+  if (signal === 'bullish') return pctChange > 0;
+  if (signal === 'bearish') return pctChange < 0;
+  return Math.abs(pctChange) < 2; // neutral = flat is correct
+}
+
+async function scoreJournalEntries() {
+  const now = Date.now();
+  const D7  = 7  * 24 * 60 * 60 * 1000;
+  const D30 = 30 * 24 * 60 * 60 * 1000;
+  let changed = false;
+
+  for (const e of _journal) {
+    if (!e.ticker || !e.priceAtCall) continue;
+    const age = now - e.ts;
+
+    if (age >= D7 && !e.scored7d) {
+      const cur = await fetchCurrentPrice(e.ticker);
+      if (cur) {
+        const pct = ((cur - e.priceAtCall) / e.priceAtCall) * 100;
+        e.outcome7d  = { price: cur, pctChange: parseFloat(pct.toFixed(2)), won: signalWon(e.signal, pct) };
+        e.scored7d   = true;
+        changed = true;
+      }
+    }
+
+    if (age >= D30 && !e.scored30d) {
+      const cur = await fetchCurrentPrice(e.ticker);
+      if (cur) {
+        const pct = ((cur - e.priceAtCall) / e.priceAtCall) * 100;
+        e.outcome30d = { price: cur, pctChange: parseFloat(pct.toFixed(2)), won: signalWon(e.signal, pct) };
+        e.scored30d  = true;
+        changed = true;
+      }
+    }
+  }
+
+  if (changed) saveJournal();
+  renderJournal();
+}
+
+function clearJournal() {
+  if (!confirm('Clear all conviction journal entries?')) return;
+  _journal = [];
+  saveJournal();
+  renderJournal();
+}
+
+function renderJournal() {
+  const list = document.getElementById('journal-list');
+  if (!list) return;
+
+  // KPIs
+  const scored7  = _journal.filter(e => e.scored7d);
+  const scored30 = _journal.filter(e => e.scored30d);
+  const win7     = scored7.filter(e => e.outcome7d?.won).length;
+  const win30    = scored30.filter(e => e.outcome30d?.won).length;
+  const avgConf  = _journal.length
+    ? (_journal.reduce((s,e) => s + (e.confidence||0), 0) / _journal.length * 100).toFixed(0)
+    : null;
+
+  // Best call = highest 30d pct move that was directionally correct
+  const bestEntry = _journal
+    .filter(e => e.scored30d && e.outcome30d?.won)
+    .sort((a,b) => Math.abs(b.outcome30d.pctChange) - Math.abs(a.outcome30d.pctChange))[0];
+
+  document.getElementById('jkpi-total').textContent = _journal.length || '—';
+  document.getElementById('jkpi-7d').textContent   = scored7.length  ? `${Math.round(win7/scored7.length*100)}%` : '—';
+  document.getElementById('jkpi-30d').textContent  = scored30.length ? `${Math.round(win30/scored30.length*100)}%` : '—';
+  document.getElementById('jkpi-conf').textContent = avgConf ? avgConf + '%' : '—';
+  document.getElementById('jkpi-best').textContent = bestEntry
+    ? `${bestEntry.ticker} ${bestEntry.outcome30d.pctChange > 0 ? '+' : ''}${bestEntry.outcome30d.pctChange}% (30d)`
+    : '—';
+
+  // Color KPIs
+  const r7  = scored7.length  ? win7/scored7.length   : null;
+  const r30 = scored30.length ? win30/scored30.length : null;
+  const colorRate = (r, id) => {
+    const el = document.getElementById(id);
+    if (!el || r === null) return;
+    el.style.color = r >= 0.6 ? 'var(--green)' : r >= 0.4 ? 'var(--amber)' : 'var(--red)';
+  };
+  colorRate(r7,  'jkpi-7d');
+  colorRate(r30, 'jkpi-30d');
+
+  if (!_journal.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:32px">No calls logged yet — ask Obama a question and every signal he emits gets recorded here automatically.</div>';
+    return;
+  }
+
+  const signalIcon = { bullish: '▲', bearish: '▼', neutral: '◆' };
+  const signalColor = { bullish: 'var(--green)', bearish: 'var(--red)', neutral: 'var(--amber)' };
+
+  list.innerHTML = _journal.map(e => {
+    const date  = new Date(e.ts).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    const time  = new Date(e.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const confPct = Math.round((e.confidence||0)*100);
+
+    const outcomeHtml = (outcome, label) => {
+      if (!outcome) return `<span style="color:var(--muted);font-size:11px">${label}: pending</span>`;
+      const sign = outcome.pctChange >= 0 ? '+' : '';
+      const col  = outcome.won ? 'var(--green)' : 'var(--red)';
+      const icon = outcome.won ? '✓' : '✗';
+      return `<span style="color:${col};font-size:12px;font-weight:600">${icon} ${label}: ${sign}${outcome.pctChange}%</span>`;
+    };
+
+    const tickerBadge = e.ticker
+      ? `<span style="font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:1px 7px;border-radius:4px;margin-left:6px">${e.ticker}</span>`
+      : '';
+
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px 16px;background:var(--surface)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+            <span style="color:${signalColor[e.signal]};font-weight:700;font-size:13px">${signalIcon[e.signal]||'◆'} ${(e.signal||'').toUpperCase()}</span>
+            ${tickerBadge}
+            <span style="font-size:11px;color:var(--muted);margin-left:4px">${confPct}% conf</span>
+          </div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:8px;line-height:1.4">${e.question || '(no context)'}</div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            ${outcomeHtml(e.outcome7d,  '7d')}
+            ${outcomeHtml(e.outcome30d, '30d')}
+            ${e.priceAtCall ? `<span style="color:var(--muted);font-size:11px">entry $${e.priceAtCall.toLocaleString()}</span>` : ''}
+          </div>
+        </div>
+        <div style="text-align:right;white-space:nowrap">
+          <div style="font-size:11px;color:var(--muted)">${date}</div>
+          <div style="font-size:11px;color:var(--muted)">${time}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 // ── OBAMA QUIPS ───────────────────────────────────────────────────────────────
 const OBAMA_QUIPS = [
@@ -3716,6 +3949,9 @@ async function startLiveData() {
 
 // Auto-start on load
 if (FINNHUB_API_KEY) setTimeout(startLiveData, 600);
+
+// Score any pending journal entries on load (quietly, after prices are live)
+setTimeout(() => scoreJournalEntries(), 5000);
 
 // ══════════════════════════════════════════════
 // INIT
