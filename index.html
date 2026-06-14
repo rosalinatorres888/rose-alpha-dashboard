@@ -1097,6 +1097,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
               <option value="bear">Bearish</option>
             </select>
             <span class="card-action" onclick="fetchAINews()">⚡ AI Headlines</span>
+            <span class="card-action" onclick="askObamaAboutNews()" title="Send top headlines to Obama Analyst">🎙 Ask Obama</span>
           </div>
         </div>
         <div class="news-list" id="news-list"></div>
@@ -2022,7 +2023,7 @@ function showSection(name) {
   if (name==='watchlist') renderWatchlistFull();
   if (name==='risk') loadRisk();
   if (name==='market') { renderThreadTabs(); renderObamaQuickPrompts(); }
-  if (name==='research') { renderThreadTabs(); renderObamaQuickPrompts(); }
+  if (name==='research') { renderThreadTabs(); renderObamaQuickPrompts(); restoreLastDeepResearch(); }
   if (name==='chaos') { restoreLastChaosPred(); updateChaosIndex(); }
   if (name==='portfolio') { renderPortfolioStats(); renderPortfolio(); }
 }
@@ -2870,6 +2871,12 @@ async function deepResearch(query){
       RESEARCH_HISTORY.unshift({ q: q, text: cd.textContent, ts: Date.now() });
       if (RESEARCH_HISTORY.length > 12) RESEARCH_HISTORY.length = 12;
       try { localStorage.setItem('rose_research_history', JSON.stringify(RESEARCH_HISTORY)); } catch(e2) {}
+      // C: Persist currently displayed result so navigating away and back restores it
+      try {
+        localStorage.setItem('rose_last_deep', JSON.stringify({
+          q, html: cd.innerHTML, title: td.textContent
+        }));
+      } catch(e2) {}
       renderResearchHistory();
     }
   } catch(e) {
@@ -2877,6 +2884,35 @@ async function deepResearch(query){
   }
   btn.disabled = false;
   btn.innerHTML = 'Research';
+}
+
+// B: Send top headlines from current news filter to Obama Analyst
+// C: Restore last deep research result when navigating back to AI Research tab
+function restoreLastDeepResearch() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('rose_last_deep'));
+    if (!saved || !saved.html) return;
+    const rd = document.getElementById('deep-result');
+    const cd = document.getElementById('deep-content');
+    const td = document.getElementById('deep-title');
+    if (!rd || !cd || !td) return;
+    rd.style.display = 'block';
+    td.textContent = saved.title || ('📊 ' + (saved.q || '').substring(0, 55));
+    cd.innerHTML = saved.html;
+  } catch(e) {}
+}
+
+function askObamaAboutNews() {
+  const top = filteredNews.slice(0, 3);
+  if (!top.length) return;
+  const headlines = top.map((n, i) => `${i+1}. ${n.headline} (${n.source})`).join('\n');
+  AGENT_MODE = true;
+  const toggle = document.getElementById('agent-toggle');
+  if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
+  const q = `Here are today's top market headlines:\n${headlines}\n\nGiven my portfolio holdings, what are the 3 most important actions I should consider right now? Use search_web for any breaking context you need.`;
+  document.getElementById('research-input').value = q;
+  showSection('market');
+  sendResearch();
 }
 
 async function analyzeMarket(){
