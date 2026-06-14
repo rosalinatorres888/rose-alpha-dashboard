@@ -2434,6 +2434,31 @@ function renderMarkdown(text) {
 }
 
 // ── SIGNAL PARSING UTILITIES ──────────────────────────────────────────────
+function renderToolLogBadges(log) {
+  const toolColors = {
+    get_price:            ['#1e3a5f','#5b9bf8'],
+    get_news:             ['#1a3a2a','#4ade80'],
+    get_earnings_calendar:['#2d1b4e','#c084fc'],
+    search_web:           ['#2d2a1a','#fbbf24'],
+    calculate:            ['#1f2937','#9ca3af'],
+    validate_hypothesis:  ['#1e3a5f','#60a5fa'],
+    run_scenario:         ['#3b1f1f','#f87171'],
+  };
+  return log.split('<br>').filter(Boolean).map(line => {
+    const match = line.match(/🔧\s*(\w+)\((.+?)\)…/);
+    if (!match) return `<span style="font-size:11px;color:var(--muted)">${line}</span>`;
+    const [, tool, args] = match;
+    const [bg, fg] = toolColors[tool] || ['#1f2937','#9ca3af'];
+    const label = tool.replace(/_/g,' ');
+    let argStr = '';
+    try { const p = JSON.parse(args); argStr = Object.values(p)[0] || ''; } catch(e) { argStr = args; }
+    argStr = String(argStr).slice(0, 32);
+    return `<span style="display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:10px;background:${bg};border:1px solid ${fg}30;font-size:11px;color:${fg};font-family:var(--font-m);margin:1px 2px 1px 0">
+      🔧 <b>${label}</b>${argStr ? `<span style="opacity:.7">(${argStr})</span>` : ''}
+    </span>`;
+  }).join('');
+}
+
 function parseObamaSignal(text) {
   try {
     const match = text.match(/```json\s*([\s\S]*?)```/);
@@ -2652,8 +2677,8 @@ function _briefIsStale() {
 }
 
 async function runMorningBrief() {
-  if (_briefFired || !ANTHROPIC_API_KEY) return;
-  if (!_briefIsStale()) return; // already ran within the last 6 hours
+  if (_briefFired) return;
+  if (!_briefIsStale()) return;
   _briefFired = true;
   try { localStorage.setItem('rose_brief_ts', String(Date.now())); } catch(e) {}
 
@@ -2670,23 +2695,30 @@ async function runMorningBrief() {
   const bubble   = document.getElementById('brief-bubble');
   const speechEl = document.getElementById('obama-speech');
 
-  const briefPrompt = `${buildPortfolioContext()}\n\n${buildMarketContext()}Do not wait for a question. Proactively surface the 3 most important things I should know about my portfolio RIGHT NOW. Lead with the most urgent. Be direct, specific, and cite exact prices and percentages from the data above. End with your JSON signal block as instructed.`;
+  const briefPrompt = `${buildPortfolioContext()}\n\n${buildMarketContext()}
 
-  let fullText = '';
-  let started  = false;
+You are delivering the morning portfolio brief. Use your tools to gather fresh intelligence BEFORE writing:
+1. Call get_price() on any holding that appears to have an unusual move
+2. Call get_news() on the 1-2 most newsworthy tickers
+3. Call get_earnings_calendar() to flag any upcoming earnings in the next 7 days
+4. Call search_web() for one macro query if warranted (e.g. "Fed rate outlook June 2026")
+
+Then deliver the brief: 3 most important things to know RIGHT NOW, most urgent first. Cite specific prices, percentages, and headlines. End with your JSON signal block.`;
+
+  let toolLog = '';
 
   try {
-    await callClaudeStream(briefPrompt, (chunk) => {
-      if (!started) { bubble.innerHTML = ''; started = true; }
-      fullText += chunk;
-      bubble.innerHTML = stripJsonBlock(fullText).replace(/\n/g, '<br>');
-      if (speechEl) speechEl.innerHTML = (fullText.split(/[.!?]/)[0] || '') + '...';
+    const { text, toolResults } = await callClaudeWithTools(briefPrompt, (update) => {
+      toolLog += (toolLog ? '<br>' : '') + update;
+      bubble.innerHTML = renderToolLogBadges(toolLog) + '<div class="typing"><span></span><span></span><span></span></div>';
       history.scrollTop = history.scrollHeight;
-    }, 600, OBAMA_SYSTEM);
+    }, OBAMA_SYSTEM);
 
-    const signal    = parseObamaSignal(fullText);
-    const cleanText = stripJsonBlock(fullText);
-    bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+    const signal    = parseObamaSignal(text);
+    const cleanText = stripJsonBlock(text);
+    const toolLogHtml = toolLog ? `<div style="margin-bottom:10px">${renderToolLogBadges(toolLog)}</div>` : '';
+    bubble.innerHTML = toolLogHtml + cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+    if (speechEl) speechEl.innerHTML = (cleanText.split(/[.!?]/)[0] || '') + '...';
     pushToThread('assistant', cleanText);
     if (signal) captureJournalEntry(signal, 'Morning brief');
   } catch(e) {
@@ -2821,13 +2853,13 @@ async function sendResearch(){
 
       const { text, toolResults } = await callClaudeWithTools(q, (update) => {
         toolLog += (toolLog ? '<br>' : '') + update;
-        bubble.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${toolLog}</div><div class="typing"><span></span><span></span><span></span></div>`;
+        bubble.innerHTML = renderToolLogBadges(toolLog) + '<div class="typing"><span></span><span></span><span></span></div>';
         history.scrollTop = history.scrollHeight;
       }, OBAMA_SYSTEM);
 
       const signal    = parseObamaSignal(text);
       const cleanText = stripJsonBlock(text);
-      const toolLogHtml = toolLog ? `<div style="font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px">${toolLog}</div>` : '';
+      const toolLogHtml = toolLog ? `<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">${renderToolLogBadges(toolLog)}</div>` : '';
       bubble.innerHTML = toolLogHtml + cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal) + renderHypothesisCard(toolResults) + renderScenarioTable(toolResults);
       if (speechEl) speechEl.innerHTML = (cleanText.split(/[.!?]/)[0] || '') + '...';
       fullText = cleanText;
@@ -2869,15 +2901,15 @@ function renderObamaQuickPrompts() {
   const topMover = sorted[0];
   const topLoser = ASSETS.filter(a=>a.change<0).sort((a,b)=>a.change-b.change)[0];
   const prompts = [
-    topMover ? { label: `${topMover.ticker} ${topMover.change>=0?'▲':'▼'}${Math.abs(topMover.change)}%`, q: `Why is ${topMover.ticker} moving ${topMover.change>=0?'up':'down'} ${Math.abs(topMover.change)}% today? What's driving it?` } : null,
-    topLoser && topLoser.ticker !== topMover?.ticker ? { label: `${topLoser.ticker} ${topLoser.change}%`, q: `${topLoser.ticker} is down ${topLoser.change}% — should I be concerned or is this a buying opportunity?` } : null,
-    { label: 'Portfolio health', q: 'Review my full portfolio and tell me the 3 most important things I should act on right now.' },
-    { label: 'Biggest risk today', q: 'What is the single biggest macro risk to my portfolio in the next 30 days?' },
-    { label: 'SPY vs QQQ', q: 'SPY vs QQQ — which is the better position for the current macro environment?' },
+    topMover ? { label: `${topMover.ticker} ${topMover.change>=0?'▲':'▼'}${Math.abs(topMover.change)}%`, q: `Why is ${topMover.ticker} moving ${topMover.change>=0?'up':'down'} ${Math.abs(topMover.change)}% today? What's driving it and what should I do?`, agent: true } : null,
+    topLoser && topLoser.ticker !== topMover?.ticker ? { label: `${topLoser.ticker} ${topLoser.change}%`, q: `${topLoser.ticker} is down ${topLoser.change}% — use get_news and search_web to find what's driving it, then tell me: buy, hold, or trim?`, agent: true } : null,
+    { label: 'Portfolio health', q: 'Use get_portfolio_summary, get_price on my top holdings, and get_earnings_calendar to give me a full health check. What are the 3 most important things to act on?', agent: true },
+    { label: 'Upcoming earnings', q: 'Call get_earnings_calendar and search_web for analyst consensus on each upcoming report. Which earnings should I be most prepared for?', agent: true },
+    { label: 'Biggest risk today', q: 'Use search_web to find the top macro risk right now, then assess its impact on my specific holdings. Be concrete.', agent: true },
   ].filter(Boolean).slice(0, 5);
 
   container.innerHTML = prompts.map(p =>
-    `<button class="obama-quick-btn" onclick="quickResearch(${JSON.stringify(p.q)})">${p.label}</button>`
+    `<button class="obama-quick-btn" onclick="quickResearchAgent(${JSON.stringify(p.q)},${p.agent||false})">${p.label}</button>`
   ).join('');
 }
 
@@ -3161,6 +3193,17 @@ async function callClaudeWithTools(userMessage, onUpdate, systemPrompt) {
 }
 
 function quickResearch(q){
+  document.getElementById('research-input').value=q;
+  showSection('market');
+  sendResearch();
+}
+
+function quickResearchAgent(q, useAgent=true){
+  if (useAgent) {
+    AGENT_MODE = true;
+    const toggle = document.getElementById('agent-toggle');
+    if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
+  }
   document.getElementById('research-input').value=q;
   showSection('market');
   sendResearch();
