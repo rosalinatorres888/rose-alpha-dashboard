@@ -726,8 +726,8 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 </head>
 <body>
 <!-- API KEY MODAL -->
-<div id="api-modal" style="position:fixed;inset:0;z-index:9999;background:rgba(17,24,39,0.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;">
-  <div style="background:#ffffff;border-radius:16px;border:1px solid #dde1e8;box-shadow:0 20px 60px rgba(0,0,0,0.18);width:100%;max-width:460px;overflow:hidden;font-family:'Inter',sans-serif;">
+<div id="api-modal" style="display:none">
+  <div>
     <div style="padding:24px 28px 0">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
         <div style="width:36px;height:36px;background:#e8f0ff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px">🔑</div>
@@ -4732,37 +4732,23 @@ setInterval(() => detectRegime(false), REGIME_TTL_MS);
 // ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
-// Restore saved API keys from localStorage
+// All API keys are proxied server-side — no client keys needed
 (function restoreKeys() {
   try {
-    const savedAnthro = (window.LOCAL_KEYS && window.LOCAL_KEYS.anthropic) || localStorage.getItem('apex_anthropic_key');
-    const savedFH     = localStorage.getItem('apex_finnhub_key');
-    const savedTavily = (window.LOCAL_KEYS && window.LOCAL_KEYS.tavily) || localStorage.getItem('apex_tavily_key');
-    if (savedTavily) TAVILY_API_KEY = savedTavily;
-    if (savedAnthro) {
-      ANTHROPIC_API_KEY = savedAnthro;
-      // Hide modal, show status bar
-      const modal = document.getElementById('api-modal');
-      const bar   = document.getElementById('api-status-bar');
-      if (modal) modal.style.display = 'none';
-      if (bar)   { bar.style.display = 'flex'; }
-    }
-    if (savedFH) {
-      FINNHUB_API_KEY = savedFH;
-    }
-    if (savedAnthro) setTimeout(runMorningBrief, 1200);
+    const bar = document.getElementById('api-status-bar');
+    if (bar) bar.style.display = 'flex';
+    setTimeout(runMorningBrief, 1200);
   } catch(e) {}
 })();
 renderMarket(); renderSectors(); renderPortfolio();
 renderChaosEvents(); renderChaosHistory(); renderChaosPnl(); renderResearchHistory();
-// Apply restored keys
+// Start live data via proxy (no client key needed)
 setTimeout(function() {
   updateStatusBar();
-  if (FINNHUB_API_KEY) startLiveData();
+  startLiveData();
 }, 400);
 renderWatchlistSidebar(); renderWatchlistFull();
 buildTicker(); renderNews(filteredNews);
-if (!FINNHUB_API_KEY) setInterval(jitter, 3500);
 window.addEventListener('resize',()=>{
   if(document.getElementById('section-charts').style.display!=='none') drawChart();
 });
