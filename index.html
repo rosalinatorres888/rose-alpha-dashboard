@@ -831,7 +831,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   <div class="nav-sl" style="margin-top:8px">Watchlist</div>
   <div class="watchlist-items" id="watchlist-sidebar"></div>
   <div class="nav-sl" style="margin-top:8px">Sectors</div>
-  <div class="nav-item" onclick="quickResearch('Tech sector outlook 2025')"><span class="icon">💻</span>Technology</div>
+  <div class="nav-item" onclick="quickResearch('Tech sector outlook 2026')"><span class="icon">💻</span>Technology</div>
   <div class="nav-item" onclick="quickResearch('Energy sector outlook')"><span class="icon">⚡</span>Energy</div>
   <div class="nav-item" onclick="quickResearch('Financial sector outlook')"><span class="icon">🏦</span>Financials</div>
   <div class="nav-item" onclick="quickResearch('Healthcare sector')"><span class="icon">⚕</span>Healthcare</div>
@@ -1137,9 +1137,9 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
       <div style="padding:18px;display:flex;flex-direction:column;gap:14px">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Analyze NVIDIA: growth drivers, risks, valuation')">📊 NVDA Deep Dive</button>
-          <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Compare top AI ETFs: BOTZ, ARKK, QQQ for 2025')">🤖 AI ETF Comparison</button>
-          <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Bitcoin vs Ethereum: investment thesis 2025-2026')">₿ BTC vs ETH</button>
-          <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Top 5 risk factors for US equities in 2025')">⚠️ Risk Factors</button>
+          <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Compare top AI ETFs: BOTZ, ARKK, QQQ for 2026')">🤖 AI ETF Comparison</button>
+          <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Bitcoin vs Ethereum: investment thesis 2026-2027')">₿ BTC vs ETH</button>
+          <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Top 5 risk factors for US equities in 2026')">⚠️ Risk Factors</button>
           <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Dollar cost averaging vs lump sum investing')">📈 DCA Strategy</button>
           <button class="quick-btn" style="padding:11px 10px;font-size:14px;text-align:left;border-radius:8px" onclick="deepResearch('Sectors that outperform in high interest rate environments')">🏦 Rate Sectors</button>
         </div>
@@ -1344,11 +1344,11 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   </div>
 
   <div id="section-portfolio" style="display:none">
-    <div class="stats-row fadeIn">
-      <div class="stat-card green"><div class="stat-label">Total Value</div><div class="stat-value">$84,320</div><div class="stat-sub up">▲ +$2,140 today</div></div>
-      <div class="stat-card blue"><div class="stat-label">Total Return</div><div class="stat-value">+24.6%</div><div class="stat-sub up">▲ +$16,490 all time</div></div>
-      <div class="stat-card amber"><div class="stat-label">Positions</div><div class="stat-value">12</div><div class="stat-sub" style="color:var(--muted)">3 asset classes</div></div>
-      <div class="stat-card red"><div class="stat-label">Best Performer</div><div class="stat-value" style="font-size:20px">NVDA</div><div class="stat-sub up">▲ +187% gain</div></div>
+    <div class="stats-row fadeIn" id="portfolio-stats-row">
+      <div class="stat-card green"><div class="stat-label">Total Value</div><div class="stat-value" id="port-total-value">—</div><div class="stat-sub up" id="port-daily-sub">—</div></div>
+      <div class="stat-card blue"><div class="stat-label">Total Return</div><div class="stat-value" id="port-total-return">—</div><div class="stat-sub up" id="port-return-sub">—</div></div>
+      <div class="stat-card amber"><div class="stat-label">Positions</div><div class="stat-value" id="port-positions">—</div><div class="stat-sub" id="port-classes" style="color:var(--muted)">—</div></div>
+      <div class="stat-card red"><div class="stat-label">Best Performer</div><div class="stat-value" id="port-best-ticker" style="font-size:20px">—</div><div class="stat-sub up" id="port-best-sub">—</div></div>
     </div>
     <div class="card fadeIn">
       <div class="card-header"><div class="card-title">Positions</div><span class="card-action" onclick="quickResearch('Review portfolio: NVDA, AAPL, BTC, SPY, QQQ — rebalancing needed?');showSection('market')">AI Review</span></div>
@@ -1945,6 +1945,43 @@ function renderSectors() {
     </div>`).join('');
 }
 
+function renderPortfolioStats() {
+  const totalValue = PORTFOLIO.reduce((s, p) => s + p.shares * p.current, 0);
+  const totalCost  = PORTFOLIO.reduce((s, p) => s + p.shares * p.avg, 0);
+  const totalPnl   = totalValue - totalCost;
+  const totalPnlPct = ((totalPnl / totalCost) * 100).toFixed(1);
+
+  // Daily change: use live ASSETS change% per ticker
+  const dailyChange = PORTFOLIO.reduce((s, p) => {
+    const a = ASSETS.find(x => x.ticker === p.ticker);
+    return s + (a ? (p.shares * p.current * (a.change / 100)) : 0);
+  }, 0);
+
+  const best = PORTFOLIO.reduce((mx, p) => {
+    const pct = ((p.current - p.avg) / p.avg) * 100;
+    return pct > mx.pct ? { ticker: p.ticker, pct } : mx;
+  }, { ticker: '—', pct: -Infinity });
+
+  const types = [...new Set(PORTFOLIO.map(p => p.type))];
+
+  const fmt = v => '$' + Math.abs(v).toLocaleString(undefined, { maximumFractionDigits: 0 });
+  const sign = v => v >= 0 ? '▲ +' : '▼ -';
+
+  document.getElementById('port-total-value').textContent  = fmt(totalValue);
+  document.getElementById('port-daily-sub').textContent    = sign(dailyChange) + fmt(dailyChange) + ' today';
+  document.getElementById('port-daily-sub').className      = 'stat-sub ' + (dailyChange >= 0 ? 'up' : 'down');
+
+  document.getElementById('port-total-return').textContent = (totalPnl >= 0 ? '+' : '') + totalPnlPct + '%';
+  document.getElementById('port-return-sub').textContent   = sign(totalPnl) + fmt(totalPnl) + ' all time';
+  document.getElementById('port-return-sub').className     = 'stat-sub ' + (totalPnl >= 0 ? 'up' : 'down');
+
+  document.getElementById('port-positions').textContent    = PORTFOLIO.length;
+  document.getElementById('port-classes').textContent      = types.length + ' asset classes';
+
+  document.getElementById('port-best-ticker').textContent  = best.ticker;
+  document.getElementById('port-best-sub').textContent     = '▲ +' + best.pct.toFixed(1) + '% gain';
+}
+
 function renderPortfolio() {
   document.getElementById('portfolio-tbody').innerHTML = PORTFOLIO.map(p=>{
     const pnl    = (p.current-p.avg)*p.shares;
@@ -1987,6 +2024,7 @@ function showSection(name) {
   if (name==='market') { renderThreadTabs(); renderObamaQuickPrompts(); }
   if (name==='research') { renderThreadTabs(); renderObamaQuickPrompts(); }
   if (name==='chaos') { restoreLastChaosPred(); updateChaosIndex(); }
+  if (name==='portfolio') { renderPortfolioStats(); renderPortfolio(); }
 }
 function setTab(name){showSection(name);}
 
@@ -2300,10 +2338,20 @@ document.addEventListener('DOMContentLoaded', () => { renderThreadTabs(); render
 
 // ── MORNING BRIEF ─────────────────────────────────────────────────────────
 let _briefFired = false;
+const _BRIEF_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+function _briefIsStale() {
+  try {
+    const ts = parseInt(localStorage.getItem('rose_brief_ts') || '0', 10);
+    return Date.now() - ts > _BRIEF_TTL_MS;
+  } catch(e) { return true; }
+}
 
 async function runMorningBrief() {
   if (_briefFired || !ANTHROPIC_API_KEY) return;
+  if (!_briefIsStale()) return; // already ran within the last 6 hours
   _briefFired = true;
+  try { localStorage.setItem('rose_brief_ts', String(Date.now())); } catch(e) {}
 
   const history = document.getElementById('chat-history');
   const botDiv  = document.createElement('div');
