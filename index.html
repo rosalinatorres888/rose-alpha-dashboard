@@ -2694,6 +2694,90 @@ async function runMorningBrief() {
   }
 }
 
+// ── PROACTIVE ALERTS — fires after each price refresh if something noteworthy ──
+const _ALERT_TTL_MS   = 60 * 60 * 1000; // at most once per hour
+const _BIG_MOVE_PCT   = 4;               // single-asset 24h move threshold
+const _CONC_THRESHOLD = 45;              // portfolio concentration %
+let _lastAlertTs = 0;
+
+function _detectAlerts() {
+  const findings = [];
+
+  // 1. Big single-day moves
+  ASSETS.forEach(a => {
+    if (Math.abs(a.change) >= _BIG_MOVE_PCT) {
+      const dir = a.change > 0 ? 'surging' : 'dropping';
+      findings.push(`${a.ticker} is ${dir} ${a.change > 0 ? '+' : ''}${a.change}% today ($${a.price.toLocaleString(undefined,{maximumFractionDigits:2})})`);
+    }
+  });
+
+  // 2. Portfolio concentration
+  const totalVal = PORTFOLIO.reduce((s,p) => s + p.shares * p.current, 0);
+  PORTFOLIO.forEach(p => {
+    const pct = (p.shares * p.current / totalVal * 100);
+    if (pct >= _CONC_THRESHOLD) findings.push(`${p.ticker} is now ${pct.toFixed(1)}% of portfolio — concentration risk`);
+  });
+
+  // 3. Correlation pair breakdowns (reuse CORR_PAIRS)
+  if (typeof CORR_PAIRS !== 'undefined') {
+    CORR_PAIRS.forEach(pair => {
+      const a = ASSETS.find(x => x.ticker === pair.a);
+      const b = ASSETS.find(x => x.ticker === pair.b);
+      if (!a || !b) return;
+      const div = Math.abs(a.change - b.change);
+      if (div >= pair.threshold * 1.5) // only fire on strong divergences
+        findings.push(`Correlation breakdown: ${pair.label} — ${a.ticker} ${a.change>=0?'+':''}${a.change}% vs ${b.ticker} ${b.change>=0?'+':''}${b.change}% (${div.toFixed(1)}% spread)`);
+    });
+  }
+
+  return findings;
+}
+
+async function checkProactiveAlerts() {
+  if (Date.now() - _lastAlertTs < _ALERT_TTL_MS) return;
+  if (Date.now() - (_briefFired ? parseInt(localStorage.getItem('rose_brief_ts')||'0') : 0) < 5 * 60 * 1000) return; // skip if brief just ran
+  const findings = _detectAlerts();
+  if (!findings.length) return;
+
+  _lastAlertTs = Date.now();
+
+  const history = document.getElementById('chat-history');
+  if (!history) return;
+
+  const botDiv = document.createElement('div');
+  botDiv.className = 'msg ai fadeIn';
+  botDiv.innerHTML = `<div class="obama-msg-label bot" style="color:#f59e0b">⚡ ALERT</div>
+    <div class="obama-bubble bot" id="alert-bubble-${_lastAlertTs}">
+      <div class="typing"><span></span><span></span><span></span></div>
+    </div>`;
+  history.appendChild(botDiv);
+  history.scrollTop = history.scrollHeight;
+
+  const bubble = botDiv.querySelector('.obama-bubble');
+  const alertPrompt = `${buildMarketContext()}\n\nUrgent alerts detected:\n${findings.map((f,i) => `${i+1}. ${f}`).join('\n')}\n\nAddress these alerts directly and concisely in 60-90 words. No preamble. Lead with the most important finding. End with your JSON signal block.`;
+
+  const ALERT_SYSTEM = OBAMA_SYSTEM.replace('120-200 words per response', '60-90 words per response');
+
+  let fullText = '';
+  let started = false;
+  try {
+    await callClaudeStream(alertPrompt, chunk => {
+      if (!started) { bubble.innerHTML = ''; started = true; }
+      fullText += chunk;
+      bubble.innerHTML = stripJsonBlock(fullText).replace(/\n/g, '<br>');
+      history.scrollTop = history.scrollHeight;
+    }, 600, ALERT_SYSTEM);
+
+    const signal    = parseObamaSignal(fullText);
+    const cleanText = stripJsonBlock(fullText);
+    bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+    pushToThread('assistant', cleanText);
+    if (signal) captureJournalEntry(signal, findings[0]);
+  } catch(e) {
+    bubble.textContent = 'Alert scan failed: ' + e.message;
+  }
+}
+
 async function sendResearch(){
   if (!ANTHROPIC_API_KEY) { showApiModal(); return; }
   const inp = document.getElementById('research-input');
@@ -4681,6 +4765,8 @@ async function refreshAllPrices() {
   const ds = document.getElementById('data-stamp');
   if (ds) ds.textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
   showLiveBadge();
+  // Silent background alert scan — fires Obama unprompted if something noteworthy
+  setTimeout(checkProactiveAlerts, 2000);
 }
 
 async function fetchLiveCandles(ticker, period) {
