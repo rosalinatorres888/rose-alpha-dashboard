@@ -710,18 +710,21 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 #section-research #deep-result{flex:1;}
 #section-portfolio > .card{display:flex;flex-direction:column;min-height:calc(100vh - 380px);}
 @keyframes shimmer{0%{opacity:.4}50%{opacity:.8}100%{opacity:.4}}
-.signal-card{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;flex-direction:column;gap:8px;font-family:'Inter',sans-serif;font-size:13px}
-.signal-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
-.signal-badge.bullish{background:#d1fae5;color:#065f46}
-.signal-badge.bearish{background:#fee2e2;color:#991b1b}
-.signal-badge.neutral{background:#fef9c3;color:#854d0e}
+.signal-card{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--signal-color,var(--border));display:flex;flex-direction:column;gap:8px;font-family:'Inter',sans-serif;font-size:13px}
+.signal-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase}
+.signal-badge.bullish{background:rgba(0,200,83,.18);color:#00c853;border:1px solid rgba(0,200,83,.35)}
+.signal-badge.bearish{background:rgba(255,23,68,.15);color:#ff5370;border:1px solid rgba(255,23,68,.35)}
+.signal-badge.neutral{background:rgba(255,193,7,.15);color:#ffc107;border:1px solid rgba(255,193,7,.35)}
 .confidence-bar-wrap{display:flex;align-items:center;gap:8px}
-.confidence-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px}
-.confidence-bar-fill{height:6px;border-radius:3px;background:#3b82f6;transition:width .5s ease}
+.confidence-bar-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.confidence-bar-fill{height:5px;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.confidence-bar-fill.bullish{background:linear-gradient(90deg,#00c853,#69f0ae)}
+.confidence-bar-fill.bearish{background:linear-gradient(90deg,#ff1744,#ff5370)}
+.confidence-bar-fill.neutral{background:linear-gradient(90deg,#ffc107,#ffe082)}
 .chip-row{display:flex;flex-wrap:wrap;gap:5px}
-.chip{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500}
-.chip.catalyst{background:#eff6ff;color:#1d4ed8}
-.chip.risk{background:#fff7ed;color:#c2410c}
+.chip{padding:3px 9px;border-radius:12px;font-size:11px;font-weight:500}
+.chip.catalyst{background:rgba(41,121,255,.15);color:#5b9bf8;border:1px solid rgba(41,121,255,.25)}
+.chip.risk{background:rgba(255,100,30,.12);color:#ff8a50;border:1px solid rgba(255,100,30,.25)}
 </style>
 </head>
 <body>
@@ -2399,23 +2402,26 @@ function stripJsonBlock(text) {
 function renderSignalCard(signal) {
   if (!signal) return '';
   const icons = { bullish: '▲', bearish: '▼', neutral: '◆' };
+  const borderColors = { bullish: '#00c853', bearish: '#ff1744', neutral: '#ffc107' };
   const catalystChips = (signal.catalysts || []).map(c =>
     `<span class="chip catalyst">${c}</span>`).join('');
   const riskChips = (signal.risks || []).map(r =>
     `<span class="chip risk">⚠ ${r}</span>`).join('');
   const confPct = Math.round((signal.confidence || 0) * 100);
-  return `<div class="signal-card">
+  const s = signal.signal || 'neutral';
+  const accentColor = borderColors[s] || borderColors.neutral;
+  return `<div class="signal-card" style="--signal-color:${accentColor}">
     <div style="display:flex;align-items:center;gap:10px;">
-      <span class="signal-badge ${signal.signal}">${icons[signal.signal] || '◆'} ${signal.signal}</span>
+      <span class="signal-badge ${s}">${icons[s] || '◆'} ${s}</span>
       <div class="confidence-bar-wrap" style="flex:1">
         <div class="confidence-bar-track">
-          <div class="confidence-bar-fill" style="width:${confPct}%"></div>
+          <div class="confidence-bar-fill ${s}" style="width:${confPct}%"></div>
         </div>
-        <span style="font-size:11px;color:var(--muted);white-space:nowrap">${confPct}% confidence</span>
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap;font-weight:600">${confPct}%</span>
       </div>
     </div>
-    ${catalystChips ? `<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px">CATALYSTS</div><div class="chip-row">${catalystChips}</div></div>` : ''}
-    ${riskChips ? `<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px">RISKS</div><div class="chip-row">${riskChips}</div></div>` : ''}
+    ${catalystChips ? `<div><div style="font-size:10px;color:var(--muted);letter-spacing:.05em;margin-bottom:4px">CATALYSTS</div><div class="chip-row">${catalystChips}</div></div>` : ''}
+    ${riskChips ? `<div><div style="font-size:10px;color:var(--muted);letter-spacing:.05em;margin-bottom:4px">RISKS</div><div class="chip-row">${riskChips}</div></div>` : ''}
   </div>`;
 }
 
