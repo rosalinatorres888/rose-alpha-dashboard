@@ -3071,6 +3071,7 @@ function esc(s) {
 }
 
 function renderChaosPortfolioImpact(preds, eventText) {
+  window._lastChaosEvent = eventText;
   const container = document.getElementById('chaos-portfolio-impact');
   if (!container) return;
 
@@ -3108,18 +3109,19 @@ function renderChaosPortfolioImpact(preds, eventText) {
         <span style="font-weight:700;font-size:13px">TOTAL EXPOSURE</span>
         <span style="font-weight:700;font-size:14px;color:${totalColor}">${sign(total)}$${Math.abs(total).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
       </div>
-      <button onclick="sendChaosToObama(${JSON.stringify(eventText).replace(/</g,'&lt;')})"
+      <button onclick="sendChaosToObama()"
         style="margin-top:8px;width:100%;padding:7px 0;background:var(--blue-bg);border:1px solid rgba(41,121,255,.4);border-radius:7px;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.04em">
         🎙 Ask Obama about this event
       </button>
     </div>`;
 }
 
-function sendChaosToObama(eventText) {
+function sendChaosToObama() {
+  const eventText = window._lastChaosEvent || 'this chaos event';
   AGENT_MODE = true;
   const toggle = document.getElementById('agent-toggle');
   if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
-  const q = `Trump just made this move: "${eventText}". Given my actual portfolio holdings, what should I do right now? Use search_web if needed for latest context, then give me a clear action plan.`;
+  const q = 'Trump just made this move: "' + eventText.substring(0, 200) + '". Given my actual portfolio holdings, what should I do right now? Use search_web if needed for latest context, then give me a clear action plan.';
   document.getElementById('research-input').value = q;
   showSection('market');
   sendResearch();
