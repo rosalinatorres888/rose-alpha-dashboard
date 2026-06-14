@@ -769,6 +769,12 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         style="width:100%;padding:9px 14px;font-family:'DM Mono',monospace;font-size:16px;border:1px solid #dde1e8;border-radius:8px;background:#f5f6f9;color:#111827;outline:none;box-sizing:border-box;"
         onfocus="this.style.borderColor='rgba(0,200,83,.5)'" onblur="this.style.borderColor='#dde1e8'"/>
     </div>
+    <div style="padding:0 28px 14px">
+      <div style="font-size:16px;color:#374151;margin-bottom:6px;font-weight:600">Tavily API Key <span style="font-size:14px;color:#9ca3af;font-weight:400">(for live web search)</span></div>
+      <input id="tavily-key-input" type="password" placeholder="tvly-..."
+        style="width:100%;padding:9px 14px;font-family:'DM Mono',monospace;font-size:16px;border:1px solid #dde1e8;border-radius:8px;background:#f5f6f9;color:#111827;outline:none;box-sizing:border-box;"
+        onfocus="this.style.borderColor='rgba(41,121,255,.5)'" onblur="this.style.borderColor='#dde1e8'"/>
+    </div>
     <div style="padding:0 28px 20px;display:flex;gap:10px">
       <button id="connect-btn" onclick="saveApiKey()"
         style="flex:1;padding:12px;border:none;border-radius:9px;background:#2979ff;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:17px;cursor:pointer;box-shadow:0 0 16px rgba(41,121,255,.4);transition:all .15s;"
@@ -973,7 +979,10 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           <div class="obama-input-area">
             <input class="obama-input" id="research-input" placeholder="Ask the analyst..." onkeydown="if(event.key==='Enter')sendResearch()"/>
             <button class="obama-ask-btn" id="research-btn" onclick="sendResearch()">Ask Obama</button>
-            <button onclick="_briefFired=false; runMorningBrief()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;margin-left:6px" title="Re-run morning brief">↻ Brief</button>
+            <button id="agent-toggle" onclick="AGENT_MODE=!AGENT_MODE; this.style.background=AGENT_MODE?'#2979ff':'var(--surface)'; this.style.color=AGENT_MODE?'#fff':'var(--muted)'; this.title=AGENT_MODE?'Tools ON — Obama searches the web':'Tools OFF — click to enable live search'"
+              style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;margin-left:6px;transition:all .2s"
+              title="Tools OFF — click to enable live search">🔧 Tools</button>
+            <button onclick="_briefFired=false; runMorningBrief()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;margin-left:4px" title="Re-run morning brief">↻ Brief</button>
           </div>
         </div>
     </div>
@@ -1350,6 +1359,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 // API KEY MANAGEMENT
 // ══════════════════════════════════════════════
 let ANTHROPIC_API_KEY = '';
+let TAVILY_API_KEY    = '';
 
 function validateKeyInput(input) {
   const val = input.value.trim();
@@ -1398,6 +1408,13 @@ function saveApiKey() {
     FINNHUB_API_KEY = fhEl.value.trim();
     try { localStorage.setItem('apex_finnhub_key', FINNHUB_API_KEY); } catch(e) {}
     fhEl.value = '';
+  }
+
+  const tvEl = document.getElementById('tavily-key-input');
+  if (tvEl && tvEl.value.trim()) {
+    TAVILY_API_KEY = tvEl.value.trim();
+    try { localStorage.setItem('apex_tavily_key', TAVILY_API_KEY); } catch(e) {}
+    tvEl.value = '';
   }
 
   document.getElementById('api-modal').style.display = 'none';
@@ -2295,24 +2312,42 @@ async function sendResearch(){
   let started  = false;
 
   try {
-    await callClaudeStream([...getActiveHistory(), { role: 'user', content: buildMarketContext() + q }], (chunk) => {
-      if (!started) { bubble.innerHTML = ''; started = true; }
-      fullText += chunk;
-      // Strip partial json block while streaming so it doesn't flash raw JSON
-      bubble.innerHTML = stripJsonBlock(fullText).replace(/\n/g, '<br>');
-      const firstSent = fullText.split(/[.!?]/)[0];
-      if (firstSent && speechEl) speechEl.innerHTML = firstSent + '...';
-      history.scrollTop = history.scrollHeight;
-    }, 600, OBAMA_SYSTEM);
+    if (AGENT_MODE) {
+      // Agentic mode: tool use loop with live web search
+      let toolLog = '';
+      bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
 
-    // After stream: parse signal and render card
-    const signal    = parseObamaSignal(fullText);
-    const cleanText = stripJsonBlock(fullText);
-    bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+      const { text, toolResults } = await callClaudeWithTools(q, (update) => {
+        toolLog += (toolLog ? '<br>' : '') + update;
+        bubble.innerHTML = `<div style="font-size:11px;color:var(--muted);margin-bottom:6px">${toolLog}</div><div class="typing"><span></span><span></span><span></span></div>`;
+        history.scrollTop = history.scrollHeight;
+      }, OBAMA_SYSTEM);
 
-    // Save clean text to active thread (not the json block)
+      const signal    = parseObamaSignal(text);
+      const cleanText = stripJsonBlock(text);
+      const toolLogHtml = toolLog ? `<div style="font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:8px">${toolLog}</div>` : '';
+      bubble.innerHTML = toolLogHtml + cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+      if (speechEl) speechEl.innerHTML = (cleanText.split(/[.!?]/)[0] || '') + '...';
+      fullText = cleanText;
+    } else {
+      // Standard streaming mode
+      await callClaudeStream([...getActiveHistory(), { role: 'user', content: buildMarketContext() + q }], (chunk) => {
+        if (!started) { bubble.innerHTML = ''; started = true; }
+        fullText += chunk;
+        bubble.innerHTML = stripJsonBlock(fullText).replace(/\n/g, '<br>');
+        const firstSent = fullText.split(/[.!?]/)[0];
+        if (firstSent && speechEl) speechEl.innerHTML = firstSent + '...';
+        history.scrollTop = history.scrollHeight;
+      }, 600, OBAMA_SYSTEM);
+
+      const signal    = parseObamaSignal(fullText);
+      const cleanText = stripJsonBlock(fullText);
+      bubble.innerHTML = cleanText.replace(/\n/g, '<br>') + renderSignalCard(signal);
+      fullText = cleanText;
+    }
+
     pushToThread('user', q);
-    pushToThread('assistant', cleanText);
+    pushToThread('assistant', fullText);
   } catch(e) {
     bubble.textContent = 'I must be transparent with you — ' + e.message;
   }
@@ -2340,6 +2375,191 @@ function renderObamaQuickPrompts() {
   container.innerHTML = prompts.map(p =>
     `<button class="obama-quick-btn" onclick="quickResearch(${JSON.stringify(p.q)})">${p.label}</button>`
   ).join('');
+}
+
+// ── T3-A: TOOL USE — AGENT TOOLS & LOOP ──────────────────────────────────
+let AGENT_MODE = false;
+
+const AGENT_TOOLS = [
+  {
+    name: 'search_web',
+    description: 'Search the web for current news, prices, events, or analysis. Use for anything that may have happened after your training cutoff — earnings results, Fed decisions, macro events, analyst ratings.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query e.g. "NVDA earnings Q1 2026" or "Fed rate decision June 2026"' }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'get_price',
+    description: 'Get current price and 24h change for a ticker from the live dashboard.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        ticker: { type: 'string', description: 'Ticker symbol e.g. AAPL, BTC, SPY' }
+      },
+      required: ['ticker']
+    }
+  },
+  {
+    name: 'get_news',
+    description: 'Get recent news headlines for a ticker from the live dashboard feed.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Ticker symbol or topic e.g. NVDA, "federal reserve"' }
+      },
+      required: ['query']
+    }
+  },
+  {
+    name: 'calculate',
+    description: 'Evaluate a mathematical expression. Use for P&L, percentage changes, position sizing.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        expression: { type: 'string', description: 'Safe JS math expression e.g. "(894.51 - 312.40) / 312.40 * 100"' }
+      },
+      required: ['expression']
+    }
+  },
+  {
+    name: 'get_portfolio_summary',
+    description: 'Returns current portfolio holdings with P&L, concentration, and total value.',
+    input_schema: { type: 'object', properties: {}, required: [] }
+  }
+];
+
+async function executeTool(name, input) {
+  if (name === 'search_web') {
+    if (!TAVILY_API_KEY) return { error: 'Tavily API key not set — enter it via the API modal.' };
+    try {
+      const r = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: TAVILY_API_KEY,
+          query: input.query,
+          search_depth: 'basic',
+          max_results: 5,
+          include_answer: true
+        })
+      });
+      if (!r.ok) return { error: 'Tavily error: ' + r.status };
+      const d = await r.json();
+      const results = (d.results || []).map(r => ({
+        title: r.title,
+        url: r.url,
+        snippet: (r.content || '').slice(0, 300)
+      }));
+      return { answer: d.answer || null, results, query: input.query };
+    } catch(e) {
+      return { error: 'Search failed: ' + e.message };
+    }
+  }
+
+  if (name === 'calculate') {
+    try {
+      const safe = input.expression.replace(/[^0-9+\-*/().% ]/g, '');
+      const result = Function('"use strict"; return (' + safe + ')')();
+      return { result: Number(result.toFixed(4)), expression: input.expression };
+    } catch(e) {
+      return { error: 'Invalid expression: ' + e.message };
+    }
+  }
+
+  if (name === 'get_portfolio_summary') {
+    return { summary: buildPortfolioContext() };
+  }
+
+  if (name === 'get_price') {
+    const asset = ASSETS.find(a => a.ticker.toUpperCase() === input.ticker.toUpperCase());
+    if (asset) return { ticker: asset.ticker, price: asset.price, change_24h: asset.change, source: 'dashboard_live' };
+    if (FINNHUB_API_KEY) {
+      try {
+        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${input.ticker}&token=${FINNHUB_API_KEY}`);
+        const d = await r.json();
+        if (d.c) return { ticker: input.ticker, price: d.c, change_24h: d.dp, source: 'finnhub' };
+      } catch(e) {}
+    }
+    return { error: `Ticker ${input.ticker} not found` };
+  }
+
+  if (name === 'get_news') {
+    const local = (typeof NEWS_DATA !== 'undefined' ? NEWS_DATA : [])
+      .filter(n => n.headline.toLowerCase().includes(input.query.toLowerCase()))
+      .slice(0, 5);
+    if (local.length) return { headlines: local.map(n => ({ headline: n.headline, source: n.source, time: n.time })) };
+    if (FINNHUB_API_KEY) {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const week  = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
+        const r = await fetch(`https://finnhub.io/api/v1/company-news?symbol=${input.query}&from=${week}&to=${today}&token=${FINNHUB_API_KEY}`);
+        const d = await r.json();
+        return { headlines: d.slice(0,5).map(n => ({ headline: n.headline, source: n.source, time: new Date(n.datetime*1000).toLocaleDateString() })) };
+      } catch(e) {}
+    }
+    return { error: 'No news found for: ' + input.query };
+  }
+
+  return { error: `Unknown tool: ${name}` };
+}
+
+async function callClaudeWithTools(userMessage, onUpdate, systemPrompt) {
+  const sysText = systemPrompt || OBAMA_SYSTEM;
+  const messages = [
+    ...getActiveHistory(),
+    { role: 'user', content: buildMarketContext() + userMessage }
+  ];
+  const toolResultsAccumulator = [];
+  let iterations = 0;
+
+  while (iterations < 6) {
+    iterations++;
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 900,
+        system: [{ type: 'text', text: sysText, cache_control: { type: 'ephemeral' } }],
+        tools: AGENT_TOOLS,
+        messages
+      })
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
+    const data = await res.json();
+
+    if (data.stop_reason === 'end_turn') {
+      const textBlock = data.content.find(b => b.type === 'text');
+      return { text: textBlock ? textBlock.text : '', toolResults: toolResultsAccumulator };
+    }
+
+    if (data.stop_reason === 'tool_use') {
+      const toolBlocks = data.content.filter(b => b.type === 'tool_use');
+      const toolResults = [];
+      for (const block of toolBlocks) {
+        if (onUpdate) onUpdate(`🔧 ${block.name}(${block.name === 'search_web' ? '"' + block.input.query + '"' : JSON.stringify(block.input)})…`);
+        const result = await executeTool(block.name, block.input);
+        toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(result) });
+        toolResultsAccumulator.push({ name: block.name, input: block.input, result });
+      }
+      messages.push({ role: 'assistant', content: data.content });
+      messages.push({ role: 'user', content: toolResults });
+      continue;
+    }
+
+    const textBlock = data.content.find(b => b.type === 'text');
+    return { text: textBlock ? textBlock.text : '', toolResults: toolResultsAccumulator };
+  }
+  throw new Error('Agent loop exceeded max iterations');
 }
 
 function quickResearch(q){
@@ -3128,6 +3348,8 @@ if (FINNHUB_API_KEY) setTimeout(startLiveData, 600);
   try {
     const savedAnthro = (window.LOCAL_KEYS && window.LOCAL_KEYS.anthropic) || localStorage.getItem('apex_anthropic_key');
     const savedFH     = localStorage.getItem('apex_finnhub_key');
+    const savedTavily = localStorage.getItem('apex_tavily_key');
+    if (savedTavily) TAVILY_API_KEY = savedTavily;
     if (savedAnthro) {
       ANTHROPIC_API_KEY = savedAnthro;
       // Hide modal, show status bar
