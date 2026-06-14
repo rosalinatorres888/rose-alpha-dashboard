@@ -1533,6 +1533,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 // ══════════════════════════════════════════════
 // API KEY MANAGEMENT
 // ══════════════════════════════════════════════
+const PROXY_BASE = 'https://rose-alpha-proxy.rosalinatorres.workers.dev';
 let ANTHROPIC_API_KEY = '';
 let TAVILY_API_KEY    = '';
 
@@ -2224,9 +2225,9 @@ Rules: be precise and direct, lead with insights, no fabricated prices, use bull
 async function callClaude(msg, maxTokens=400, customSystem=null) {
   // Non-streaming fallback for chart analysis & deep research
   const sysText = customSystem || SYSTEM_PROMPT;
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: maxTokens,
@@ -2242,9 +2243,9 @@ async function callClaude(msg, maxTokens=400, customSystem=null) {
 async function callClaudeStream(msg, onChunk, maxTokens=400, customSystem=null) {
   // Streaming version — calls onChunk(text) for each delta
   const sysText = customSystem || SYSTEM_PROMPT;
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-haiku-4-5',
       max_tokens: maxTokens,
@@ -2775,13 +2776,11 @@ const AGENT_TOOLS = [
 
 async function executeTool(name, input) {
   if (name === 'search_web') {
-    if (!TAVILY_API_KEY) return { error: 'Tavily API key not set — enter it via the API modal.' };
     try {
-      const r = await fetch('https://api.tavily.com/search', {
+      const r = await fetch(`${PROXY_BASE}/proxy/tavily`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          api_key: TAVILY_API_KEY,
           query: input.query,
           search_depth: 'basic',
           max_results: 5,
@@ -2820,7 +2819,7 @@ async function executeTool(name, input) {
     if (asset) return { ticker: asset.ticker, price: asset.price, change_24h: asset.change, source: 'dashboard_live' };
     if (FINNHUB_API_KEY) {
       try {
-        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${input.ticker}&token=${FINNHUB_API_KEY}`);
+        const r = await fetch(`${PROXY_BASE}/proxy/finnhub/quote?symbol=${input.ticker}`);
         const d = await r.json();
         if (d.c) return { ticker: input.ticker, price: d.c, change_24h: d.dp, source: 'finnhub' };
       } catch(e) {}
@@ -2837,7 +2836,7 @@ async function executeTool(name, input) {
       try {
         const today = new Date().toISOString().split('T')[0];
         const week  = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
-        const r = await fetch(`https://finnhub.io/api/v1/company-news?symbol=${input.query}&from=${week}&to=${today}&token=${FINNHUB_API_KEY}`);
+        const r = await fetch(`${PROXY_BASE}/proxy/finnhub/company-news?symbol=${input.query}&from=${week}&to=${today}`);
         const d = await r.json();
         return { headlines: d.slice(0,5).map(n => ({ headline: n.headline, source: n.source, time: new Date(n.datetime*1000).toLocaleDateString() })) };
       } catch(e) {}
@@ -2894,13 +2893,11 @@ async function callClaudeWithTools(userMessage, onUpdate, systemPrompt) {
 
   while (iterations < 6) {
     iterations++;
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
@@ -3245,7 +3242,7 @@ function captureJournalEntry(signal, question, ticker) {
 async function fetchCurrentPrice(ticker) {
   if (!ticker || !FINNHUB_API_KEY) return null;
   try {
-    const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_API_KEY}`);
+    const r = await fetch(`${PROXY_BASE}/proxy/finnhub/quote?symbol=${ticker}`);
     const d = await r.json();
     return d && d.c > 0 ? d.c : null;
   } catch(e) { return null; }
@@ -3417,7 +3414,7 @@ async function fetchMacroSignals() {
   await Promise.allSettled(
     Object.entries(proxies).map(async ([key, sym]) => {
       try {
-        const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_API_KEY}`);
+        const r = await fetch(`${PROXY_BASE}/proxy/finnhub/quote?symbol=${sym}`);
         const d = await r.json();
         if (d && d.c > 0) results[key] = { price: d.c, change: d.dp || 0 };
       } catch(e) {}
@@ -3463,13 +3460,11 @@ Respond with ONLY valid JSON, no other text:
 {"regime":"<Risk-On|Risk-Off|Stagflation|Goldilocks|Transition>","confidence":0.0–1.0,"rationale":"<1 sentence>","implications":"<1 sentence on what this means for the portfolio>","keySignals":["<signal1>","<signal2>","<signal3>"]}`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
@@ -3721,13 +3716,11 @@ ${getRegimeContext()}
 In 100–140 words, deliver ONE clear lesson from this historical crash that applies specifically to this portfolio's composition today. Be direct, cite the exact numbers above, and end with one concrete protective action the investor should consider. Speak as Obama — measured, data-driven, slightly professorial.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
@@ -3768,7 +3761,7 @@ async function loadEarningsCalendar(force) {
     const today = new Date();
     const end   = new Date(today.getTime() + 21 * 24 * 60 * 60 * 1000);
     const fmt   = d => d.toISOString().split('T')[0];
-    const r     = await fetch(`https://finnhub.io/api/v1/calendar/earnings?from=${fmt(today)}&to=${fmt(end)}&token=${FINNHUB_API_KEY}`);
+    const r     = await fetch(`${PROXY_BASE}/proxy/finnhub/calendar/earnings?from=${fmt(today)}&to=${fmt(end)}`);
     const data  = await r.json();
     const tickers = new Set(PORTFOLIO.map(p => p.ticker));
     const hits  = (data.earningsCalendar || []).filter(e => tickers.has(e.symbol));
@@ -4011,13 +4004,11 @@ ${getRegimeContext()}
 Analyze their decision-making patterns in 150–180 words. Identify: (1) the dominant emotional bias you detect, if any; (2) one trading pattern that is working in their favor; (3) one specific behavioral trap they keep falling into; (4) one concrete rule they should adopt to improve discipline. Be direct, cite specific trades from the log, and speak as Obama — measured, data-driven, slightly professorial. Do not sugarcoat.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
@@ -4497,8 +4488,8 @@ setInterval(updateChaosIndex, 5000);
 // ══════════════════════════════════════════════
 // FINNHUB — LIVE MARKET DATA
 // ══════════════════════════════════════════════
-let FINNHUB_API_KEY = (window.LOCAL_KEYS && window.LOCAL_KEYS.finnhub) || '';
-const FH_BASE = 'https://finnhub.io/api/v1';
+let FINNHUB_API_KEY = '';
+const FH_BASE = `${PROXY_BASE}/proxy/finnhub`;
 
 const CRYPTO_MAP = { BTC:'BINANCE:BTCUSDT', ETH:'BINANCE:ETHUSDT', SOL:'BINANCE:SOLUSDT' };
 const LIVE_TICKERS = ['AAPL','NVDA','MSFT','TSLA','GOOGL','SPY','QQQ','VTI','BTC','ETH','SOL'];
@@ -4506,8 +4497,7 @@ let lastPrices = {};
 let liveInterval = null;
 
 async function fhFetch(path) {
-  const sep = path.includes('?') ? '&' : '?';
-  const res = await fetch(FH_BASE + path + sep + 'token=' + FINNHUB_API_KEY);
+  const res = await fetch(FH_BASE + path);
   if (!res.ok) throw new Error('Finnhub ' + res.status);
   return res.json();
 }
