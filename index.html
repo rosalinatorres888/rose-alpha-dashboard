@@ -859,7 +859,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
   </div>
 
   <!-- ══ REGIME BANNER ══ -->
-  <div id="regime-banner" style="display:none;margin:8px 0 4px;padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px;font-size:13px">
+  <div id="regime-banner" style="display:none;margin:8px 0 4px;padding:9px 18px;border-radius:10px;border:1px solid var(--border);background:var(--surface);align-items:center;gap:12px;font-size:13px">
     <span id="regime-icon" style="font-size:18px">🌐</span>
     <div style="flex:1">
       <span id="regime-label" style="font-weight:700;font-size:14px">Detecting regime…</span>
@@ -3266,25 +3266,23 @@ async function scoreJournalEntries() {
   for (const e of _journal) {
     if (!e.ticker || !e.priceAtCall) continue;
     const age = now - e.ts;
+    const needs7  = age >= D7  && !e.scored7d;
+    const needs30 = age >= D30 && !e.scored30d;
+    if (!needs7 && !needs30) continue;
 
-    if (age >= D7 && !e.scored7d) {
-      const cur = await fetchCurrentPrice(e.ticker);
-      if (cur) {
-        const pct = ((cur - e.priceAtCall) / e.priceAtCall) * 100;
-        e.outcome7d  = { price: cur, pctChange: parseFloat(pct.toFixed(2)), won: signalWon(e.signal, pct) };
-        e.scored7d   = true;
-        changed = true;
-      }
+    const cur = await fetchCurrentPrice(e.ticker);
+    if (!cur) continue;
+    const pct = ((cur - e.priceAtCall) / e.priceAtCall) * 100;
+
+    if (needs7) {
+      e.outcome7d = { price: cur, pctChange: parseFloat(pct.toFixed(2)), won: signalWon(e.signal, pct) };
+      e.scored7d  = true;
+      changed = true;
     }
-
-    if (age >= D30 && !e.scored30d) {
-      const cur = await fetchCurrentPrice(e.ticker);
-      if (cur) {
-        const pct = ((cur - e.priceAtCall) / e.priceAtCall) * 100;
-        e.outcome30d = { price: cur, pctChange: parseFloat(pct.toFixed(2)), won: signalWon(e.signal, pct) };
-        e.scored30d  = true;
-        changed = true;
-      }
+    if (needs30) {
+      e.outcome30d = { price: cur, pctChange: parseFloat(pct.toFixed(2)), won: signalWon(e.signal, pct) };
+      e.scored30d  = true;
+      changed = true;
     }
   }
 
@@ -3607,9 +3605,9 @@ let _stressInit = false;
 
 function initStressReplay() {
   if (_stressInit) return;
-  _stressInit = true;
   const btn = document.getElementById('stress-scenario-btns');
   if (!btn) return;
+  _stressInit = true;
   btn.innerHTML = CRASH_SCENARIOS.map(s =>
     `<button onclick="runStressScenario('${s.id}')"
       style="padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
@@ -3820,7 +3818,7 @@ function earningsBrief(ticker, date, epsEst) {
   if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
   document.getElementById('research-input').value = q;
   showSection('market');
-  sendResearch();
+  setTimeout(sendResearch, 0);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -3890,7 +3888,7 @@ function correlationDeepDive(tickerA, tickerB, label, divergence) {
   if (toggle) { toggle.style.background = '#2979ff'; toggle.style.color = '#fff'; }
   document.getElementById('research-input').value = q;
   showSection('market');
-  sendResearch();
+  setTimeout(sendResearch, 0);
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -3961,6 +3959,7 @@ function renderTradeLog() {
     const time = new Date(e.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     const tagChips = (e.tags || []).map(tag => {
       const meta = BIAS_TAGS[tag];
+      if (!meta) return '';
       return `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:${meta.color}22;color:${meta.color};text-transform:uppercase;letter-spacing:.05em">${tag}</span>`;
     }).join('');
     const tickerBadge = e.ticker
