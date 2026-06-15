@@ -975,69 +975,123 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           </div>
           <div class="obama-stage">
             <div class="obama-avatar avatar3d" id="rosa-avatar" onclick="rosaTalk()">
-                <svg viewBox="0 0 130 150" role="img" aria-label="ROSA AI analyst — rose avatar">
+                <svg viewBox="0 0 130 150" role="img" aria-label="ROSA — mini-me avatar">
                   <defs>
-                    <radialGradient id="rGlow" cx="50%" cy="45%" r="55%">
-                      <stop offset="0%" stop-color="rgba(233,30,140,.45)"/><stop offset="100%" stop-color="rgba(233,30,140,0)"/>
+                    <radialGradient id="mgGlow" cx="50%" cy="40%" r="55%">
+                      <stop offset="0%" stop-color="rgba(212,149,106,.3)"/><stop offset="100%" stop-color="rgba(212,149,106,0)"/>
                     </radialGradient>
-                    <radialGradient id="rPetalOuter" cx="40%" cy="30%" r="65%">
-                      <stop offset="0%" stop-color="#f48fb1"/><stop offset="100%" stop-color="#c2185b"/>
-                    </radialGradient>
-                    <radialGradient id="rPetalMid" cx="45%" cy="35%" r="60%">
-                      <stop offset="0%" stop-color="#fce4ec"/><stop offset="100%" stop-color="#e91e8c"/>
-                    </radialGradient>
-                    <radialGradient id="rCenter" cx="40%" cy="35%" r="60%">
-                      <stop offset="0%" stop-color="#ffd7e9"/><stop offset="100%" stop-color="#f06292"/>
-                    </radialGradient>
-                    <linearGradient id="rStem" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stop-color="#1b5e20"/><stop offset="100%" stop-color="#66bb6a"/>
+                    <linearGradient id="mgHair" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#2d1a0e"/><stop offset="55%" stop-color="#3d2415"/><stop offset="100%" stop-color="#1e0e06"/>
                     </linearGradient>
+                    <radialGradient id="mgSkin" cx="42%" cy="32%" r="62%">
+                      <stop offset="0%" stop-color="#e8a87c"/><stop offset="100%" stop-color="#c47845"/>
+                    </radialGradient>
+                    <radialGradient id="mgEye" cx="38%" cy="32%" r="62%">
+                      <stop offset="0%" stop-color="#3a2210"/><stop offset="100%" stop-color="#0d0804"/>
+                    </radialGradient>
                   </defs>
-                  <!-- Ambient glow -->
-                  <ellipse cx="65" cy="65" rx="52" ry="52" fill="url(#rGlow)"/>
+
+                  <!-- Warm glow -->
+                  <ellipse cx="65" cy="62" rx="56" ry="56" fill="url(#mgGlow)"/>
                   <!-- Drop shadow -->
-                  <ellipse cx="65" cy="148" rx="22" ry="3.5" fill="rgba(0,0,0,.4)"/>
-                  <!-- Stem -->
-                  <path d="M 65 95 Q 63 118 61 147" stroke="url(#rStem)" stroke-width="4" fill="none" stroke-linecap="round"/>
-                  <!-- Thorn -->
-                  <path d="M 64 115 L 57 111 L 64 113 Z" fill="#2e7d32"/>
-                  <!-- Left leaf -->
-                  <path d="M 63 122 Q 47 110 45 122 Q 52 125 63 122 Z" fill="#388e3c"/>
-                  <path d="M 54 116 Q 58 121 63 122" stroke="#81c784" stroke-width="1" fill="none"/>
-                  <!-- Right leaf -->
-                  <path d="M 65 130 Q 82 118 84 130 Q 76 132 65 130 Z" fill="#2e7d32"/>
-                  <path d="M 75 123 Q 70 128 65 130" stroke="#66bb6a" stroke-width="1" fill="none"/>
-                  <!-- Calyx / sepals -->
-                  <path d="M 52 96 Q 58 88 65 86 Q 72 88 78 96 Q 73 92 65 93 Q 57 92 52 96 Z" fill="#388e3c"/>
-                  <path d="M 56 93 Q 60 84 65 86" stroke="#66bb6a" stroke-width=".8" fill="none"/>
-                  <path d="M 74 93 Q 70 84 65 86" stroke="#66bb6a" stroke-width=".8" fill="none"/>
-                  <!-- Outer petals (5) -->
-                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)"/>
-                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)" transform="rotate(72 65 70)"/>
-                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="#d81b60" transform="rotate(144 65 70)"/>
-                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)" transform="rotate(216 65 70)"/>
-                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)" transform="rotate(288 65 70)"/>
-                  <!-- Middle petals (5, offset 36°) -->
-                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(36 65 70)"/>
-                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(108 65 70)"/>
-                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="#f48fb1" transform="rotate(180 65 70)"/>
-                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(252 65 70)"/>
-                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(324 65 70)"/>
-                  <!-- Inner petals (3) -->
-                  <path d="M 65 70 C 60 67 57 60 62 53 C 65 49 68 57 65 70 Z" fill="#fce4ec" opacity=".9"/>
-                  <path d="M 65 70 C 60 67 57 60 62 53 C 65 49 68 57 65 70 Z" fill="#fce4ec" opacity=".9" transform="rotate(120 65 70)"/>
-                  <path d="M 65 70 C 60 67 57 60 62 53 C 65 49 68 57 65 70 Z" fill="#fce4ec" opacity=".9" transform="rotate(240 65 70)"/>
-                  <!-- Center bud -->
-                  <circle cx="65" cy="67" r="10" fill="url(#rCenter)" stroke="#e91e8c" stroke-width="1.2"/>
-                  <circle cx="65" cy="67" r="5.5" fill="#fce4ec" stroke="#f48fb1" stroke-width="1"/>
-                  <circle cx="65" cy="67" r="2.5" fill="#f8bbd0"/>
-                  <!-- Sparkle accents -->
-                  <circle cx="32" cy="48" r="1.8" fill="#f8bbd0" opacity=".75"/>
-                  <circle cx="98" cy="42" r="1.2" fill="#f8bbd0" opacity=".6"/>
-                  <circle cx="27" cy="70" r="1" fill="#e91e8c" opacity=".5"/>
-                  <circle cx="103" cy="62" r="1.5" fill="#f48fb1" opacity=".65"/>
-                  <circle cx="50" cy="25" r="1" fill="#fce4ec" opacity=".5"/>
-                  <circle cx="82" cy="28" r="1.2" fill="#f48fb1" opacity=".55"/>
+                  <ellipse cx="65" cy="148" rx="26" ry="3.5" fill="rgba(0,0,0,.35)"/>
+
+                  <!-- Black top / shoulders -->
+                  <path d="M 0 150 L 0 122 C 14 114 35 109 52 107 L 65 104 L 78 107 C 95 109 116 114 130 122 L 130 150 Z" fill="#181818"/>
+                  <path d="M 0 128 C 14 118 35 111 52 108" stroke="#2a2a2a" stroke-width="1.5" fill="none"/>
+                  <path d="M 130 128 C 116 118 95 111 78 108" stroke="#2a2a2a" stroke-width="1.5" fill="none"/>
+
+                  <!-- Back hair — wide dark voluminous shape -->
+                  <path d="M 65 22 C 36 20 12 38 10 68 C 8 96 15 126 18 150 L 42 150 C 38 128 35 106 37 86 C 39 66 46 50 65 46 C 84 50 91 66 93 86 C 95 106 92 128 88 150 L 112 150 C 115 126 122 96 120 68 C 118 38 94 20 65 22 Z" fill="url(#mgHair)"/>
+                  <!-- Hair highlight streaks left -->
+                  <path d="M 23 72 C 21 90 22 115 26 142" stroke="#5c3a22" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".55"/>
+                  <path d="M 30 62 C 27 80 27 110 31 138" stroke="#4a2e18" stroke-width="2" fill="none" stroke-linecap="round" opacity=".45"/>
+                  <!-- Hair highlight streaks right -->
+                  <path d="M 107 72 C 109 90 108 115 104 142" stroke="#5c3a22" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".55"/>
+                  <path d="M 100 62 C 103 80 103 110 99 138" stroke="#4a2e18" stroke-width="2" fill="none" stroke-linecap="round" opacity=".45"/>
+
+                  <!-- Neck -->
+                  <path d="M 56 88 L 56 106 Q 65 110 74 106 L 74 88 Q 65 92 56 88 Z" fill="#d4956a"/>
+                  <path d="M 57 88 Q 65 93 73 88" stroke="#b8784a" stroke-width="1.2" fill="none" opacity=".5"/>
+
+                  <!-- Face -->
+                  <ellipse cx="65" cy="60" rx="27" ry="32" fill="url(#mgSkin)"/>
+                  <!-- Cheek blush -->
+                  <ellipse cx="44" cy="66" rx="7" ry="4" fill="#e07060" opacity=".18"/>
+                  <ellipse cx="86" cy="66" rx="7" ry="4" fill="#e07060" opacity=".18"/>
+                  <!-- Chin highlight -->
+                  <ellipse cx="65" cy="87" rx="7" ry="2.5" fill="#e8a87c" opacity=".4"/>
+
+                  <!-- Front hair over forehead -->
+                  <path d="M 38 28 C 42 20 52 17 65 19 C 78 17 88 20 92 28 C 88 23 78 22 65 22 C 52 22 42 23 38 28 Z" fill="#2d1a0e"/>
+                  <!-- Left front hair framing face -->
+                  <path d="M 38 28 C 32 40 30 58 32 82 C 34 104 37 124 36 148" stroke="#3d2415" stroke-width="9" fill="none" stroke-linecap="round"/>
+                  <path d="M 36 30 C 29 44 27 62 29 88 C 31 110 34 130 33 148" stroke="#2d1a0e" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+                  <!-- Right front hair framing face -->
+                  <path d="M 92 28 C 98 40 100 58 98 82 C 96 104 93 124 94 148" stroke="#3d2415" stroke-width="9" fill="none" stroke-linecap="round"/>
+                  <path d="M 94 30 C 101 44 103 62 101 88 C 99 110 96 130 97 148" stroke="#2d1a0e" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+
+                  <!-- Eyebrows — strong, arched, dark -->
+                  <path d="M 42 47 Q 50 43 58 46" stroke="#1a0d06" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+                  <path d="M 72 46 Q 80 43 88 47" stroke="#1a0d06" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+
+                  <!-- Left eye -->
+                  <ellipse cx="50" cy="56" rx="7.5" ry="5" fill="#fff" stroke="#8b6040" stroke-width=".7"/>
+                  <ellipse cx="50" cy="56" rx="4.5" ry="4.2" fill="url(#mgEye)"/>
+                  <circle cx="50" cy="56" r="2.6" fill="#0d0804"/>
+                  <circle cx="48.5" cy="54.5" r="1.1" fill="#fff" opacity=".85"/>
+                  <!-- Left upper lid / liner -->
+                  <path d="M 42.5 53 Q 50 51 57.5 53" stroke="#100806" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                  <!-- Left lashes -->
+                  <path d="M 43 53 L 41 50 M 46.5 51.5 L 45.5 49 M 50 51 L 50 48.5 M 53.5 51.5 L 54.5 49 M 57 53 L 59 50" stroke="#100806" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                  <!-- Left lower liner -->
+                  <path d="M 43.5 59 Q 50 61 56.5 59" stroke="#3d2010" stroke-width=".9" fill="none" opacity=".5"/>
+
+                  <!-- Right eye -->
+                  <ellipse cx="80" cy="56" rx="7.5" ry="5" fill="#fff" stroke="#8b6040" stroke-width=".7"/>
+                  <ellipse cx="80" cy="56" rx="4.5" ry="4.2" fill="url(#mgEye)"/>
+                  <circle cx="80" cy="56" r="2.6" fill="#0d0804"/>
+                  <circle cx="78.5" cy="54.5" r="1.1" fill="#fff" opacity=".85"/>
+                  <!-- Right upper lid / liner -->
+                  <path d="M 72.5 53 Q 80 51 87.5 53" stroke="#100806" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                  <!-- Right lashes -->
+                  <path d="M 73 53 L 71 50 M 76.5 51.5 L 75.5 49 M 80 51 L 80 48.5 M 83.5 51.5 L 84.5 49 M 87 53 L 89 50" stroke="#100806" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                  <!-- Right lower liner -->
+                  <path d="M 73.5 59 Q 80 61 86.5 59" stroke="#3d2010" stroke-width=".9" fill="none" opacity=".5"/>
+
+                  <!-- Nose — subtle -->
+                  <path d="M 62 64 Q 60 70 62 74 Q 65 76.5 68 74 Q 70 70 68 64" stroke="#b8784a" stroke-width="1.1" fill="none" opacity=".5" stroke-linecap="round"/>
+                  <ellipse cx="61.5" cy="74" rx="2.2" ry="1.6" fill="#b8784a" opacity=".3"/>
+                  <ellipse cx="68.5" cy="74" rx="2.2" ry="1.6" fill="#b8784a" opacity=".3"/>
+
+                  <!-- Lips — mauve pink, smile showing teeth -->
+                  <path d="M 54 79 Q 58 76.5 65 77.5 Q 72 76.5 76 79 Q 72 81 65 80 Q 58 81 54 79 Z" fill="#c96080"/>
+                  <path d="M 54 79 Q 58 84.5 65 85.5 Q 72 84.5 76 79 Q 72 81 65 80 Q 58 81 54 79 Z" fill="#de7896"/>
+                  <!-- Teeth -->
+                  <path d="M 57 80 Q 65 82 73 80 Q 72 85 65 86 Q 58 85 57 80 Z" fill="#f5eeee" opacity=".92"/>
+                  <!-- Lip line -->
+                  <path d="M 54 79 Q 65 78 76 79" stroke="#b05570" stroke-width=".7" fill="none"/>
+                  <!-- Smile dimples -->
+                  <path d="M 53 78 Q 50 82 52 86" stroke="#c47845" stroke-width=".9" fill="none" opacity=".28" stroke-linecap="round"/>
+                  <path d="M 77 78 Q 80 82 78 86" stroke="#c47845" stroke-width=".9" fill="none" opacity=".28" stroke-linecap="round"/>
+
+                  <!-- Gold choker necklace with small charm drops -->
+                  <path d="M 48 97 Q 65 101 82 97" stroke="#d4af37" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                  <line x1="52" y1="98" x2="52" y2="101" stroke="#d4af37" stroke-width="1.2"/><circle cx="52" cy="102" r="1.4" fill="#d4af37"/>
+                  <line x1="57" y1="99" x2="57" y2="102" stroke="#d4af37" stroke-width="1.2"/><circle cx="57" cy="103" r="1.4" fill="#ffd700"/>
+                  <line x1="62" y1="100" x2="62" y2="103" stroke="#d4af37" stroke-width="1.2"/><circle cx="62" cy="104" r="1.4" fill="#d4af37"/>
+                  <line x1="65" y1="100.5" x2="65" y2="103.5" stroke="#d4af37" stroke-width="1.2"/><circle cx="65" cy="104.5" r="1.6" fill="#ffd700"/>
+                  <line x1="68" y1="100" x2="68" y2="103" stroke="#d4af37" stroke-width="1.2"/><circle cx="68" cy="104" r="1.4" fill="#d4af37"/>
+                  <line x1="73" y1="99" x2="73" y2="102" stroke="#d4af37" stroke-width="1.2"/><circle cx="73" cy="103" r="1.4" fill="#ffd700"/>
+                  <line x1="78" y1="98" x2="78" y2="101" stroke="#d4af37" stroke-width="1.2"/><circle cx="78" cy="102" r="1.4" fill="#d4af37"/>
+                  <!-- Longer chain necklace -->
+                  <path d="M 46 98 Q 65 110 84 98" stroke="#c9a227" stroke-width=".9" fill="none" opacity=".65"/>
+
+                  <!-- Tiny rose in hair (top right) — ROSA brand touch -->
+                  <circle cx="90" cy="33" r="5.5" fill="#e91e8c" opacity=".75"/>
+                  <circle cx="90" cy="33" r="3.5" fill="#f48fb1" opacity=".8"/>
+                  <circle cx="90" cy="33" r="1.8" fill="#fce4ec"/>
+                  <path d="M 90 38 Q 90 43 89 46" stroke="#388e3c" stroke-width="1.5" fill="none" stroke-linecap="round"/>
                 </svg>
               </div>
           </div>
