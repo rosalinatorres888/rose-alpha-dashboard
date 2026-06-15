@@ -974,8 +974,8 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
             <span style="font-size:10px;color:var(--muted);opacity:.6">Live · streaming</span>
           </div>
           <div class="obama-stage">
-            <div class="obama-avatar avatar3d" id="rosa-avatar" onclick="rosaTalk()">
-                <svg viewBox="0 0 130 150" role="img" aria-label="ROSA — mini-me avatar">
+            <div class="obama-avatar avatar3d" id="rosa-avatar" onclick="rosaTalk()" style="border-radius:50%;overflow:hidden;background:none;box-shadow:0 0 32px rgba(233,30,140,.35),0 4px 24px rgba(0,0,0,.5);">
+                <svg viewBox="0 0 130 150" role="img" aria-label="ROSA — mini-me avatar" style="display:none">
                   <defs>
                     <radialGradient id="mgGlow" cx="50%" cy="40%" r="55%">
                       <stop offset="0%" stop-color="rgba(212,149,106,.3)"/><stop offset="100%" stop-color="rgba(212,149,106,0)"/>
@@ -1093,6 +1093,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
                   <circle cx="90" cy="33" r="1.8" fill="#fce4ec"/>
                   <path d="M 90 38 Q 90 43 89 46" stroke="#388e3c" stroke-width="1.5" fill="none" stroke-linecap="round"/>
                 </svg>
+                <img src="rosa-avatar.png" alt="ROSA" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;"/>
               </div>
           </div>
           <div id="thread-bar" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-bottom:1px solid var(--border);flex-wrap:wrap;background:var(--surface);">
