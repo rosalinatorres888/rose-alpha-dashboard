@@ -1660,8 +1660,9 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 // API KEY MANAGEMENT
 // ══════════════════════════════════════════════
 const PROXY_BASE = 'https://rose-alpha-proxy.rosalinatorres.workers.dev';
-let ANTHROPIC_API_KEY = '';
-let TAVILY_API_KEY    = '';
+// All keys live server-side in the Cloudflare Worker proxy — no client key needed
+let ANTHROPIC_API_KEY = 'proxy';
+let TAVILY_API_KEY    = 'proxy';
 
 function validateKeyInput(input) {
   const val = input.value.trim();
