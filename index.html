@@ -783,7 +783,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 </head>
 <body>
 <!-- API KEY MODAL -->
-<div id="api-modal" style="display:none">
+<div id="api-modal" style="display:none !important">
   <div>
     <div style="padding:24px 28px 0">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
@@ -1752,6 +1752,7 @@ function updateStatusBar() {
 }
 
 function showApiModal() {
+  return; // All keys live server-side in Cloudflare Worker — modal disabled
   document.getElementById('api-status-bar').style.display = 'none';
   const modal = document.getElementById('api-modal');
   modal.style.display = 'flex';
