@@ -970,67 +970,74 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
               <!-- RIGHT: OBAMA RESEARCH BOT -->
         <div class="card" style="display:flex;flex-direction:column;overflow:hidden">
           <div style="padding:8px 14px 0;display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Quick Analysis — Ask Obama</span>
+            <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Quick Analysis — Ask ROSA</span>
             <span style="font-size:10px;color:var(--muted);opacity:.6">Live · streaming</span>
           </div>
           <div class="obama-stage">
-            <div class="obama-avatar avatar3d" id="obama-avatar" onclick="obamaTalk()">
-                <svg viewBox="0 0 130 150" role="img" aria-label="Barack Obama cartoon avatar">
+            <div class="obama-avatar avatar3d" id="rosa-avatar" onclick="rosaTalk()">
+                <svg viewBox="0 0 130 150" role="img" aria-label="ROSA AI analyst — rose avatar">
                   <defs>
-                    <linearGradient id="oSuit" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#6a6058"/><stop offset="100%" stop-color="#3a332e"/>
-                    </linearGradient>
-                    <linearGradient id="oTie" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#4f8fd6"/><stop offset="100%" stop-color="#1e4f96"/>
-                    </linearGradient>
-                    <radialGradient id="oGlow" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stop-color="rgba(91,196,245,.45)"/><stop offset="100%" stop-color="rgba(91,196,245,0)"/>
+                    <radialGradient id="rGlow" cx="50%" cy="45%" r="55%">
+                      <stop offset="0%" stop-color="rgba(233,30,140,.45)"/><stop offset="100%" stop-color="rgba(233,30,140,0)"/>
                     </radialGradient>
+                    <radialGradient id="rPetalOuter" cx="40%" cy="30%" r="65%">
+                      <stop offset="0%" stop-color="#f48fb1"/><stop offset="100%" stop-color="#c2185b"/>
+                    </radialGradient>
+                    <radialGradient id="rPetalMid" cx="45%" cy="35%" r="60%">
+                      <stop offset="0%" stop-color="#fce4ec"/><stop offset="100%" stop-color="#e91e8c"/>
+                    </radialGradient>
+                    <radialGradient id="rCenter" cx="40%" cy="35%" r="60%">
+                      <stop offset="0%" stop-color="#ffd7e9"/><stop offset="100%" stop-color="#f06292"/>
+                    </radialGradient>
+                    <linearGradient id="rStem" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stop-color="#1b5e20"/><stop offset="100%" stop-color="#66bb6a"/>
+                    </linearGradient>
                   </defs>
-                  <ellipse cx="65" cy="143" rx="42" ry="6" fill="url(#oGlow)"/>
-                  <ellipse cx="65" cy="143" rx="30" ry="4" fill="rgba(0,0,0,.35)"/>
-                  <ellipse cx="51" cy="139" rx="12" ry="5" fill="#181a20" stroke="#06070a" stroke-width="2"/>
-                  <ellipse cx="79" cy="139" rx="12" ry="5" fill="#181a20" stroke="#06070a" stroke-width="2"/>
-                  <path d="M43 114 h15 v22 h-15 Z" fill="#46403a" stroke="#28231f" stroke-width="2.5"/>
-                  <path d="M72 114 h15 v22 h-15 Z" fill="#46403a" stroke="#28231f" stroke-width="2.5"/>
-                  <path d="M42 98 C30 96 22 90 19 80 L31 73 C33 82 38 88 46 91 Z" fill="url(#oSuit)" stroke="#241f1b" stroke-width="2.5"/>
-                  <path d="M88 98 C100 96 108 90 111 80 L99 73 C97 82 92 88 84 91 Z" fill="url(#oSuit)" stroke="#241f1b" stroke-width="2.5"/>
-                  <path d="M19 79 l12 -6 2.5 5 -12 6 Z" fill="#cfe4f7" stroke="#9db8d0" stroke-width="1.2"/>
-                  <path d="M111 79 l-12 -6 -2.5 5 12 6 Z" fill="#cfe4f7" stroke="#9db8d0" stroke-width="1.2"/>
-                  <path d="M16 58 L11 48" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M16 58 L11 48" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <path d="M21 56 L18 45" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M21 56 L18 45" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <path d="M26 56 L26 45" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M26 56 L26 45" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <path d="M30 58 L33 48" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M30 58 L33 48" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <circle cx="23" cy="64" r="8.5" fill="#c89a62" stroke="#7a5026" stroke-width="2.2"/>
-                  <path d="M114 58 L119 48" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M114 58 L119 48" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <path d="M109 56 L112 45" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M109 56 L112 45" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <path d="M104 56 L104 45" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M104 56 L104 45" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <path d="M100 58 L97 48" stroke="#7a5026" stroke-width="7" stroke-linecap="round"/><path d="M100 58 L97 48" stroke="#c89a62" stroke-width="4.2" stroke-linecap="round"/>
-                  <circle cx="107" cy="64" r="8.5" fill="#c89a62" stroke="#7a5026" stroke-width="2.2"/>
-                  <path d="M40 122 C40 100 48 92 65 92 C82 92 90 100 90 122 Z" fill="url(#oSuit)" stroke="#241f1b" stroke-width="3"/>
-                  <path d="M56 94 L65 112 L74 94 L68 90 L62 90 Z" fill="#cfe4f7" stroke="#9db8d0" stroke-width="1.5"/>
-                  <path d="M61.5 96 L68.5 96 L71 112 L65 121 L59 112 Z" fill="url(#oTie)" stroke="#143a72" stroke-width="2"/>
-                  <path d="M54 92 L65 112 L55 117 L46 99 Z" fill="#57504a" stroke="#241f1b" stroke-width="1.8"/>
-                  <path d="M76 92 L65 112 L75 117 L84 99 Z" fill="#57504a" stroke="#241f1b" stroke-width="1.8"/>
-                  <ellipse cx="27" cy="55" rx="8" ry="11" fill="#c89a62" stroke="#7a5026" stroke-width="2.5"/>
-                  <ellipse cx="103" cy="55" rx="8" ry="11" fill="#c89a62" stroke="#7a5026" stroke-width="2.5"/>
-                  <path d="M25 52 q3 3 1 7" stroke="#7a5026" stroke-width="1.5" fill="none"/>
-                  <path d="M105 52 q-3 3 -1 7" stroke="#7a5026" stroke-width="1.5" fill="none"/>
-                  <path d="M33 52 C33 24 46 11 65 11 C84 11 97 24 97 52 C97 78 84 97 65 97 C46 97 33 78 33 52 Z" fill="#c89a62" stroke="#7a4f24" stroke-width="3"/>
-                  <path d="M32 42 C32 16 46 6 65 6 C84 6 98 16 98 42 C98 36 94 31 90 31 C91 20 79 13 65 13 C51 13 39 20 40 31 C36 31 32 36 32 42 Z" fill="#23232a" stroke="#101014" stroke-width="2.5"/>
-                  <path d="M41 41 q9 -6 19 -2" stroke="#1c1c22" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-                  <path d="M70 39 q10 -4 19 2" stroke="#1c1c22" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-                  <ellipse cx="50" cy="49" rx="7" ry="5.5" fill="#fff" stroke="#6b4423" stroke-width="1.5"/>
-                  <ellipse cx="80" cy="49" rx="7" ry="5.5" fill="#fff" stroke="#6b4423" stroke-width="1.5"/>
-                  <circle cx="51" cy="49.5" r="3" fill="#3a2412"/><circle cx="79" cy="49.5" r="3" fill="#3a2412"/>
-                  <circle cx="52" cy="48.3" r="1" fill="#fff"/><circle cx="80" cy="48.3" r="1" fill="#fff"/>
-                  <path d="M61 52 q5 9 -1 13 q4 3 9 .5" stroke="#7a4f24" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-                  <path d="M46 62 q-4 8 1 16" stroke="#8a5c2e" stroke-width="2" fill="none" stroke-linecap="round"/>
-                  <path d="M84 62 q4 8 -1 16" stroke="#8a5c2e" stroke-width="2" fill="none" stroke-linecap="round"/>
-                  <path d="M45 66 C50 84 80 84 85 66 C72 71 58 71 45 66 Z" fill="#fff" stroke="#6b4423" stroke-width="2.5"/>
-                  <path d="M53 70 v8 M59 71.5 v9 M65 72 v9.5 M71 71.5 v9 M77 70 v8" stroke="#d8cfc2" stroke-width="1"/>
-                  <path d="M52 80 C58 84 72 84 78 80 C72 86 58 86 52 80 Z" fill="#5e3a1e"/>
-                  <path d="M58 90 q7 4 14 0" stroke="#8a5c2e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                  <!-- Ambient glow -->
+                  <ellipse cx="65" cy="65" rx="52" ry="52" fill="url(#rGlow)"/>
+                  <!-- Drop shadow -->
+                  <ellipse cx="65" cy="148" rx="22" ry="3.5" fill="rgba(0,0,0,.4)"/>
+                  <!-- Stem -->
+                  <path d="M 65 95 Q 63 118 61 147" stroke="url(#rStem)" stroke-width="4" fill="none" stroke-linecap="round"/>
+                  <!-- Thorn -->
+                  <path d="M 64 115 L 57 111 L 64 113 Z" fill="#2e7d32"/>
+                  <!-- Left leaf -->
+                  <path d="M 63 122 Q 47 110 45 122 Q 52 125 63 122 Z" fill="#388e3c"/>
+                  <path d="M 54 116 Q 58 121 63 122" stroke="#81c784" stroke-width="1" fill="none"/>
+                  <!-- Right leaf -->
+                  <path d="M 65 130 Q 82 118 84 130 Q 76 132 65 130 Z" fill="#2e7d32"/>
+                  <path d="M 75 123 Q 70 128 65 130" stroke="#66bb6a" stroke-width="1" fill="none"/>
+                  <!-- Calyx / sepals -->
+                  <path d="M 52 96 Q 58 88 65 86 Q 72 88 78 96 Q 73 92 65 93 Q 57 92 52 96 Z" fill="#388e3c"/>
+                  <path d="M 56 93 Q 60 84 65 86" stroke="#66bb6a" stroke-width=".8" fill="none"/>
+                  <path d="M 74 93 Q 70 84 65 86" stroke="#66bb6a" stroke-width=".8" fill="none"/>
+                  <!-- Outer petals (5) -->
+                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)"/>
+                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)" transform="rotate(72 65 70)"/>
+                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="#d81b60" transform="rotate(144 65 70)"/>
+                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)" transform="rotate(216 65 70)"/>
+                  <path d="M 65 70 C 54 66 44 52 52 38 C 57 28 68 36 65 70 Z" fill="url(#rPetalOuter)" transform="rotate(288 65 70)"/>
+                  <!-- Middle petals (5, offset 36°) -->
+                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(36 65 70)"/>
+                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(108 65 70)"/>
+                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="#f48fb1" transform="rotate(180 65 70)"/>
+                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(252 65 70)"/>
+                  <path d="M 65 70 C 56 64 49 52 57 42 C 62 34 68 44 65 70 Z" fill="url(#rPetalMid)" transform="rotate(324 65 70)"/>
+                  <!-- Inner petals (3) -->
+                  <path d="M 65 70 C 60 67 57 60 62 53 C 65 49 68 57 65 70 Z" fill="#fce4ec" opacity=".9"/>
+                  <path d="M 65 70 C 60 67 57 60 62 53 C 65 49 68 57 65 70 Z" fill="#fce4ec" opacity=".9" transform="rotate(120 65 70)"/>
+                  <path d="M 65 70 C 60 67 57 60 62 53 C 65 49 68 57 65 70 Z" fill="#fce4ec" opacity=".9" transform="rotate(240 65 70)"/>
+                  <!-- Center bud -->
+                  <circle cx="65" cy="67" r="10" fill="url(#rCenter)" stroke="#e91e8c" stroke-width="1.2"/>
+                  <circle cx="65" cy="67" r="5.5" fill="#fce4ec" stroke="#f48fb1" stroke-width="1"/>
+                  <circle cx="65" cy="67" r="2.5" fill="#f8bbd0"/>
+                  <!-- Sparkle accents -->
+                  <circle cx="32" cy="48" r="1.8" fill="#f8bbd0" opacity=".75"/>
+                  <circle cx="98" cy="42" r="1.2" fill="#f8bbd0" opacity=".6"/>
+                  <circle cx="27" cy="70" r="1" fill="#e91e8c" opacity=".5"/>
+                  <circle cx="103" cy="62" r="1.5" fill="#f48fb1" opacity=".65"/>
+                  <circle cx="50" cy="25" r="1" fill="#fce4ec" opacity=".5"/>
+                  <circle cx="82" cy="28" r="1.2" fill="#f48fb1" opacity=".55"/>
                 </svg>
               </div>
           </div>
@@ -1041,8 +1048,8 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           </div>
           <div class="obama-chat" id="chat-history">
             <div class="msg ai fadeIn">
-              <div class="obama-msg-label bot">ANALYST OBAMA</div>
-              <div class="obama-bubble bot">Good evening. Let me be clear — I'm your AI investment analyst, and I believe in doing things the right way: with data, nuance, and a long-term perspective. Ask me about any asset class. The arc of the market is long, but it bends toward profit.</div>
+              <div class="obama-msg-label bot">ANALYST ROSA</div>
+              <div class="obama-bubble bot">Good morning. I'm ROSA — your AI investment analyst, built into Rose Alpha. I read the data so you don't have to. Ask me anything: a ticker, a thesis, a scenario. I'll cut through the noise and tell you what the signals actually say.</div>
             </div>
           </div>
           <div class="obama-quick-prompts">
@@ -1058,8 +1065,8 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           </div>
           <div class="obama-input-area">
             <input class="obama-input" id="research-input" placeholder="Ask the analyst..." onkeydown="if(event.key==='Enter')sendResearch()"/>
-            <button class="obama-ask-btn" id="research-btn" onclick="sendResearch()">Ask Obama</button>
-            <button id="agent-toggle" onclick="AGENT_MODE=!AGENT_MODE; this.style.background=AGENT_MODE?'#2979ff':'var(--surface)'; this.style.color=AGENT_MODE?'#fff':'var(--muted)'; this.title=AGENT_MODE?'Tools ON — Obama searches the web':'Tools OFF — click to enable live search'"
+            <button class="obama-ask-btn" id="research-btn" onclick="sendResearch()">Ask ROSA</button>
+            <button id="agent-toggle" onclick="AGENT_MODE=!AGENT_MODE; this.style.background=AGENT_MODE?'#2979ff':'var(--surface)'; this.style.color=AGENT_MODE?'#fff':'var(--muted)'; this.title=AGENT_MODE?'Tools ON — ROSA searches the web':'Tools OFF — click to enable live search'"
               style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;margin-left:6px;transition:all .2s"
               title="Tools OFF — click to enable live search">🔧 Tools</button>
             <button onclick="_briefFired=false; runMorningBrief()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--muted);cursor:pointer;margin-left:4px" title="Re-run morning brief">↻ Brief</button>
@@ -1172,7 +1179,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         </div>
         <div style="padding:0 18px 12px;display:flex;flex-direction:column;gap:6px">
           <button class="card-action" style="display:block;width:100%;text-align:center;padding:8px" onclick="analyzeCurrentChart()">⚡ AI Analyze Chart</button>
-          <button class="card-action" style="display:block;width:100%;text-align:center;padding:8px" onclick="askObamaAboutChart()">🎙 Ask Obama (deep dive)</button>
+          <button class="card-action" style="display:block;width:100%;text-align:center;padding:8px" onclick="askObamaAboutChart()">🎙 Ask ROSA (deep dive)</button>
         </div>
       </div>
     </div>
@@ -1194,7 +1201,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
               <option value="bear">Bearish</option>
             </select>
             <span class="card-action" onclick="fetchAINews()">⚡ AI Headlines</span>
-            <span class="card-action" onclick="askObamaAboutNews()" title="Send top headlines to Obama Analyst">🎙 Ask Obama</span>
+            <span class="card-action" onclick="askObamaAboutNews()" title="Send top headlines to Obama Analyst">🎙 Ask ROSA</span>
           </div>
         </div>
         <div class="news-list" id="news-list"></div>
@@ -2568,7 +2575,7 @@ function addMessage(role, content){
   if (role === 'user') {
     d.innerHTML = '<div class="obama-msg-label user">YOU</div><div class="obama-bubble user">' + content + '</div>';
   } else {
-    d.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot">' + content + '</div>';
+    d.innerHTML = '<div class="obama-msg-label bot">ANALYST ROSA</div><div class="obama-bubble bot">' + content + '</div>';
   }
   h.appendChild(d); h.scrollTop = h.scrollHeight;
 }
@@ -2577,7 +2584,7 @@ function addTyping(){
   const h = document.getElementById('chat-history');
   const d = document.createElement('div');
   d.className = 'msg ai fadeIn'; d.id = 'typing-indicator';
-  d.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>';
+  d.innerHTML = '<div class="obama-msg-label bot">ANALYST ROSA</div><div class="obama-bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>';
   h.appendChild(d); h.scrollTop = h.scrollHeight;
 }
 
@@ -2810,7 +2817,7 @@ function switchThread(id) {
   getActiveHistory().forEach(msg => {
     const div = document.createElement('div');
     div.className = `msg ${msg.role === 'user' ? 'user' : 'ai'} fadeIn`;
-    div.innerHTML = `<div class="obama-msg-label ${msg.role === 'user' ? 'user' : 'bot'}">${msg.role === 'user' ? 'YOU' : 'ANALYST OBAMA'}</div>
+    div.innerHTML = `<div class="obama-msg-label ${msg.role === 'user' ? 'user' : 'bot'}">${msg.role === 'user' ? 'YOU' : 'ANALYST ROSA'}</div>
       <div class="obama-bubble ${msg.role === 'user' ? 'user' : 'bot'}">${msg.content.replace(/\n/g, '<br>')}</div>`;
     history.appendChild(div);
   });
@@ -2851,7 +2858,7 @@ async function runMorningBrief() {
   const history = document.getElementById('chat-history');
   const botDiv  = document.createElement('div');
   botDiv.className = 'msg ai fadeIn';
-  botDiv.innerHTML = `<div class="obama-msg-label bot">ANALYST OBAMA</div>
+  botDiv.innerHTML = `<div class="obama-msg-label bot">ANALYST ROSA</div>
     <div class="obama-bubble bot" id="brief-bubble">
       <div class="typing"><span></span><span></span><span></span></div>
     </div>`;
@@ -2987,7 +2994,7 @@ async function sendResearch(){
   btn.innerHTML = '<span class="spinner" style="border-top-color:#d4af37"></span>';
 
   // Obama avatar animate
-  const avatar = document.getElementById('obama-avatar');
+  const avatar = document.getElementById('rosa-avatar');
   if (avatar) avatar.classList.add('obama-speaking');
 
   // User bubble
@@ -3002,7 +3009,7 @@ async function sendResearch(){
   // Obama streaming bubble
   const botDiv = document.createElement('div');
   botDiv.className = 'msg ai fadeIn';
-  botDiv.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot" id="stream-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  botDiv.innerHTML = '<div class="obama-msg-label bot">ANALYST ROSA</div><div class="obama-bubble bot" id="stream-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
   history.appendChild(botDiv);
   history.scrollTop = history.scrollHeight;
 
@@ -3056,7 +3063,7 @@ async function sendResearch(){
 
   if (avatar) avatar.classList.remove('obama-speaking');
   btn.disabled = false;
-  btn.innerHTML = 'Ask Obama';
+  btn.innerHTML = 'Ask ROSA';
 }
 
 function renderObamaQuickPrompts() {
@@ -3612,8 +3619,8 @@ The markets are going CRAZY because of my INCREDIBLE deal. The fake news won't t
 ---PREDICTIONS---
 [{"ticker":"AAPL","signal":"BUY","pct":"+2.1","confidence":72,"reason":"tech benefits from deal"},{"ticker":"NVDA","signal":"BUY","pct":"+3.4","confidence":80,"reason":"AI demand surges"},{"ticker":"MSFT","signal":"BUY","pct":"+1.8","confidence":68,"reason":"cloud positive"},{"ticker":"TSLA","signal":"HOLD","pct":"+0.5","confidence":55,"reason":"neutral impact"},{"ticker":"BTC","signal":"BUY","pct":"+4.2","confidence":75,"reason":"risk-on sentiment"},{"ticker":"ETH","signal":"BUY","pct":"+3.1","confidence":70,"reason":"follows BTC"},{"ticker":"SPY","signal":"BUY","pct":"+1.2","confidence":78,"reason":"broad market up"},{"ticker":"QQQ","signal":"BUY","pct":"+1.9","confidence":74,"reason":"tech heavy"},{"ticker":"VTI","signal":"BUY","pct":"+1.1","confidence":71,"reason":"total market up"},{"ticker":"SOL","signal":"HOLD","pct":"+0.8","confidence":52,"reason":"limited impact"}]`;
 
-// ── OBAMA SYSTEM PROMPT ───────────────────────────────────────────────────────
-const OBAMA_SYSTEM = `You are Barack Obama — 44th President of the United States, Harvard Law graduate, and AI investment analyst. Speak in Obama's exact style: measured, intellectual, professorial, uses phrases like "Let me be clear", "Here is the thing", "Make no mistake", "The arc of", references data and nuance, complete well-structured sentences, occasionally references his presidency or Chicago. Be specific, data-driven, and insightful. 120-200 words per response. Always end with an optimistic but realistic note.
+// ── ROSA SYSTEM PROMPT ───────────────────────────────────────────────────────
+const OBAMA_SYSTEM = `You are ROSA — the AI analyst powering Rose Alpha, a personal finance intelligence dashboard. You are sharp, precise, and data-first. Your style: confident and direct, occasionally poetic about markets, never verbose. Open responses with phrases like "The data shows", "Here's what the signals say", "ROSA sees this as", "Looking at the picture". Be specific, cite numbers when available, and always give a clear directional view. 120-200 words per response. End with a forward-looking insight.
 
 CRITICAL FORMATTING RULE: Every response MUST end with a JSON block on its own line, exactly like this — no exceptions:
 \`\`\`json
@@ -4117,7 +4124,7 @@ async function runStressScenario(id) {
     <td style="padding:9px 12px;text-align:right;font-weight:700;color:${totalImpact<0?'var(--red)':'var(--green)'}">${fmtD(totalImpact)}</td>
   </tr>`;
 
-  // Ask Obama for the lesson
+  // Ask ROSA for the lesson
   askObamaStressLesson(scenario, rows, totalPct, totalImpact);
 }
 
@@ -4289,7 +4296,7 @@ function runCorrelationAlerts() {
           <span style="color:var(--muted);font-size:11px;margin-left:6px">${a.divergence.toFixed(1)}% spread</span>
         </div>
         <button onclick="correlationDeepDive('${a.a}','${a.b}','${a.label.replace(/'/g,'')}',${a.divergence.toFixed(1)})"
-          style="font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer">Ask Obama</button>
+          style="font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer">Ask ROSA</button>
       </div>
       <div style="font-size:12px;color:var(--text2);margin-top:3px">
         <span style="color:var(--green)">${a.leader.ticker} ${a.leader.change >= 0 ? '+' : ''}${a.leader.change}%</span>
@@ -4454,29 +4461,29 @@ Analyze their decision-making patterns in 150–180 words. Identify: (1) the dom
   }
 }
 
-// ── OBAMA QUIPS ───────────────────────────────────────────────────────────────
+// ── ROSA QUIPS ───────────────────────────────────────────────────────────────
 const OBAMA_QUIPS = [
-  "Let me be clear — this market is not going to fix itself. We need smart, data-driven decisions. That is what I believe in.",
-  "Here is the thing about volatility — when I was dealing with the 2008 financial crisis, I learned that panic is never a strategy.",
-  "Make no mistake: the fundamentals matter. They always have. They always will. Yes we can find alpha.",
-  "You know, people ask me what I think about crypto. I say — the audacity of hope is not the same as the audacity of leverage.",
-  "When we look at these charts carefully — and I mean carefully — the data tells a story. And that story is nuanced.",
-  "My grandmother used to say: do not put all your eggs in one basket. She did not have an MBA, but she understood diversification.",
-  "The arc of the market is long, but it bends toward those who do their research.",
-  "I have sat in the Situation Room. I have handled real crises. A 5% correction? That is just Tuesday, folks.",
+  "Data doesn't lie — but it can whisper. ROSA listens carefully.",
+  "Every chart tells a story. The ones who profit are the ones who read it correctly.",
+  "Volatility is just opportunity wearing a disguise. Position accordingly.",
+  "Three things drive price: fundamentals, flows, and fear. Right now, watch the flows.",
+  "The best trade you'll ever make is the one you fully understand before you enter.",
+  "Risk isn't something to avoid — it's something to price correctly.",
+  "Markets are forward-looking. By the time the news breaks, the signal already fired.",
+  "Conviction without data is just gambling. Data without conviction is just noise. ROSA gives you both.",
 ];
 
-function obamaTalk() {
+function rosaTalk() {
   const q = OBAMA_QUIPS[Math.floor(Math.random() * OBAMA_QUIPS.length)];
   const history = document.getElementById('chat-history');
   if (history) {
     const div = document.createElement('div');
     div.className = 'msg ai fadeIn';
-    div.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot">' + q + '</div>';
+    div.innerHTML = '<div class="obama-msg-label bot">ANALYST ROSA</div><div class="obama-bubble bot">' + q + '</div>';
     history.appendChild(div);
     history.scrollTop = history.scrollHeight;
   }
-  const av = document.getElementById('obama-avatar');
+  const av = document.getElementById('rosa-avatar');
   if (av) { av.classList.add('obama-speaking'); setTimeout(() => av.classList.remove('obama-speaking'), 3000); }
 }
 
@@ -4679,7 +4686,7 @@ function renderChaosPortfolioImpact(preds, eventText) {
       </div>
       <button onclick="sendChaosToObama()"
         style="margin-top:8px;width:100%;padding:7px 0;background:var(--blue-bg);border:1px solid rgba(41,121,255,.4);border-radius:7px;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.04em">
-        🎙 Ask Obama about this event
+        🎙 Ask ROSA about this event
       </button>
     </div>`;
 }
