@@ -1346,7 +1346,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div>
             <div style="font-size:18px;font-weight:700;color:var(--text)">📓 Conviction Journal</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px">Obama's calls graded by real price movement · 7d &amp; 30d outcomes</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">ROSA's calls graded by real price movement · 7d &amp; 30d outcomes</div>
           </div>
           <div style="display:flex;gap:8px">
             <button onclick="scoreJournalEntries()" style="font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text2);cursor:pointer">⟳ Score Now</button>
@@ -1365,7 +1365,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
 
         <!-- Entry list -->
         <div id="journal-list" style="display:flex;flex-direction:column;gap:10px">
-          <div style="color:var(--muted);font-size:14px;text-align:center;padding:32px">No calls logged yet — ask Obama a question and every signal he emits gets recorded here automatically.</div>
+          <div style="color:var(--muted);font-size:14px;text-align:center;padding:32px">No calls logged yet — ask ROSA a question and every signal she emits gets recorded here automatically.</div>
         </div>
       </div>
 
@@ -1527,7 +1527,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div>
             <div style="font-size:18px;font-weight:700;color:var(--text)">🗒 Trade Journal</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px">Log trades in plain English · Obama audits for emotional bias</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Log trades in plain English · ROSA audits for emotional bias</div>
           </div>
           <button onclick="requestBiasAudit()" style="font-size:12px;padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;font-weight:600">🎙 Bias Audit</button>
         </div>
@@ -1552,12 +1552,12 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
           <span style="font-size:22px">🎙</span>
           <div>
-            <div style="font-size:16px;font-weight:700;color:var(--text)">Obama's Bias Audit</div>
+            <div style="font-size:16px;font-weight:700;color:var(--text)">ROSA's Bias Audit</div>
             <div style="font-size:12px;color:var(--muted)">Patterns in your decision-making — updated on demand</div>
           </div>
         </div>
         <div id="bias-audit-output" style="flex:1;font-size:14px;color:var(--muted);line-height:1.6;padding:8px 0">
-          Click <strong>Bias Audit</strong> after logging a few trades to get Obama's read on your decision patterns.
+          Click <strong>Bias Audit</strong> after logging a few trades to get ROSA's read on your decision patterns.
         </div>
       </div>
 
@@ -1597,7 +1597,7 @@ html:not([data-theme="light"]) .logo{text-shadow:none;}
           <div id="stress-obama-wrap" style="display:none;border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
               <span style="font-size:22px">🎙</span>
-              <span style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Obama's Lesson</span>
+              <span style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">ROSA's Lesson</span>
             </div>
             <div id="stress-obama-text" style="font-size:14px;color:var(--text2);line-height:1.6"></div>
           </div>
@@ -3830,7 +3830,7 @@ function renderJournal() {
   colorRate(r30, 'jkpi-30d');
 
   if (!_journal.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:32px">No calls logged yet — ask Obama a question and every signal he emits gets recorded here automatically.</div>';
+    list.innerHTML = '<div style="color:var(--muted);font-size:14px;text-align:center;padding:32px">No calls logged yet — ask ROSA a question and every signal she emits gets recorded here automatically.</div>';
     return;
   }
 
@@ -4204,14 +4204,14 @@ async function askObamaStressLesson(scenario, rows, totalPct, totalImpact) {
   el.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
 
   const worstHolding = rows[0];
-  const prompt = `You are Barack Obama analyzing a portfolio stress test.
+  const prompt = `You are ROSA analyzing a portfolio stress test.
 
 Scenario: ${scenario.label} — ${scenario.context}
 Portfolio total impact: ${totalPct.toFixed(1)}% (${totalImpact >= 0 ? '+' : ''}$${Math.abs(totalImpact).toLocaleString(undefined,{maximumFractionDigits:0})})
 Worst holding: ${worstHolding.ticker} at ${worstHolding.crashPct}% (${worstHolding.dollarImpact >= 0 ? '+' : ''}$${Math.abs(worstHolding.dollarImpact).toLocaleString(undefined,{maximumFractionDigits:0})})
 ${getRegimeContext()}
 
-In 100–140 words, deliver ONE clear lesson from this historical crash that applies specifically to this portfolio's composition today. Be direct, cite the exact numbers above, and end with one concrete protective action the investor should consider. Speak as Obama — measured, data-driven, slightly professorial.`;
+In 100–140 words, deliver ONE clear lesson from this historical crash that applies specifically to this portfolio's composition today. Be direct, cite the exact numbers above, and end with one concrete protective action the investor should consider. Speak as ROSA — sharp, data-driven, precise.`;
 
   try {
     const resp = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
@@ -4490,12 +4490,12 @@ async function requestBiasAudit() {
     `${i+1}. [${new Date(e.ts).toLocaleDateString('en-US',{month:'short',day:'numeric'})}]${e.ticker?' '+e.ticker:''} — "${e.text}"${e.tags?.length?' (auto-tagged: '+e.tags.join(', ')+')'  :''}`
   ).join('\n');
 
-  const prompt = `You are Barack Obama reviewing this investor's trade journal. Here are their recent trades:
+  const prompt = `You are ROSA reviewing this investor's trade journal. Here are their recent trades:
 
 ${entries}
 
 ${getRegimeContext()}
-Analyze their decision-making patterns in 150–180 words. Identify: (1) the dominant emotional bias you detect, if any; (2) one trading pattern that is working in their favor; (3) one specific behavioral trap they keep falling into; (4) one concrete rule they should adopt to improve discipline. Be direct, cite specific trades from the log, and speak as Obama — measured, data-driven, slightly professorial. Do not sugarcoat.`;
+Analyze their decision-making patterns in 150–180 words. Identify: (1) the dominant emotional bias you detect, if any; (2) one trading pattern that is working in their favor; (3) one specific behavioral trap they keep falling into; (4) one concrete rule they should adopt to improve discipline. Be direct, cite specific trades from the log, and speak as ROSA — sharp, data-driven, precise. Do not sugarcoat.`;
 
   try {
     const resp = await fetch(`${PROXY_BASE}/proxy/anthropic`, {
