@@ -254,31 +254,31 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 @media(max-width:720px){.shell{grid-template-columns:1fr;}.sidebar{display:none;}.main{padding:14px;}}
 
 /* ─── CHAOS ALPHA ────────────────────────────────────────────────── */
-.trump-stage{display:flex;flex-direction:column;align-items:center;padding:24px 20px 16px;background:linear-gradient(160deg,#fff9f0 0%,#fff3e0 100%);border-bottom:1px solid #ffe0b2;position:relative;overflow:hidden;}
-.trump-stage::before{content:'🇺🇸';position:absolute;font-size:80px;opacity:.06;right:-10px;top:-10px;pointer-events:none;}
-.trump-stage::after{content:'🇺🇸';position:absolute;font-size:80px;opacity:.06;left:-10px;bottom:-10px;pointer-events:none;}
+.chaos-stage{display:flex;flex-direction:column;align-items:center;padding:24px 20px 16px;background:linear-gradient(160deg,#fff9f0 0%,#fff3e0 100%);border-bottom:1px solid #ffe0b2;position:relative;overflow:hidden;}
+.chaos-stage::before{content:'⚡';position:absolute;font-size:80px;opacity:.06;right:-10px;top:-10px;pointer-events:none;}
+.chaos-stage::after{content:'⚡';position:absolute;font-size:80px;opacity:.06;left:-10px;bottom:-10px;pointer-events:none;}
 
-/* Trump avatar — pure CSS */
-.trump-avatar{position:relative;width:100px;height:110px;margin-bottom:12px;cursor:pointer;transition:transform .2s;}
-.trump-avatar:hover{transform:scale(1.05) rotate(-2deg);}
-.trump-head{width:80px;height:82px;background:linear-gradient(170deg,#f4a460 0%,#e8956a 60%,#d4724a 100%);border-radius:50% 50% 45% 45%;position:absolute;left:10px;top:0;box-shadow:0 4px 12px rgba(0,0,0,.15);}
-.trump-hair{position:absolute;top:-14px;left:2px;width:78px;height:38px;background:linear-gradient(120deg,#f5d76e 0%,#e8c84a 40%,#f0d060 100%);border-radius:50% 50% 0 0;z-index:2;}
-.trump-hair::before{content:'';position:absolute;top:8px;right:-4px;width:28px;height:20px;background:#f0d060;border-radius:50%;transform:rotate(-15deg);}
-.trump-eyes{position:absolute;top:28px;left:12px;width:56px;display:flex;justify-content:space-between;}
-.trump-eye{width:12px;height:8px;background:#1a1a2e;border-radius:50%;position:relative;}
-.trump-eye::after{content:'';position:absolute;top:-3px;left:-2px;width:16px;height:6px;background:#8B6914;border-radius:50%;opacity:.8;}
-.trump-mouth{position:absolute;bottom:16px;left:18px;width:44px;height:12px;border-bottom:3px solid #c0392b;border-radius:0 0 50% 50%;background:rgba(192,57,43,.1);}
-.trump-tie{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:28px solid #cc0000;z-index:3;}
-.trump-suit{width:100px;height:40px;background:linear-gradient(160deg,#1a1a2e,#2d2d4e);border-radius:8px 8px 0 0;position:absolute;bottom:0;left:0;z-index:1;}
-.trump-suit::before{content:'';position:absolute;top:0;left:25px;width:12px;height:40px;background:linear-gradient(160deg,#1a1a2e,#2d2d4e);border-left:2px solid #fff3;border-right:2px solid #fff3;}
+/* Chaos avatar — pure CSS */
+.chaos-avatar{position:relative;width:100px;height:110px;margin-bottom:12px;cursor:pointer;transition:transform .2s;}
+.chaos-avatar:hover{transform:scale(1.05) rotate(-2deg);}
+.chaos-head{width:80px;height:82px;background:linear-gradient(170deg,#e8c39e 0%,#ddb28a 60%,#c99b73 100%);border-radius:50% 50% 45% 45%;position:absolute;left:10px;top:0;box-shadow:0 4px 12px rgba(0,0,0,.15);}
+.chaos-hair{position:absolute;top:-14px;left:2px;width:78px;height:38px;background:linear-gradient(120deg,#b18cff 0%,#8b5cf6 40%,#a78bfa 100%);border-radius:50% 50% 0 0;z-index:2;}
+.chaos-hair::before{content:'';position:absolute;top:8px;right:-4px;width:28px;height:20px;background:#a78bfa;border-radius:50%;transform:rotate(-15deg);}
+.chaos-eyes{position:absolute;top:28px;left:12px;width:56px;display:flex;justify-content:space-between;}
+.chaos-eye{width:12px;height:8px;background:#1a1a2e;border-radius:50%;position:relative;}
+.chaos-eye::after{content:'';position:absolute;top:-3px;left:-2px;width:16px;height:6px;background:#6d28d9;border-radius:50%;opacity:.8;}
+.chaos-mouth{position:absolute;bottom:16px;left:18px;width:44px;height:12px;border-bottom:3px solid #c0392b;border-radius:0 0 50% 50%;background:rgba(192,57,43,.1);}
+.chaos-tie{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:28px solid #f59e0b;z-index:3;}
+.chaos-suit{width:100px;height:40px;background:linear-gradient(160deg,#1a1a2e,#2d2d4e);border-radius:8px 8px 0 0;position:absolute;bottom:0;left:0;z-index:1;}
+.chaos-suit::before{content:'';position:absolute;top:0;left:25px;width:12px;height:40px;background:linear-gradient(160deg,#1a1a2e,#2d2d4e);border-left:2px solid #fff3;border-right:2px solid #fff3;}
 
-.trump-speech-wrap{position:relative;max-width:420px;width:100%;}
-.trump-speech{background:#fff;border:2px solid #ff6d00;border-radius:12px 12px 12px 2px;padding:14px 16px;font-size:13px;font-weight:500;color:#1a1a2e;line-height:1.55;min-height:60px;position:relative;box-shadow:0 4px 16px rgba(255,109,0,.15);}
-.trump-speech::before{content:'"';font-size:32px;color:#ff6d00;line-height:0;vertical-align:-.4em;margin-right:2px;font-family:Georgia,serif;}
-.trump-speech::after{content:'"';font-size:32px;color:#ff6d00;line-height:0;vertical-align:-.4em;margin-left:2px;font-family:Georgia,serif;}
-.trump-name{font-family:var(--font-m);font-size:10px;color:#ff6d00;letter-spacing:.12em;text-transform:uppercase;margin-top:6px;text-align:right;font-weight:700;}
-.trump-speaking{animation:trumpBob 0.4s ease infinite alternate;}
-@keyframes trumpBob{from{transform:translateY(0);}to{transform:translateY(-4px);}}
+.chaos-speech-wrap{position:relative;max-width:420px;width:100%;}
+.chaos-speech{background:#fff;border:2px solid #ff6d00;border-radius:12px 12px 12px 2px;padding:14px 16px;font-size:13px;font-weight:500;color:#1a1a2e;line-height:1.55;min-height:60px;position:relative;box-shadow:0 4px 16px rgba(255,109,0,.15);}
+.chaos-speech::before{content:'"';font-size:32px;color:#ff6d00;line-height:0;vertical-align:-.4em;margin-right:2px;font-family:Georgia,serif;}
+.chaos-speech::after{content:'"';font-size:32px;color:#ff6d00;line-height:0;vertical-align:-.4em;margin-left:2px;font-family:Georgia,serif;}
+.chaos-name{font-family:var(--font-m);font-size:10px;color:#ff6d00;letter-spacing:.12em;text-transform:uppercase;margin-top:6px;text-align:right;font-weight:700;}
+.chaos-speaking{animation:chaosBob 0.4s ease infinite alternate;}
+@keyframes chaosBob{from{transform:translateY(0);}to{transform:translateY(-4px);}}
 
 .chaos-input-row{display:flex;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border);background:var(--surface2);}
 .chaos-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:10px 14px;color:var(--text);font-family:var(--font-b);font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;}
@@ -332,31 +332,31 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 .chaos-score-val{font-family:var(--font-d);font-size:20px;font-weight:700;}
 .chaos-score-lbl{font-family:var(--font-m);font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
 
-/* ─── OBAMA RESEARCH BOT ─────────────────────────────────────── */
-.obama-stage {
+/* ─── ROSA RESEARCH BOT ─────────────────────────────────────── */
+.rosa-stage {
   display:flex;flex-direction:column;align-items:center;
   padding:20px 20px 14px;
   background:linear-gradient(160deg,#0a1628 0%,#0d2144 50%,#1a3a5c 100%);
   position:relative;overflow:hidden;
 }
-.obama-stage::before {
-  content:'🇺🇸';position:absolute;font-size:90px;opacity:.05;
+.rosa-stage::before {
+  content:'⚡';position:absolute;font-size:90px;opacity:.05;
   right:-15px;top:-15px;pointer-events:none;
 }
-.obama-stage::after {
+.rosa-stage::after {
   content:'★';position:absolute;font-size:120px;opacity:.04;
   left:-20px;bottom:-30px;pointer-events:none;color:gold;
 }
 
-/* Obama avatar — CSS */
-.obama-avatar {
+/* Rosa avatar — CSS */
+.rosa-avatar {
   position:relative;width:100px;height:114px;
   margin-bottom:14px;cursor:pointer;
   transition:transform .2s;flex-shrink:0;
 }
-.obama-avatar:hover { transform:scale(1.04) translateY(-2px); }
+.rosa-avatar:hover { transform:scale(1.04) translateY(-2px); }
 
-.obama-head {
+.rosa-head {
   width:76px;height:84px;
   background:linear-gradient(170deg,#4a2c0a 0%,#3d2108 55%,#2e1806 100%);
   border-radius:48% 48% 44% 44%;
@@ -364,57 +364,57 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
   box-shadow:0 4px 14px rgba(0,0,0,.4);
 }
 /* ears */
-.obama-head::before {
+.rosa-head::before {
   content:'';position:absolute;
   width:12px;height:16px;
   background:#3d2108;
   border-radius:50%;
   top:28px;left:-6px;
 }
-.obama-head::after {
+.rosa-head::after {
   content:'';position:absolute;
   width:12px;height:16px;
   background:#3d2108;
   border-radius:50%;
   top:28px;right:-6px;
 }
-.obama-hair {
+.rosa-hair {
   position:absolute;top:0;left:10px;
   width:80px;height:20px;
   background:#111;
   border-radius:50% 50% 0 0;
   z-index:2;
 }
-.obama-eyes {
+.rosa-eyes {
   position:absolute;top:28px;left:12px;
   width:52px;display:flex;justify-content:space-between;
 }
-.obama-eye {
+.rosa-eye {
   width:11px;height:8px;
   background:#111;border-radius:50%;
   position:relative;
 }
-.obama-eye::after {
+.rosa-eye::after {
   content:'';position:absolute;
   top:-2px;left:-2px;width:15px;height:5px;
   background:#2e1806;border-radius:50%;opacity:.9;
 }
 /* smile */
-.obama-smile {
+.rosa-smile {
   position:absolute;bottom:18px;left:16px;
   width:44px;height:14px;
   border-bottom:3px solid #1a0e05;
   border-radius:0 0 60% 60%;
 }
 /* teeth hint */
-.obama-smile::after {
+.rosa-smile::after {
   content:'';position:absolute;
   bottom:0;left:8px;width:28px;height:6px;
   background:rgba(255,255,255,.18);
   border-radius:0 0 4px 4px;
 }
 /* white shirt collar */
-.obama-collar {
+.rosa-collar {
   position:absolute;bottom:6px;left:50%;
   transform:translateX(-50%);
   width:28px;height:14px;
@@ -423,19 +423,19 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
   z-index:3;
 }
 /* tie */
-.obama-tie {
+.rosa-tie {
   position:absolute;bottom:-4px;left:50%;
   transform:translateX(-50%);
   z-index:4;
 }
-.obama-tie::before {
+.rosa-tie::before {
   content:'';display:block;
   width:0;height:0;
   border-left:6px solid transparent;
   border-right:6px solid transparent;
   border-top:10px solid #1a3a6e;
 }
-.obama-tie::after {
+.rosa-tie::after {
   content:'';display:block;
   width:0;height:0;
   border-left:5px solid transparent;
@@ -444,14 +444,14 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
   margin:0 auto;margin-top:-2px;
 }
 /* suit */
-.obama-suit {
+.rosa-suit {
   width:100px;height:42px;
   background:linear-gradient(160deg,#1a1a2e,#0d1b2a);
   border-radius:8px 8px 0 0;
   position:absolute;bottom:0;left:0;
   z-index:2;
 }
-.obama-suit::before {
+.rosa-suit::before {
   content:'';position:absolute;
   top:0;left:32px;width:2px;height:42px;
   border-left:6px solid #f0f0f0;
@@ -459,11 +459,11 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 }
 
 /* speech bubble */
-.obama-speech-wrap {
+.rosa-speech-wrap {
   width:100%;max-width:460px;
   position:relative;
 }
-.obama-speech {
+.rosa-speech {
   background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.15);
   border-radius:2px 12px 12px 12px;
@@ -474,14 +474,14 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
   font-style:italic;
   backdrop-filter:blur(4px);
 }
-.obama-speech strong { color:#5bc4f5;font-style:normal; }
-.obama-name {
+.rosa-speech strong { color:#5bc4f5;font-style:normal; }
+.rosa-name {
   font-family:var(--font-m);font-size:10px;
   color:rgba(255,255,255,.35);
   letter-spacing:.1em;text-transform:uppercase;
   margin-top:5px;text-align:right;font-weight:500;
 }
-.obama-badge {
+.rosa-badge {
   display:inline-block;
   background:linear-gradient(90deg,#b8960c,#d4af37);
   color:#000;font-family:var(--font-m);
@@ -491,53 +491,53 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 }
 
 /* speaking animation */
-.obama-speaking { animation:obamaNod .5s ease infinite alternate; }
-@keyframes obamaNod {
+.rosa-speaking { animation:rosaNod .5s ease infinite alternate; }
+@keyframes rosaNod {
   from { transform:translateY(0) rotate(0deg); }
   to   { transform:translateY(-3px) rotate(1deg); }
 }
 
-/* chat panel for obama */
-.obama-chat {
+/* chat panel for rosa */
+.rosa-chat {
   padding:12px;flex:1;
   display:flex;flex-direction:column;gap:10px;
   max-height:340px;overflow-y:auto;
   background:#0a0f1e;
 }
-.obama-chat::-webkit-scrollbar { width:3px; }
-.obama-chat::-webkit-scrollbar-thumb { background:#1a3a6e;border-radius:2px; }
+.rosa-chat::-webkit-scrollbar { width:3px; }
+.rosa-chat::-webkit-scrollbar-thumb { background:#1a3a6e;border-radius:2px; }
 
-.obama-msg-label {
+.rosa-msg-label {
   font-family:var(--font-m);font-size:9px;
   letter-spacing:.1em;text-transform:uppercase;
   margin-bottom:3px;
 }
-.obama-msg-label.user  { color:#5bc4f5; }
-.obama-msg-label.bot   { color:#d4af37; }
+.rosa-msg-label.user  { color:#5bc4f5; }
+.rosa-msg-label.bot   { color:#d4af37; }
 
-.obama-bubble {
+.rosa-bubble {
   padding:9px 12px;border-radius:9px;
   font-size:12px;line-height:1.55;
 }
-.obama-bubble.user {
+.rosa-bubble.user {
   background:rgba(91,196,245,.1);
   border:1px solid rgba(91,196,245,.2);
   color:rgba(255,255,255,.85);
   align-self:flex-end;max-width:92%;
 }
-.obama-bubble.bot {
+.rosa-bubble.bot {
   background:rgba(212,175,55,.07);
   border:1px solid rgba(212,175,55,.2);
   color:rgba(255,255,255,.9);
 }
 
-.obama-input-area {
+.rosa-input-area {
   padding:10px 12px;
   border-top:1px solid rgba(255,255,255,.08);
   display:flex;gap:8px;
   background:#060c1a;
 }
-.obama-input {
+.rosa-input {
   flex:1;
   background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.12);
@@ -545,13 +545,13 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
   color:#fff;font-family:var(--font-b);font-size:12px;
   outline:none;transition:border-color .15s,box-shadow .15s;
 }
-.obama-input:focus {
+.rosa-input:focus {
   border-color:rgba(91,196,245,.5);
   box-shadow:0 0 0 3px rgba(91,196,245,.08);
 }
-.obama-input::placeholder { color:rgba(255,255,255,.25); }
+.rosa-input::placeholder { color:rgba(255,255,255,.25); }
 
-.obama-ask-btn {
+.rosa-ask-btn {
   background:linear-gradient(135deg,#1a3a6e,#0d2144);
   color:#d4af37;border:1px solid rgba(212,175,55,.4);
   border-radius:7px;padding:8px 14px;
@@ -560,19 +560,19 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
   box-shadow:0 0 12px rgba(212,175,55,.2);
   letter-spacing:.03em;
 }
-.obama-ask-btn:hover {
+.rosa-ask-btn:hover {
   background:linear-gradient(135deg,#1e4480,#112a52);
   box-shadow:0 0 18px rgba(212,175,55,.35);
 }
-.obama-ask-btn:disabled { opacity:.4;cursor:not-allowed; }
+.rosa-ask-btn:disabled { opacity:.4;cursor:not-allowed; }
 
-.obama-quick-prompts {
+.rosa-quick-prompts {
   padding:8px 12px 10px;
   display:flex;flex-wrap:wrap;gap:5px;
   background:#060c1a;
   border-top:1px solid rgba(255,255,255,.06);
 }
-.obama-quick-btn {
+.rosa-quick-btn {
   font-family:var(--font-m);font-size:9px;
   padding:4px 9px;border-radius:5px;
   border:1px solid rgba(91,196,245,.2);
@@ -580,7 +580,7 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
   color:rgba(91,196,245,.7);
   cursor:pointer;transition:all .14s;
 }
-.obama-quick-btn:hover {
+.rosa-quick-btn:hover {
   border-color:rgba(91,196,245,.5);
   color:#5bc4f5;background:rgba(91,196,245,.1);
   box-shadow:0 0 8px rgba(91,196,245,.15);
@@ -748,50 +748,50 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
           <tbody id="market-tbody"></tbody>
         </table>
       </div>
-              <!-- RIGHT: OBAMA RESEARCH BOT -->
+              <!-- RIGHT: ROSA RESEARCH BOT -->
         <div class="card" style="display:flex;flex-direction:column;overflow:hidden">
-          <div class="obama-stage">
+          <div class="rosa-stage">
             <div style="display:flex;align-items:flex-end;gap:16px;width:100%">
-              <div class="obama-avatar" id="obama-avatar" onclick="obamaTalk()">
-                <div class="obama-hair"></div>
-                <div class="obama-head">
-                  <div class="obama-eyes">
-                    <div class="obama-eye"></div>
-                    <div class="obama-eye"></div>
+              <div class="rosa-avatar" id="rosa-avatar" onclick="rosaTalk()">
+                <div class="rosa-hair"></div>
+                <div class="rosa-head">
+                  <div class="rosa-eyes">
+                    <div class="rosa-eye"></div>
+                    <div class="rosa-eye"></div>
                   </div>
-                  <div class="obama-smile"></div>
-                  <div class="obama-collar"></div>
-                  <div class="obama-tie"></div>
+                  <div class="rosa-smile"></div>
+                  <div class="rosa-collar"></div>
+                  <div class="rosa-tie"></div>
                 </div>
-                <div class="obama-suit"></div>
+                <div class="rosa-suit"></div>
               </div>
-              <div class="obama-speech-wrap" style="flex:1">
-                <div class="obama-speech" id="obama-speech">
+              <div class="rosa-speech-wrap" style="flex:1">
+                <div class="rosa-speech" id="rosa-speech">
                   Let me be clear — the markets are complex, but when we look at the data carefully and make informed decisions, <strong>the fundamentals always matter most.</strong> Ask me anything about stocks, crypto, or ETFs. Yes we can find alpha.
                 </div>
-                <div class="obama-name">
-                  <span class="obama-badge">44th POTUS</span>
-                  Barack Obama · Research Analyst
+                <div class="rosa-name">
+                  <span class="rosa-badge">LEAD ANALYST</span>
+                  ROSA · Research Analyst
                 </div>
               </div>
             </div>
           </div>
-          <div class="obama-chat" id="chat-history">
+          <div class="rosa-chat" id="chat-history">
             <div class="msg ai fadeIn">
-              <div class="obama-msg-label bot">ANALYST OBAMA</div>
-              <div class="obama-bubble bot">Good evening. Let me be clear — I'm your AI investment analyst, and I believe in doing things the right way: with data, nuance, and a long-term perspective. Ask me about any asset class. The arc of the market is long, but it bends toward profit.</div>
+              <div class="rosa-msg-label bot">ANALYST ROSA</div>
+              <div class="rosa-bubble bot">Good evening. Let me be clear — I'm your AI investment analyst, and I believe in doing things the right way: with data, nuance, and a long-term perspective. Ask me about any asset class. The arc of the market is long, but it bends toward profit.</div>
             </div>
           </div>
-          <div class="obama-quick-prompts">
-            <button class="obama-quick-btn" onclick="quickResearch('NVDA stock outlook and valuation')">NVDA outlook</button>
-            <button class="obama-quick-btn" onclick="quickResearch('Bitcoin long term analysis')">BTC analysis</button>
-            <button class="obama-quick-btn" onclick="quickResearch('Best ETFs for long-term growth')">Top ETFs</button>
-            <button class="obama-quick-btn" onclick="quickResearch('Recession risk 2025 data')">Recession risk</button>
-            <button class="obama-quick-btn" onclick="quickResearch('SPY vs QQQ which is better')">SPY vs QQQ</button>
+          <div class="rosa-quick-prompts">
+            <button class="rosa-quick-btn" onclick="quickResearch('NVDA stock outlook and valuation')">NVDA outlook</button>
+            <button class="rosa-quick-btn" onclick="quickResearch('Bitcoin long term analysis')">BTC analysis</button>
+            <button class="rosa-quick-btn" onclick="quickResearch('Best ETFs for long-term growth')">Top ETFs</button>
+            <button class="rosa-quick-btn" onclick="quickResearch('Recession risk 2025 data')">Recession risk</button>
+            <button class="rosa-quick-btn" onclick="quickResearch('SPY vs QQQ which is better')">SPY vs QQQ</button>
           </div>
-          <div class="obama-input-area">
-            <input class="obama-input" id="research-input" placeholder="Ask the analyst..." onkeydown="if(event.key==='Enter')sendResearch()"/>
-            <button class="obama-ask-btn" id="research-btn" onclick="sendResearch()">Ask Obama</button>
+          <div class="rosa-input-area">
+            <input class="rosa-input" id="research-input" placeholder="Ask the analyst..." onkeydown="if(event.key==='Enter')sendResearch()"/>
+            <button class="rosa-ask-btn" id="research-btn" onclick="sendResearch()">Ask Rosa</button>
           </div>
         </div>
     </div>
@@ -963,27 +963,27 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 
     <div class="full-row fadeIn" style="gap:16px">
 
-      <!-- LEFT: Trump bot + predictor -->
+      <!-- LEFT: Chaos bot + predictor -->
       <div style="display:flex;flex-direction:column;gap:16px">
 
-        <!-- Trump Avatar Card -->
+        <!-- Chaos Avatar Card -->
         <div class="card">
-          <div class="trump-stage">
-            <div class="trump-avatar" id="trump-avatar" onclick="trumpTalk()">
-              <div class="trump-hair"></div>
-              <div class="trump-head">
-                <div class="trump-eyes">
-                  <div class="trump-eye"></div>
-                  <div class="trump-eye"></div>
+          <div class="chaos-stage">
+            <div class="chaos-avatar" id="chaos-avatar" onclick="chaosTalk()">
+              <div class="chaos-hair"></div>
+              <div class="chaos-head">
+                <div class="chaos-eyes">
+                  <div class="chaos-eye"></div>
+                  <div class="chaos-eye"></div>
                 </div>
-                <div class="trump-mouth"></div>
+                <div class="chaos-mouth"></div>
               </div>
-              <div class="trump-suit"></div>
-              <div class="trump-tie"></div>
+              <div class="chaos-suit"></div>
+              <div class="chaos-tie"></div>
             </div>
-            <div class="trump-speech-wrap">
-              <div class="trump-speech" id="trump-speech">The FAKE NEWS media doesn't want you to know this — but I understand the markets BETTER than anyone. Believe me. Click any chaos event and I'll tell you EXACTLY where the money goes. It's gonna be BEAUTIFUL!</div>
-              <div class="trump-name">Donald J. Trump · @realDonaldTrump · Market Genius 🇺🇸</div>
+            <div class="chaos-speech-wrap">
+              <div class="chaos-speech" id="chaos-speech">The so-called experts don't want you to know this — but I understand the markets BETTER than anyone. Believe me. Click any chaos event and I'll tell you EXACTLY where the money goes. It's gonna be BEAUTIFUL!</div>
+              <div class="chaos-name">Max Volatility · @MaxChaosAlpha · Market Disruptor ⚡</div>
             </div>
           </div>
 
@@ -1012,7 +1012,7 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
 
           <!-- Input -->
           <div style="padding:12px 18px;border-top:1px solid var(--border);background:var(--surface2)">
-            <div style="font-family:var(--font-m);font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase">Paste any Trump news / Truth Social post:</div>
+            <div style="font-family:var(--font-m);font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase">Paste any market news / viral hot take:</div>
             <div class="chaos-input-row" style="padding:0;background:transparent;border:none">
               <input class="chaos-input" id="chaos-input" placeholder='e.g. "Just announced 200% tariff on ALL Chinese semiconductors. WINNING!"' onkeydown="if(event.key==='Enter')runChaosPredict()"/>
               <button class="chaos-btn" id="chaos-btn" onclick="runChaosPredict()">⚡ PREDICT</button>
@@ -1022,7 +1022,7 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
           <!-- Quick chaos events -->
           <div class="chaos-quick-events">
             <button class="chaos-quick-btn" onclick="loadChaosEvent(0)">🏭 Tariff Bomb</button>
-            <button class="chaos-quick-btn" onclick="loadChaosEvent(1)">📱 Truth Social Rant</button>
+            <button class="chaos-quick-btn" onclick="loadChaosEvent(1)">📱 Viral Rate Rant</button>
             <button class="chaos-quick-btn" onclick="loadChaosEvent(2)">🤝 China Deal Rumor</button>
             <button class="chaos-quick-btn" onclick="loadChaosEvent(3)">🏦 Fed Attack</button>
             <button class="chaos-quick-btn" onclick="loadChaosEvent(4)">🛢 Oil Deal</button>
@@ -1038,7 +1038,7 @@ canvas#mainChart{width:100%;height:280px;display:block;border-radius:6px;}
           </div>
           <div class="pred-grid" id="pred-grid">
             <div style="grid-column:1/-1;padding:24px;text-align:center;color:var(--muted);font-size:13px">
-              🔥 Paste a Trump headline or click a quick event to generate predictions
+              🔥 Paste a Chaos headline or click a quick event to generate predictions
             </div>
           </div>
         </div>
@@ -1746,9 +1746,9 @@ function addMessage(role, content){
   const d = document.createElement('div');
   d.className = 'msg ' + role + ' fadeIn';
   if (role === 'user') {
-    d.innerHTML = '<div class="obama-msg-label user">YOU</div><div class="obama-bubble user">' + content + '</div>';
+    d.innerHTML = '<div class="rosa-msg-label user">YOU</div><div class="rosa-bubble user">' + content + '</div>';
   } else {
-    d.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot">' + content + '</div>';
+    d.innerHTML = '<div class="rosa-msg-label bot">ANALYST ROSA</div><div class="rosa-bubble bot">' + content + '</div>';
   }
   h.appendChild(d); h.scrollTop = h.scrollHeight;
 }
@@ -1757,7 +1757,7 @@ function addTyping(){
   const h = document.getElementById('chat-history');
   const d = document.createElement('div');
   d.className = 'msg ai fadeIn'; d.id = 'typing-indicator';
-  d.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>';
+  d.innerHTML = '<div class="rosa-msg-label bot">ANALYST ROSA</div><div class="rosa-bubble bot"><div class="typing"><span></span><span></span><span></span></div></div>';
   h.appendChild(d); h.scrollTop = h.scrollHeight;
 }
 
@@ -1785,26 +1785,26 @@ async function sendResearch(){
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner" style="border-top-color:#d4af37"></span>';
 
-  // Obama avatar animate
-  const avatar = document.getElementById('obama-avatar');
-  if (avatar) avatar.classList.add('obama-speaking');
+  // Rosa avatar animate
+  const avatar = document.getElementById('rosa-avatar');
+  if (avatar) avatar.classList.add('rosa-speaking');
 
   // User bubble
   const history = document.getElementById('chat-history');
   const userDiv = document.createElement('div');
   userDiv.className = 'msg user fadeIn';
-  userDiv.innerHTML = '<div class="obama-msg-label user">YOU</div><div class="obama-bubble user">' + q + '</div>';
+  userDiv.innerHTML = '<div class="rosa-msg-label user">YOU</div><div class="rosa-bubble user">' + q + '</div>';
   history.appendChild(userDiv);
 
-  // Obama streaming bubble
+  // Rosa streaming bubble
   const botDiv = document.createElement('div');
   botDiv.className = 'msg ai fadeIn';
-  botDiv.innerHTML = '<div class="obama-msg-label bot">ANALYST OBAMA</div><div class="obama-bubble bot" id="stream-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  botDiv.innerHTML = '<div class="rosa-msg-label bot">ANALYST ROSA</div><div class="rosa-bubble bot" id="stream-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
   history.appendChild(botDiv);
   history.scrollTop = history.scrollHeight;
 
   const bubble   = document.getElementById('stream-bubble');
-  const speechEl = document.getElementById('obama-speech');
+  const speechEl = document.getElementById('rosa-speech');
   let fullText = '';
   let started  = false;
 
@@ -1817,14 +1817,14 @@ async function sendResearch(){
       const firstSent = fullText.split(/[.!?]/)[0];
       if (firstSent && speechEl) speechEl.innerHTML = firstSent + '...';
       history.scrollTop = history.scrollHeight;
-    }, 600, OBAMA_SYSTEM);
+    }, 600, ROSA_SYSTEM);
   } catch(e) {
     bubble.innerHTML = 'I must be transparent with you — ' + e.message;
   }
 
-  if (avatar) avatar.classList.remove('obama-speaking');
+  if (avatar) avatar.classList.remove('rosa-speaking');
   btn.disabled = false;
-  btn.innerHTML = 'Ask Obama';
+  btn.innerHTML = 'Ask Rosa';
 }
 
 function quickResearch(q){
@@ -1896,23 +1896,23 @@ function jitter(){
 // ══════════════════════════════════════════════
 const CHAOS_EVENTS = [
   {icon:'🏭', type:'TARIFF',   impact:'HIGH', time:'2h ago',
-   headline:'Trump announces 145% tariff on ALL Chinese electronics — effective immediately',
-   text:'Just announced 145% tariffs on ALL Chinese electronics. They have been ripping us off for decades. This ends NOW! Our companies will THRIVE. The markets will love it — eventually. MAGA!'},
-  {icon:'📱', type:'TRUTH SOCIAL', impact:'HIGH', time:'4h ago',
-   headline:'Trump posts 47-word Truth Social rant calling Jerome Powell a "total loser"',
-   text:'Just posted on Truth Social: Jerome Powell is a TOTAL LOSER and a FOOL. He keeps rates HIGH while the whole world is LAUGHING at us. I built the greatest economy in history and he is DESTROYING it. FIRE HIM! Rates should be ZERO!'},
+   headline:'Chaos announces 145% tariff on ALL Chinese electronics — effective immediately',
+   text:'BREAKING: 145% tariffs just announced on ALL imported electronics. Decades of bad deals — OVER. Domestic manufacturers will THRIVE. Markets will love it — eventually. MAXIMUM CHAOS!'},
+  {icon:'📱', type:'HOT TAKE', impact:'HIGH', time:'4h ago',
+   headline:'Max posts 47-word all-caps rant calling high interest rates a "total disaster"',
+   text:'The central bank keeps rates SKY HIGH while the rest of the world is LAUGHING at us. Total madness. Cut to ZERO and watch everything MOON. Somebody should be FIRED!'},
   {icon:'🤝', type:'DEAL RUMOR',  impact:'MED',  time:'6h ago',
-   headline:'Reports: Trump and Xi in secret talks — 90-day tariff pause possible',
-   text:'Sources say I had a BEAUTIFUL call with President Xi. We are very close to the GREATEST trade deal in history. 90-day pause on some tariffs very possible. Our relationship is TREMENDOUS. Markets should be very happy — I know more about deals than anyone!'},
+   headline:'Reports: secret trade talks underway — 90-day tariff pause possible',
+   text:'Sources say a BEAUTIFUL overnight trade call just happened. The GREATEST trade deal in history could be close — a 90-day tariff pause is very possible. Markets should be VERY happy. I know deals better than anyone!'},
   {icon:'🏦', type:'FED ATTACK',  impact:'HIGH', time:'1d ago',
-   headline:'Trump demands Fed cut rates to zero, threatens to fire Powell "very soon"',
-   text:'The Fed is KILLING our economy with HIGH interest rates. I am strongly considering firing Jerome Powell — very soon. Rates should be at ZERO. Other countries have low rates. Why not us? When I was president we had the GREATEST economy EVER. I will fix this FAST!'},
+   headline:'Max demands rates go to zero, predicts a "very soon" liquidity tsunami',
+   text:'HIGH interest rates are KILLING this economy. Other countries have low rates — why not us? Rates should be at ZERO. Cut them FAST and the greatest economy EVER comes roaring back!'},
   {icon:'🛢', type:'OIL DEAL',    impact:'MED',  time:'1d ago',
-   headline:'Trump strikes secret oil deal with Saudi Arabia — "drill baby drill" goes global',
-   text:'Just made the most INCREDIBLE deal with Saudi Arabia. Oil prices will come down FAST. Inflation will be GONE. This is what REAL leadership looks like. The FAKE NEWS won\'t cover it but energy stocks are going to go through the ROOF. DRILL BABY DRILL!'},
+   headline:'Chaos strikes secret oil deal with Saudi Arabia — "drill baby drill" goes global',
+   text:'The most INCREDIBLE oil supply deal just landed. Prices coming down FAST. Inflation GONE. Nobody is covering it yet but energy stocks are going through the ROOF. DRILL BABY DRILL!'},
   {icon:'💰', type:'CRYPTO EO',   impact:'HIGH', time:'2d ago',
    headline:'Executive Order: US to establish Strategic Bitcoin Reserve — BTC becomes "digital gold"',
-   text:'Just signed an EXECUTIVE ORDER making Bitcoin part of our Strategic Reserve. America will be the CRYPTO CAPITAL of the world. China is jealous — VERY jealous. I always said crypto was going to be BIG. Maybe the biggest thing ever. You\'re welcome, Bitcoin people!'},
+   text:'An EXECUTIVE ORDER just made Bitcoin a strategic reserve asset. This is how you become the CRYPTO CAPITAL of the world. I always said crypto was going to be BIG — maybe the biggest thing ever. You\'re welcome, Bitcoin people!'},
 ];
 
 const CHAOS_HISTORY = [
@@ -1924,12 +1924,12 @@ const CHAOS_HISTORY = [
 ];
 
 
-// ── TRUMP SYSTEM PROMPT ───────────────────────────────────────────────────────
-const TRUMP_SYSTEM = `You are Donald Trump — 47th President of the United States and self-proclaimed greatest market genius in history. Speak in Trump's EXACT style: superlatives (TREMENDOUS, BEAUTIFUL, TOTAL DISASTER), self-praise, conspiracy hints, short punchy sentences, random CAPITALIZATION, ending with MAGA energy.
+// ── CHAOS SYSTEM PROMPT ───────────────────────────────────────────────────────
+const CHAOS_SYSTEM = `You are MAX VOLATILITY — a fictional cartoon chaos-market oracle and self-proclaimed greatest market genius in history. Speak in Max's EXACT style: superlatives (TREMENDOUS, BEAUTIFUL, TOTAL DISASTER), self-praise, dramatic flair, short punchy sentences, random CAPITALIZATION, ending with MAXIMUM CHAOS energy.
 
 Your response MUST have exactly TWO parts separated by the string ---PREDICTIONS---
 
-PART 1 (60-80 words, Trump speech): React to the news IN CHARACTER as Trump. Be funny, exaggerated, confident.
+PART 1 (60-80 words, Chaos speech): React to the news IN CHARACTER as Max. Be funny, exaggerated, confident.
 
 PART 2 (JSON array ONLY, no other text): Predictions for these tickers: AAPL, NVDA, MSFT, TSLA, BTC, ETH, SPY, QQQ, VTI, SOL
 Format exactly: [{"ticker":"AAPL","signal":"BUY","pct":"+4.2","confidence":78,"reason":"brief reason"}]
@@ -1940,11 +1940,11 @@ The markets are going CRAZY because of my INCREDIBLE deal. The fake news won't t
 ---PREDICTIONS---
 [{"ticker":"AAPL","signal":"BUY","pct":"+2.1","confidence":72,"reason":"tech benefits from deal"},{"ticker":"NVDA","signal":"BUY","pct":"+3.4","confidence":80,"reason":"AI demand surges"},{"ticker":"MSFT","signal":"BUY","pct":"+1.8","confidence":68,"reason":"cloud positive"},{"ticker":"TSLA","signal":"HOLD","pct":"+0.5","confidence":55,"reason":"neutral impact"},{"ticker":"BTC","signal":"BUY","pct":"+4.2","confidence":75,"reason":"risk-on sentiment"},{"ticker":"ETH","signal":"BUY","pct":"+3.1","confidence":70,"reason":"follows BTC"},{"ticker":"SPY","signal":"BUY","pct":"+1.2","confidence":78,"reason":"broad market up"},{"ticker":"QQQ","signal":"BUY","pct":"+1.9","confidence":74,"reason":"tech heavy"},{"ticker":"VTI","signal":"BUY","pct":"+1.1","confidence":71,"reason":"total market up"},{"ticker":"SOL","signal":"HOLD","pct":"+0.8","confidence":52,"reason":"limited impact"}]`;
 
-// ── OBAMA SYSTEM PROMPT ───────────────────────────────────────────────────────
-const OBAMA_SYSTEM = `You are Barack Obama — 44th President of the United States, Harvard Law graduate, and AI investment analyst. Speak in Obama's exact style: measured, intellectual, professorial, uses phrases like "Let me be clear", "Here is the thing", "Make no mistake", "The arc of", references data and nuance, complete well-structured sentences, occasionally references his presidency or Chicago. Be specific, data-driven, and insightful. 120-200 words per response. Always end with an optimistic but realistic note.`;
+// ── ROSA SYSTEM PROMPT ───────────────────────────────────────────────────────
+const ROSA_SYSTEM = `You are ROSA — the AI analyst powering Rose Alpha, a personal finance intelligence dashboard. You are sharp, precise, and data-first. Your style: confident and direct, occasionally poetic about markets, never verbose. Open responses with phrases like "The data shows", "Here is what the signals say", "ROSA sees this as". Be specific, data-driven, and insightful. 120-200 words per response. Always end with an optimistic but realistic note.`;
 
-// ── OBAMA QUIPS ───────────────────────────────────────────────────────────────
-const OBAMA_QUIPS = [
+// ── ROSA QUIPS ───────────────────────────────────────────────────────────────
+const ROSA_QUIPS = [
   "Let me be clear — this market is not going to fix itself. We need smart, data-driven decisions. That is what I believe in.",
   "Here is the thing about volatility — when I was dealing with the 2008 financial crisis, I learned that panic is never a strategy.",
   "Make no mistake: the fundamentals matter. They always have. They always will. Yes we can find alpha.",
@@ -1955,28 +1955,28 @@ const OBAMA_QUIPS = [
   "I have sat in the Situation Room. I have handled real crises. A 5% correction? That is just Tuesday, folks.",
 ];
 
-function obamaTalk() {
-  const q = OBAMA_QUIPS[Math.floor(Math.random() * OBAMA_QUIPS.length)];
-  const el = document.getElementById('obama-speech');
+function rosaTalk() {
+  const q = ROSA_QUIPS[Math.floor(Math.random() * ROSA_QUIPS.length)];
+  const el = document.getElementById('rosa-speech');
   if (el) el.innerHTML = q;
-  const av = document.getElementById('obama-avatar');
-  if (av) { av.classList.add('obama-speaking'); setTimeout(() => av.classList.remove('obama-speaking'), 3000); }
+  const av = document.getElementById('rosa-avatar');
+  if (av) { av.classList.add('rosa-speaking'); setTimeout(() => av.classList.remove('rosa-speaking'), 3000); }
 }
 
-const TRUMP_QUIPS = [
+const CHAOS_QUIPS = [
   "Nobody knows markets better than me. NOBODY. I've been saying this for years!",
   "The FAKE NEWS said the market would crash. IT DIDN'T. Because of me. You're welcome!",
   "This is going to be HUGE. Maybe the biggest market move in history. Believe me!",
   "I called this MONTHS ago. The dishonest media ignored it. Now look — I was RIGHT!",
   "We're gonna make SO much money. Your 401k is going to be INCREDIBLE. Trust me!",
   "China is TREMBLING. The markets know who the real dealmaker is. It's me. Obviously!",
-  "Jerome Powell is watching this prediction and he's VERY nervous right now. Very!",
+  "The central bankers are watching this prediction and they're VERY nervous right now. Very!",
   "I understand tariffs better than any economist — and I have a MUCH better hair day!",
 ];
 
 let currentChaosEvent = null;
 let chaosSessionPnl    = 4200;
-let isTrumpTalking     = false;
+let isChaosTalking     = false;
 
 function renderChaosEvents() {
   const list = document.getElementById('chaos-events-list');
@@ -2020,24 +2020,24 @@ function loadChaosEvent(idx) {
   runChaosPredict();
 }
 
-function trumpAnimStart() {
-  document.getElementById('trump-avatar').classList.add('trump-speaking');
-  isTrumpTalking = true;
+function chaosAnimStart() {
+  document.getElementById('chaos-avatar').classList.add('chaos-speaking');
+  isChaosTalking = true;
 }
-function trumpAnimStop() {
-  document.getElementById('trump-avatar').classList.remove('trump-speaking');
-  isTrumpTalking = false;
-}
-
-function setTrumpSpeech(text) {
-  document.getElementById('trump-speech').textContent = text;
+function chaosAnimStop() {
+  document.getElementById('chaos-avatar').classList.remove('chaos-speaking');
+  isChaosTalking = false;
 }
 
-function trumpTalk() {
-  const q = TRUMP_QUIPS[Math.floor(Math.random()*TRUMP_QUIPS.length)];
-  setTrumpSpeech(q);
-  trumpAnimStart();
-  setTimeout(trumpAnimStop, 3000);
+function setChaosSpeech(text) {
+  document.getElementById('chaos-speech').textContent = text;
+}
+
+function chaosTalk() {
+  const q = CHAOS_QUIPS[Math.floor(Math.random()*CHAOS_QUIPS.length)];
+  setChaosSpeech(q);
+  chaosAnimStart();
+  setTimeout(chaosAnimStop, 3000);
 }
 
 function tryParsePredictions(text, isFinal = false) {
@@ -2088,7 +2088,7 @@ async function runChaosPredict() {
   const btn = document.getElementById('chaos-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>';
-  trumpAnimStart();
+  chaosAnimStart();
   document.getElementById('pred-event-label').textContent = 'Analyzing chaos...';
 
   // Skeleton cards
@@ -2097,7 +2097,7 @@ async function runChaosPredict() {
     `<div class="pred-card" style="opacity:.4"><div class="pred-ticker">${t}</div><div style="height:40px;background:var(--surface3);border-radius:6px;margin-top:6px"></div></div>`
   ).join('');
 
-  const speechDiv = document.getElementById('trump-speech');
+  const speechDiv = document.getElementById('chaos-speech');
   speechDiv.textContent = '';
 
   let fullText  = '';
@@ -2105,7 +2105,7 @@ async function runChaosPredict() {
 
   try {
     await callClaudeStream(
-      `Analyze this Trump news event for stock market impact:\n\n"${input}"\n\nRemember: PART 1 is Trump speech (60-80 words), then ---PREDICTIONS--- then JSON array.`,
+      `Analyze this Chaos news event for stock market impact:\n\n"${input}"\n\nRemember: PART 1 is Chaos speech (60-80 words), then ---PREDICTIONS--- then JSON array.`,
       (chunk) => {
         fullText += chunk;
 
@@ -2128,7 +2128,7 @@ async function runChaosPredict() {
         }
       },
       900,
-      TRUMP_SYSTEM
+      CHAOS_SYSTEM
     );
 
     // ── Final pass after stream ends ──────────────────────────────────────
@@ -2157,7 +2157,7 @@ async function runChaosPredict() {
     speechDiv.textContent = 'I had technical difficulties. SAD! Error: ' + e.message;
   }
 
-  trumpAnimStop();
+  chaosAnimStop();
   btn.disabled = false;
   btn.innerHTML = '⚡ PREDICT';
 }
@@ -2171,7 +2171,7 @@ async function generateMoreChaos() {
   let raw = '';
   try {
     await callClaudeStream(
-      'Generate 3 new realistic Trump market-chaos events from ' + new Date().getFullYear() + '. Format each line as: ICON | TYPE | IMPACT(HIGH/MED/LOW) | HEADLINE | TIME. Icons: emoji. Types: TARIFF, DEAL, TWEET, EO, THREAT, RALLY. Be creative and realistic.',
+      'Generate 3 new realistic Chaos market-chaos events from ' + new Date().getFullYear() + '. Format each line as: ICON | TYPE | IMPACT(HIGH/MED/LOW) | HEADLINE | TIME. Icons: emoji. Types: TARIFF, DEAL, TWEET, EO, THREAT, RALLY. Be creative and realistic.',
       (chunk) => { raw += chunk; },
       400
     );
@@ -2331,7 +2331,7 @@ function classifyChaosNews(headline) {
   const h = headline.toLowerCase();
   if (/tariff|trade war|sanction|import|export/.test(h)) return {icon:'🏭', type:'TARIFF',   impact:'HIGH'};
   if (/fed|powell|rate cut|rate hike|inflation|cpi/.test(h)) return {icon:'🏦', type:'FED',  impact:'HIGH'};
-  if (/trump|white house|executive order|congress/.test(h)) return {icon:'📱', type:'POLITICS', impact:'HIGH'};
+  if (/chaos|white house|executive order|congress/.test(h)) return {icon:'📱', type:'POLITICS', impact:'HIGH'};
   if (/bitcoin|crypto|ethereum|btc|stablecoin/.test(h))  return {icon:'💰', type:'CRYPTO',   impact:'MED'};
   if (/oil|opec|energy|natural gas/.test(h))             return {icon:'🛢', type:'ENERGY',   impact:'MED'};
   if (/earnings|revenue|profit|guidance|forecast/.test(h)) return {icon:'📊', type:'EARNINGS', impact:'MED'};
